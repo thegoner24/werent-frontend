@@ -19,38 +19,38 @@ const animationStyles = {
 
 export default function Hero() {
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-white to-purple-50">
+    <section className="w-full py-16 bg-gradient-to-b from-[#1b3cfe] to-[#feb47a]">
       <Container>
         {/* Discount Banner */}
         <div className="mb-4">
-          <span className="bg-purple-100 text-purple-700 text-sm font-medium px-4 py-1 rounded-full inline-block">🎉 Discount 15% for New Users!</span>
+          <span className="bg-[#d3fe41] text-gray-700 text-sm font-medium px-4 py-1 rounded-full inline-block">🎉 Discount 15% for New Users!</span>
         </div>
         
         {/* Main Hero Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              Frame Your Story with Ease – <span className="text-purple-600 relative">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              Frame Your Story with Ease – <span className="text-[#d3fe41] relative">
                 Camera Rentals
-                <span className="absolute bottom-1 left-0 w-full h-2 bg-purple-200 -z-10"></span>
+                <span className="absolute bottom-1 left-0 w-full h-2 bg-[#d3fe41] -z-10"></span>
               </span> Made Simple!
             </h1>
             
-            <p className="text-gray-600">
+            <p className="text-white">
               Rent high-quality cameras and photography equipment easily and quickly, 
               complete with various options to suit your needs.
             </p>
             
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">
-              <Link href="/rent" className="bg-purple-600 text-white px-8 py-3 rounded-full font-medium hover:bg-purple-700 transition-all hover:shadow-lg hover:shadow-purple-500/30 flex items-center gap-2">
+              <Link href="/rent" className="bg-[#d3fe41] text-black px-8 py-3 rounded-full font-medium hover:bg-[#d3fe41]/80 transition-all hover:shadow-lg hover:shadow-[#d3fe41]/30 flex items-center gap-2">
                 Rent Now
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </Link>
-              <Link href="/how-to-rent" className="text-gray-700 px-8 py-3 rounded-full font-medium hover:text-purple-600 transition-all border border-gray-200 hover:border-purple-200 flex items-center">
+              <Link href="/how-to-rent" className="text-white px-8 py-3 rounded-full font-medium hover:text-[#d3fe41]/80 transition-all border border-gray-200 hover:border-[#d3fe41]/80 flex items-center">
                 How To Rent
               </Link>
             </div>
@@ -96,13 +96,13 @@ export default function Hero() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-[320px] h-[320px]">
                   {/* Background circles */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100 to-purple-50 rounded-full opacity-80 animate-pulse"></div>
-                  <div className="absolute inset-8 bg-gradient-to-tr from-purple-200 to-purple-100 rounded-full opacity-70"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#d3fe41] to-purple-50 rounded-full opacity-80 animate-pulse"></div>
+                  <div className="absolute inset-8 bg-gradient-to-tr from-[#d3fe41] to-purple-100 rounded-full opacity-70"></div>
                   <div className="absolute inset-16 bg-white rounded-full shadow-inner"></div>
                   
                   {/* Decorative elements */}
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 rounded-full opacity-40" style={{ animation: 'float 3s ease-in-out infinite' }}></div>
-                  <div className="absolute bottom-8 left-0 w-10 h-10 bg-purple-200 rounded-full opacity-60" style={{ animation: 'floatDelayed 4s ease-in-out infinite' }}></div>
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-[#d3fe41] rounded-full opacity-40" style={{ animation: 'float 3s ease-in-out infinite' }}></div>
+                  <div className="absolute bottom-8 left-0 w-10 h-10 bg-[#d3fe41] rounded-full opacity-60" style={{ animation: 'floatDelayed 4s ease-in-out infinite' }}></div>
                   
                   {/* Camera image */}
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -123,10 +123,10 @@ export default function Hero() {
               {/* Floating Elements */}
               <div className="absolute top-4 left-4 bg-white p-3 rounded-xl shadow-lg border border-gray-100 backdrop-blur-sm bg-white/90 transform hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-purple-600"></div>
-                  <div className="text-sm font-medium">Canon EOS 77D</div>
+                  <div className="w-2 h-2 rounded-full bg-[#1b3cfe]"></div>
+                  <div className="text-sm font-medium text-[#1b3cfe]">Canon EOS 77D</div>
                 </div>
-                <div className="text-sm font-bold text-purple-600">$30<span className="text-xs font-normal text-gray-500">/day</span></div>
+                <div className="text-sm font-bold text-[#1b3cfe]">$30<span className="text-xs font-normal text-gray-500">/day</span></div>
                 <div className="flex items-center mt-1">
                   <div className="flex text-yellow-400">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -153,16 +153,16 @@ export default function Hero() {
               {/* +500 Camera Badge */}
               <div className="absolute top-8 right-8 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-100 backdrop-blur-sm bg-white/90 transform hover:scale-105 transition-all duration-300">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-purple-600">+500</span>
-                  <span className="text-sm font-medium">Cameras</span>
+                  <span className="font-bold text-[#1b3cfe]">+500</span>
+                  <span className="text-sm font-medium text-gray-500">Cameras</span>
                 </div>
               </div>
               
               {/* +200 Accessories Badge */}
               <div className="absolute bottom-12 left-8 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-100 backdrop-blur-sm bg-white/90 transform hover:scale-105 transition-all duration-300">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-purple-600">+200</span>
-                  <span className="text-sm font-medium">Accessories</span>
+                  <span className="font-bold text-[#1b3cfe]">+200</span>
+                  <span className="text-sm font-medium text-gray-500">Accessories</span>
                 </div>
               </div>
             </div>

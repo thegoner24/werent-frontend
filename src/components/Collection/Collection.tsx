@@ -28,7 +28,7 @@ const CollectionItem: React.FC<CollectionItemProps> = ({ name, price, image, ava
       <h3 className="text-base font-medium text-gray-800">{name}</h3>
       <div className="flex justify-between items-center mt-3">
         <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{available} available</span>
-        <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">${price}/day</span>
+        <span className="text-sm font-bold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 bg-clip-text text-transparent">${price}/day</span>
       </div>
     </div>
   );
@@ -109,16 +109,16 @@ export default function Collection() {
     : collectionItems.filter(item => item.category === activeCategory);
 
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-white to-purple-50">
+    <section className="w-full py-16 bg-gradient-to-b from-white to-[#1b3cfe]/10">
       <Container>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Explore Our Collection</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 bg-clip-text text-transparent">Explore Our Collection</h2>
             <p className="text-gray-600">Find the perfect camera equipment for your next project</p>
           </div>
           <Link 
             href="/collection" 
-            className="group flex items-center gap-2 text-purple-600 font-medium hover:text-purple-700 transition-colors"
+            className="group flex items-center gap-2 text-[#1b3cfe] font-medium hover:text-[#1b3cfe]/90 transition-colors"
           >
             View all
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
@@ -135,7 +135,7 @@ export default function Collection() {
                 onClick={() => setActiveCategory(category.id)}
                 className={`px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
                   activeCategory === category.id
-                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 text-white shadow-md'
                     : 'bg-transparent text-gray-700 hover:bg-white hover:shadow-sm'
                 }`}
               >
@@ -146,7 +146,7 @@ export default function Collection() {
           
           <div className="ml-auto">
             <button className="bg-white p-3 rounded-full shadow-md hover:shadow-lg transition-shadow border border-gray-100 group">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 group-hover:text-purple-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 group-hover:text-[#1b3cfe] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
