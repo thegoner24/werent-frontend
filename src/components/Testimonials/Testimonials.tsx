@@ -13,7 +13,7 @@ const TestimonialCard: React.FC<TestimonialProps> = ({ name, role, content, avat
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
       <div className="flex flex-col items-center text-center mb-4">
-        <div className="w-16 h-16 rounded-full overflow-hidden relative mb-3 border-2 border-purple-100 shadow-sm">
+        <div className="w-16 h-16 rounded-full overflow-hidden relative mb-3 border-2 border-[#1b3cfe] shadow-sm">
           <Image
             src={avatar}
             alt={name}
@@ -23,11 +23,11 @@ const TestimonialCard: React.FC<TestimonialProps> = ({ name, role, content, avat
         </div>
         <div>
           <h4 className="font-semibold text-gray-900">{name}</h4>
-          <p className="text-xs font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full inline-block mt-1">{role}</p>
+          <p className="text-xs font-medium text-[#1b3cfe] bg-[#1b3cfe]/10 px-3 py-1 rounded-full inline-block mt-1">{role}</p>
         </div>
       </div>
       <div className="relative">
-        <svg className="absolute -top-2 -left-1 w-6 h-6 text-purple-200" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="absolute -top-2 -left-1 w-6 h-6 text-[#1b3cfe]" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
         </svg>
         <p className="text-gray-600 text-sm pl-6 pr-2">{content}</p>
@@ -74,10 +74,10 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-white to-purple-50">
+    <section className="w-full py-16 bg-gradient-to-b from-white to-[#1b3cfe]/10">
       <Container>
         <div className="flex flex-col items-center mb-10 text-center">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent mb-3">What Our Customers Say</h2>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 bg-clip-text text-transparent mb-3">What Our Customers Say</h2>
           <p className="text-gray-600 max-w-2xl">Hear from photographers and videographers who have experienced our premium camera rental service</p>
         </div>
         
