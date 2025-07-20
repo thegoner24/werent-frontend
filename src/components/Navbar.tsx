@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import Container from './ui/Container';
+import { useAuth } from '../contexts/AuthContext';
 
 // Custom animation styles
 const fadeInAnimation = {
@@ -15,6 +16,7 @@ const fadeInAnimation = {
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export default function Navbar() {
             About Us
             <span className={`absolute -bottom-1 left-0 w-0 h-0.5 ${underlineColorClass} transition-all group-hover:w-full`}></span>
           </Link>
+
           <Link href="/promo" className={`${scrolled ? 'text-gray-800' : 'text-white'} ${hoverTextColorClass} transition-colors relative group`}>
             Promo
             <span className={`absolute -bottom-1 left-0 w-0 h-0.5 ${underlineColorClass} transition-all group-hover:w-full`}></span>
@@ -74,11 +77,13 @@ export default function Navbar() {
           <Link href="/testimony" className={`${scrolled ? 'text-gray-800' : 'text-white'} ${hoverTextColorClass} transition-colors relative group`}>
             Testimony
             <span className={`absolute -bottom-1 left-0 w-0 h-0.5 ${underlineColorClass} transition-all group-hover:w-full`}></span>
+
           </Link>
         </div>
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
+
           <Link href="/login" className={`${scrolled ? 'text-gray-800' : 'text-white'} ${hoverTextColorClass} transition-colors font-medium`}>
             Login
           </Link>
@@ -88,6 +93,7 @@ export default function Navbar() {
           >
             Sign up
           </Link>
+
         </div>
 
         {/* Mobile Menu Button */}
@@ -120,6 +126,7 @@ export default function Navbar() {
               <Link href="/about" className="text-gray-800 hover:text-[#1b3cfe] transition-colors py-2 border-l-2 border-transparent hover:border-[#1b3cfe] pl-2">
                 About Us
               </Link>
+
               <Link href="/promo" className="text-gray-800 hover:text-[#1b3cfe] transition-colors py-2 border-l-2 border-transparent hover:border-[#1b3cfe] pl-2">
                 Promo
               </Link>
@@ -139,6 +146,7 @@ export default function Navbar() {
                 >
                   Sign up
                 </Link>
+
               </div>
             </div>
           </Container>
