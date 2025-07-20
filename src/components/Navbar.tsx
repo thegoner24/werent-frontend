@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import Container from './ui/Container';
+import { useAuth } from '../contexts/AuthContext';
 
 // Custom animation styles
 const fadeInAnimation = {
@@ -15,6 +16,7 @@ const fadeInAnimation = {
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -42,31 +44,59 @@ export default function Navbar() {
             About Us
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all group-hover:w-full"></span>
           </Link>
-          <Link href="/promo" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
-            Promo
+          <Link href="/browse" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
+            Browse Gear
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all group-hover:w-full"></span>
           </Link>
-          <Link href="/categories" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
-            Categories
+          <Link href="/how-it-works" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
+            How It Works
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all group-hover:w-full"></span>
           </Link>
-          <Link href="/testimony" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
-            Testimony
+          <Link href="/pricing" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
+            Pricing
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all group-hover:w-full"></span>
+          </Link>
+          <Link href="/contact" className="text-gray-800 hover:text-purple-600 transition-colors relative group">
+            Contact
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all group-hover:w-full"></span>
           </Link>
         </div>
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link href="/login" className="text-gray-800 hover:text-purple-600 transition-colors font-medium">
-            Login
-          </Link>
-          <Link 
-            href="/signup" 
-            className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-all hover:shadow-lg hover:shadow-purple-500/30 font-medium"
-          >
-            Sign up
-          </Link>
+          {isLoading ? (
+            <div className="w-6 h-6 animate-spin rounded-full border-b-2 border-purple-600"></div>
+          ) : isAuthenticated && user ? (
+            <>
+              <span className="text-gray-800 font-medium">
+                Hello, {user.first_name}!
+              </span>
+              <Link 
+                href="/dashboard" 
+                className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
+              >
+                Dashboard
+              </Link>
+              <button
+                onClick={logout}
+                className="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-all hover:shadow-lg font-medium"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="text-gray-800 hover:text-purple-600 transition-colors font-medium">
+                Login
+              </Link>
+              <Link 
+                href="/signup" 
+                className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-all hover:shadow-lg hover:shadow-purple-500/30 font-medium"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -99,25 +129,52 @@ export default function Navbar() {
               <Link href="/about" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
                 About Us
               </Link>
-              <Link href="/promo" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
-                Promo
+              <Link href="/browse" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
+                Browse Gear
               </Link>
-              <Link href="/categories" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
-                Categories
+              <Link href="/how-it-works" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
+                How It Works
               </Link>
-              <Link href="/testimony" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
-                Testimony
+              <Link href="/pricing" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
+                Pricing
+              </Link>
+              <Link href="/contact" className="text-gray-800 hover:text-purple-600 transition-colors py-2 border-l-2 border-transparent hover:border-purple-600 pl-2">
+                Contact
               </Link>
               <div className="pt-4 border-t border-gray-100 flex flex-col space-y-3">
-                <Link href="/login" className="text-gray-800 hover:text-purple-600 transition-colors font-medium">
-                  Login
-                </Link>
-                <Link 
-                  href="/signup" 
-                  className="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition-all hover:shadow-lg hover:shadow-purple-500/30 w-full text-center font-medium"
-                >
-                  Sign up
-                </Link>
+                {isLoading ? (
+                  <div className="w-6 h-6 animate-spin rounded-full border-b-2 border-purple-600"></div>
+                ) : isAuthenticated && user ? (
+                  <>
+                    <span className="text-gray-800 font-medium py-2">
+                      Hello, {user.first_name}!
+                    </span>
+                    <Link 
+                      href="/dashboard" 
+                      className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="bg-gray-600 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-all hover:shadow-lg w-full text-center font-medium"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className="text-gray-800 hover:text-purple-600 transition-colors font-medium">
+                      Login
+                    </Link>
+                    <Link 
+                      href="/signup" 
+                      className="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition-all hover:shadow-lg hover:shadow-purple-500/30 w-full text-center font-medium"
+                    >
+                      Sign up
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </Container>
