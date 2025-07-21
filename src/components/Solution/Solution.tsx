@@ -10,10 +10,17 @@ export default function Solution() {
         <div className="flex flex-col md:flex-row items-center gap-12">
           {/* Left side - Image */}
           <div className="md:w-1/2">
-            <div className="relative h-[320px] w-full md:h-[450px] rounded-2xl overflow-hidden bg-gradient-to-br from-pink-50 to-white border border-pink-100 shadow-2xl">
+            <div className="relative h-[420px] w-full md:h-[600px] rounded-3xl overflow-hidden bg-gradient-to-br from-pink-50 to-white border-2 border-pink-200 shadow-2xl">
+  {/* Floating decorative element */}
+  <div className="absolute z-30 left-1/2 top-1/3 -translate-x-1/2 animate-float pointer-events-none" style={{width:'180px', height:'80px'}}>
+    <svg viewBox="0 0 180 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10,40 Q60,10 170,40 Q120,70 10,40 Z" fill="#ff6b98" fillOpacity="0.25" />
+      <path d="M20,50 Q90,0 160,50 Q90,100 20,50 Z" fill="#ffb6d5" fillOpacity="0.18" />
+    </svg>
+  </div>
               {/* Animated decorative elements */}
-              <div className="absolute top-8 left-8 w-24 h-24 rounded-full bg-[#ff6b98]/90 opacity-40 animate-pulse"></div>
-              <div className="absolute bottom-12 right-12 w-32 h-32 rounded-full bg-[#ff6b98]/90 opacity-30 animate-pulse delay-1000"></div>
+              <div className="absolute top-4 left-4 w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#ff6b98]/90 opacity-40 animate-pulse"></div>
+              <div className="absolute bottom-4 right-4 w-20 h-20 md:w-32 md:h-32 rounded-full bg-[#ff6b98]/90 opacity-30 animate-pulse delay-1000"></div>
               {/* Glassmorphism effect */}
               <div className="absolute inset-0 bg-white/30 backdrop-blur-md z-0"></div>
               {/* Image with gradient overlay and inner glow */}
@@ -29,9 +36,8 @@ export default function Solution() {
                 {/* Inner glow */}
                 <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{boxShadow:'inset 0 0 60px 10px #fff8fa'}}></div>
               </div>
-              
-              {/* Alterations badge */}
-              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-100 transform hover:scale-105 transition-all duration-300">
+              {/* Floating badges in front of the image */}
+              <div className="absolute bottom-2 left-2 md:bottom-10 md:left-10 bg-white/90 backdrop-blur-sm p-3 md:p-6 rounded-xl md:rounded-2xl shadow-xl border-2 border-gray-100 z-40 pointer-events-auto transform hover:scale-105 md:hover:scale-110 transition-all duration-300">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6b98] to-[#ff6b98]/90 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,9 +50,7 @@ export default function Solution() {
                   </div>
                 </div>
               </div>
-              
-              {/* Quality badge */}
-              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-100 transform hover:scale-105 transition-all duration-300">
+              <div className="absolute top-2 right-2 md:top-10 md:right-10 bg-white/90 backdrop-blur-sm p-3 md:p-6 rounded-xl md:rounded-2xl shadow-xl border-2 border-gray-100 z-40 pointer-events-auto transform hover:scale-105 md:hover:scale-110 transition-all duration-300">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6b98] to-[#ff6b98]/90 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
