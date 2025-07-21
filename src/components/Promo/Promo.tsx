@@ -9,18 +9,19 @@ interface PromoItemProps {
   image: string;
   available: number;
   discount?: number;
+  occasion?: string;
 }
 
-const PromoItem: React.FC<PromoItemProps> = ({ name, price, image, available, discount }) => {
+const PromoItem: React.FC<PromoItemProps> = ({ name, price, image, available, discount, occasion }) => {
   return (
     <div className="relative bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
       {discount && (
-        <div className="absolute top-3 left-3 bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+        <div className="absolute top-3 left-3 bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
           {discount}% OFF
         </div>
       )}
       <div className="h-36 w-full relative mb-3 group">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1b3cfe] to-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b98] to-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <Image 
           src={image} 
           alt={name} 
@@ -29,9 +30,10 @@ const PromoItem: React.FC<PromoItemProps> = ({ name, price, image, available, di
         />
       </div>
       <h3 className="text-base font-medium text-gray-800">{name}</h3>
+      {occasion && <p className="text-xs text-gray-500 mt-1">Perfect for: {occasion}</p>}
       <div className="flex justify-between items-center mt-3">
         <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{available} available</span>
-        <span className="text-sm font-bold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 bg-clip-text text-transparent">${price}/day</span>
+        <span className="text-sm font-bold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 bg-clip-text text-transparent">${price}/day</span>
       </div>
     </div>
   );
@@ -40,48 +42,52 @@ const PromoItem: React.FC<PromoItemProps> = ({ name, price, image, available, di
 export default function Promo() {
   const promoItems: PromoItemProps[] = [
     {
-      name: 'Canon EOS 77D',
-      price: 30,
-      image: '/camera.svg',
-      available: 5,
-      discount: 20
-    },
-    {
-      name: 'Benro Tripod',
-      price: 15,
-      image: '/tripod.svg',
-      available: 8,
-      discount: 15
-    },
-    {
-      name: 'Nikon D3300',
-      price: 25,
-      image: '/camera.svg',
+      name: 'Vera Wang Evening Gown',
+      price: 85,
+      image: '/evening-gown.png',
       available: 3,
-      discount: 10
+      discount: 20,
+      occasion: 'Galas & Black Tie Events'
     },
     {
-      name: 'Lume Cube Pro',
-      price: 10,
-      image: '/light.svg',
-      available: 12,
-      discount: 25
+      name: 'Marchesa Cocktail Dress',
+      price: 65,
+      image: '/cocktail-dress.png',
+      available: 5,
+      discount: 15,
+      occasion: 'Cocktail Parties'
+    },
+    {
+      name: 'Valentino Floral Maxi',
+      price: 70,
+      image: '/floral-dress.png',
+      available: 2,
+      discount: 10,
+      occasion: 'Garden Weddings'
+    },
+    {
+      name: 'Dior Embellished Mini',
+      price: 55,
+      image: '/mini-dress.png',
+      available: 4,
+      discount: 25,
+      occasion: 'Night Out'
     }
   ];
 
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-[#1b3cfe]/10 to-white">
+    <section className="w-full py-16 bg-gradient-to-b from-[#ff6b98]/10 to-white">
       <Container>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 bg-clip-text text-transparent">Hot Deals</h2>
-              <span className="text-xs font-semibold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 text-white px-3 py-1 rounded-full shadow-sm animate-pulse">SALE ENDS IN 2 DAYS</span>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 bg-clip-text text-transparent">Special Offers</h2>
+              <span className="text-xs font-semibold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 text-white px-3 py-1 rounded-full shadow-sm animate-pulse">LIMITED TIME</span>
             </div>
-            <p className="text-gray-600">Exclusive discounts on our most popular camera equipment</p>
+            <p className="text-gray-600">Exclusive discounts on our most sought-after designer dresses</p>
           </div>
           <div className="flex gap-2">
-            <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 text-white text-xs rounded-full shadow-sm">1</span>
+            <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 text-white text-xs rounded-full shadow-sm">1</span>
             <span className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-600 text-xs rounded-full hover:bg-gray-300 transition-colors cursor-pointer">2</span>
             <span className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-600 text-xs rounded-full hover:bg-gray-300 transition-colors cursor-pointer">3</span>
           </div>
@@ -95,10 +101,10 @@ export default function Promo() {
         
         <div className="flex justify-center mt-10">
           <Link 
-            href="/promo" 
-            className="group flex items-center gap-2 text-[#1b3cfe] font-medium px-6 py-3 rounded-full border border-[#1b3cfe] hover:bg-[#1b3cfe]/10 hover:shadow-md transition-all duration-300"
+            href="/special-offers" 
+            className="group flex items-center gap-2 text-[#ff6b98] font-medium px-6 py-3 rounded-full border border-[#ff6b98] hover:bg-[#ff6b98]/10 hover:shadow-md transition-all duration-300"
           >
-            View all deals
+            View all special offers
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>

@@ -61,22 +61,22 @@ export default function Navbar() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const textColorClass = scrolled ? 'text-[#1b3cfe]' : 'text-[#d3fe41]';
-  const hoverTextColorClass = scrolled ? 'hover:text-[#1b3cfe]' : 'hover:text-[#d3fe41]';
-  const underlineColorClass = scrolled ? 'bg-[#1b3cfe]' : 'bg-[#d3fe41]';
-  const buttonBgClass = scrolled ? 'bg-[#1b3cfe]' : 'bg-[#d3fe41]';
-  const buttonHoverBgClass = scrolled ? 'hover:bg-[#1b3cfe]/90' : 'hover:bg-[#d3fe41]/90';
-  const buttonShadowClass = scrolled ? 'hover:shadow-[#1b3cfe]/30' : 'hover:shadow-[#d3fe41]/30';
+  const textColorClass = scrolled ? 'text-[#ff6b98]' : 'text-white';
+  const hoverTextColorClass = scrolled ? 'hover:text-[#ff6b98]' : 'hover:text-white';
+  const underlineColorClass = scrolled ? 'bg-[#ff6b98]' : 'bg-white';
+  const buttonBgClass = scrolled ? 'bg-[#ff6b98]' : 'bg-white';
+  const buttonHoverBgClass = scrolled ? 'hover:bg-[#ff6b98]/90' : 'hover:bg-white/90';
+  const buttonShadowClass = scrolled ? 'hover:shadow-[#ff6b98]/30' : 'hover:shadow-white/30';
 
   return (
-    <nav className={`w-full py-4 sticky top-0 z-[1000] transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-md backdrop-blur-sm' : 'bg-[#1b3cfe]'}`}>
+    <nav className={`w-full py-4 sticky top-0 z-[1000] transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-md backdrop-blur-sm' : 'bg-[#ff6b98]'}`}>
       <Container>
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold">
-              <span className={scrolled ? 'text-[#1b3cfe]' : 'text-[#d3fe41]'}>Cam</span>
-              <span className={scrolled ? 'text-gray-800' : 'text-white'}>Rent</span>
+              <span className={scrolled ? 'text-[#ff6b98]' : 'text-white'}>Dress</span>
+              <span className={scrolled ? 'text-gray-800' : 'text-white/90'}>Boutique</span>
             </span>
           </Link>
 
@@ -85,9 +85,10 @@ export default function Navbar() {
             {[
               { href: '/', label: 'Home' },
               { href: '/about', label: 'About Us' },
-              { href: '/promo', label: 'Promo' },
-              { href: '/categories', label: 'Categories' },
-              { href: '/testimony', label: 'Testimony' },
+              { href: '/collections', label: 'Collections' },
+              { href: '/designers', label: 'Designers' },
+              { href: '/occasions', label: 'Occasions' },
+              { href: '/testimonials', label: 'Testimonials' },
               { href: '/contact', label: 'Contact' },
             ].map(({ href, label }) => (
               <Link key={href} href={href} className={`${scrolled ? 'text-gray-800' : 'text-white'} ${hoverTextColorClass} transition-colors relative group`}>
@@ -165,8 +166,8 @@ export default function Navbar() {
                 <div className="flex justify-between items-center mb-8">
                   <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                     <span className="text-2xl font-bold">
-                      <span className="text-[#1b3cfe]">Cam</span>
-                      <span className="text-gray-800">Rent</span>
+                      <span className="text-[#ff6b98]">Dress</span>
+                      <span className="text-gray-800">Boutique</span>
                     </span>
                   </Link>
                   <button 
@@ -183,9 +184,10 @@ export default function Navbar() {
                   {[
                     { href: '/', label: 'Home', icon: '🏠' },
                     { href: '/about', label: 'About Us', icon: 'ℹ️' },
-                    { href: '/promo', label: 'Promo', icon: '🎉' },
-                    { href: '/categories', label: 'Categories', icon: '📋' },
-                    { href: '/testimony', label: 'Testimony', icon: '⭐' },
+                    { href: '/collections', label: 'Collections', icon: '👗' },
+                    { href: '/designers', label: 'Designers', icon: '✨' },
+                    { href: '/occasions', label: 'Occasions', icon: '🎭' },
+                    { href: '/testimonials', label: 'Testimonials', icon: '⭐' },
                     { href: '/contact', label: 'Contact', icon: '✉️' }
                   ].map(({ href, label, icon }) => (
                     <motion.div key={href} variants={itemVariants}>
@@ -215,7 +217,7 @@ export default function Navbar() {
                       </div>
                       <Link 
                         href="/dashboard" 
-                        className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        className="block text-center bg-[#ff6b98] text-white px-6 py-3 rounded-lg hover:bg-[#ff6b98]/90 transition-colors font-medium"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Go to Dashboard
@@ -241,7 +243,7 @@ export default function Navbar() {
                       </Link>
                       <Link
                         href="/signup"
-                        className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md"
+                        className="block text-center bg-[#ff6b98] text-white px-6 py-3 rounded-lg hover:bg-[#ff6b98]/90 transition-colors font-medium shadow-sm hover:shadow-md"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Create Account

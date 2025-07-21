@@ -147,8 +147,8 @@ export default function LoginPage() {
           <div className="max-w-md w-full">
             {/* Logo */}
             <div className="flex items-center mb-8">
-              <div className="bg-blue-700 text-white h-10 w-10 rounded-md flex items-center justify-center font-bold text-xl">CR</div>
-              <span className="ml-2 text-xl font-semibold">CamRent</span>
+              <div className="bg-[#ff6b98] text-white h-10 w-10 rounded-md flex items-center justify-center font-bold text-xl">DB</div>
+              <span className="ml-2 text-xl font-semibold">Dress Boutique</span>
             </div>
             
             {/* Header */}
@@ -156,7 +156,7 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Welcome Back 👋
               </h1>
-              <p className="text-gray-600">Sign in to continue managing your projects with ease.</p>
+              <p className="text-gray-600">Sign in to continue browsing our designer dress collection.</p>
             </div>
 
             {/* Success Message */}
@@ -225,7 +225,7 @@ export default function LoginPage() {
                   <input
                     type="checkbox"
                     id="remember"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-[#ff6b98] focus:ring-[#ff6b98] border-gray-300 rounded"
                   />
                   <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
                     Remember Me
@@ -234,7 +234,7 @@ export default function LoginPage() {
                 
                 <Link 
                   href="/forgot-password" 
-                  className="text-sm text-blue-600 hover:text-blue-700"
+                  className="text-sm text-[#ff6b98] hover:text-[#ff6b98]/80"
                 >
                   Forgot Password?
                 </Link>
@@ -244,7 +244,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#ff6b98] text-white py-3 px-4 rounded-md hover:bg-[#ff6b98]/90 focus:ring-2 focus:ring-[#ff6b98] focus:ring-offset-2 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -279,7 +279,7 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <p className="text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+                <Link href="/signup" className="text-[#ff6b98] hover:text-[#ff6b98]/80 font-medium">
                   Sign Up
                 </Link>
               </p>
@@ -288,13 +288,13 @@ export default function LoginPage() {
         </div>
         
         {/* Right side - Testimonial */}
-        <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100">
+        <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-[#ff6b98]/10 via-[#ffd1dc]/20 to-[#ff6b98]/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b98]/10 via-[#ffd1dc]/20 to-[#ff6b98]/10">
             {/* Testimonial Card */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-              <p className="text-gray-700 mb-4">
-                Ever since we switched to this platform, our team collaboration has improved dramatically. It's fast, reliable, and intuitive.
-              </p>
+                <p className="text-gray-700 mb-4">
+                  Dress Boutique made finding the perfect gown for my charity gala so effortless. The quality was impeccable and I received so many compliments!
+                </p>
               <div className="flex items-center">
                 <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
                   <img 
@@ -304,8 +304,8 @@ export default function LoginPage() {
                   />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Nina Wulandari</p>
-                  <p className="text-gray-600 text-sm">Freelance Designer</p>
+                  <p className="font-medium text-gray-900">Sophia Martinez</p>
+                  <p className="text-gray-600 text-sm">Event Planner</p>
                 </div>
                 <div className="ml-auto flex">
                   {[1, 2, 3, 4, 5].map((star) => (

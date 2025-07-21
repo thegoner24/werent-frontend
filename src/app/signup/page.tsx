@@ -168,8 +168,8 @@ export default function SignupPage() {
           <div className="max-w-md w-full">
             {/* Logo */}
             <div className="flex items-center mb-8">
-              <div className="bg-blue-700 text-white h-10 w-10 rounded-md flex items-center justify-center font-bold text-xl">CR</div>
-              <span className="ml-2 text-xl font-semibold">CamRent</span>
+              <div className="bg-[#ff6b98] text-white h-10 w-10 rounded-md flex items-center justify-center font-bold text-xl">DB</div>
+              <span className="ml-2 text-xl font-semibold">Dress Boutique</span>
             </div>
             
             {/* Header */}
@@ -177,7 +177,7 @@ export default function SignupPage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Sign Up
               </h1>
-              <p className="text-gray-600">Create your account to manage your projects with ease</p>
+              <p className="text-gray-600">Create an account to start renting designer dresses for your special occasions.</p>
             </div>
 
             {/* General Error */}
@@ -343,7 +343,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#ff6b98] text-white py-3 px-4 rounded-md hover:bg-[#ff6b98]/90 focus:ring-2 focus:ring-[#ff6b98] focus:ring-offset-2 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating Account...' : 'Sign Up'}
               </button>
@@ -353,7 +353,7 @@ export default function SignupPage() {
             <div className="mt-6 text-center">
               <p className="text-gray-600">
                 Already have an account?{' '}
-                <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                <Link href="/login" className="text-[#ff6b98] hover:text-[#ff6b98]/80 font-medium">
                   Sign In
                 </Link>
               </p>
@@ -362,12 +362,12 @@ export default function SignupPage() {
         </div>
         
         {/* Right side - Testimonial */}
-        <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-pink-100 to-purple-100">
+        <div className="hidden lg:block lg:w-1/2 bg-gradient-to-br from-[#ff6b98]/10 via-[#ffd1dc]/20 to-[#ff6b98]/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b98]/10 via-[#ffd1dc]/20 to-[#ff6b98]/10">
             {/* Testimonial Card */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
               <p className="text-gray-700 mb-4">
-                Their support team is incredibly responsive, and the platform's solutions are tailored to our specific needs.
+                The dress rental process has never been easier. I found the perfect gown for my wedding, and the personalized styling advice was exceptional.
               </p>
               <div className="flex items-center">
                 <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
@@ -378,8 +378,8 @@ export default function SignupPage() {
                   />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Alex Thompson</p>
-                  <p className="text-gray-600 text-sm">Project Manager</p>
+                  <p className="font-medium text-gray-900">Emily Johnson</p>
+                  <p className="text-gray-600 text-sm">Bride & Fashion Enthusiast</p>
                 </div>
                 <div className="ml-auto flex">
                   {[1, 2, 3, 4, 5].map((star) => (

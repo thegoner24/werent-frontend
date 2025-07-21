@@ -7,13 +7,14 @@ interface TestimonialProps {
   role: string;
   content: string;
   avatar: string;
+  event?: string;
 }
 
-const TestimonialCard: React.FC<TestimonialProps> = ({ name, role, content, avatar }) => {
+const TestimonialCard: React.FC<TestimonialProps> = ({ name, role, content, avatar, event }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
       <div className="flex flex-col items-center text-center mb-4">
-        <div className="w-16 h-16 rounded-full overflow-hidden relative mb-3 border-2 border-[#1b3cfe] shadow-sm">
+        <div className="w-16 h-16 rounded-full overflow-hidden relative mb-3 border-2 border-[#ff6b98] shadow-sm">
           <Image
             src={avatar}
             alt={name}
@@ -23,11 +24,12 @@ const TestimonialCard: React.FC<TestimonialProps> = ({ name, role, content, avat
         </div>
         <div>
           <h4 className="font-semibold text-gray-900">{name}</h4>
-          <p className="text-xs font-medium text-[#1b3cfe] bg-[#1b3cfe]/10 px-3 py-1 rounded-full inline-block mt-1">{role}</p>
+          <p className="text-xs font-medium text-[#ff6b98] bg-[#ff6b98]/10 px-3 py-1 rounded-full inline-block mt-1">{role}</p>
+          {event && <p className="text-xs text-gray-500 mt-1">For: {event}</p>}
         </div>
       </div>
       <div className="relative">
-        <svg className="absolute -top-2 -left-1 w-6 h-6 text-[#1b3cfe]" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="absolute -top-2 -left-1 w-6 h-6 text-[#ff6b98]" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
         </svg>
         <p className="text-gray-600 text-sm pl-6 pr-2">{content}</p>
@@ -48,37 +50,41 @@ const TestimonialCard: React.FC<TestimonialProps> = ({ name, role, content, avat
 export default function Testimonials() {
   const testimonials: TestimonialProps[] = [
     {
-      name: "Sarah Johnson",
-      role: "Professional Photographer",
-      content: "CamRent has been a game-changer for my photography business. Their equipment is top-notch and the rental process is seamless.",
-      avatar: "/avatar1.svg"
+      name: "Jessica Parker",
+      role: "Bride-to-be",
+      content: "I rented my dream Vera Wang gown for my engagement photos at a fraction of the purchase price. The dress fit perfectly after the complimentary alterations!",
+      avatar: "/avatar-woman-1.png",
+      event: "Engagement Photoshoot"
     },
     {
-      name: "Michael Chen",
-      role: "Film Student",
-      content: "As a student, I couldn't afford to buy professional equipment. CamRent allows me to access high-quality gear at affordable prices.",
-      avatar: "/avatar2.svg"
+      name: "Sophia Williams",
+      role: "Corporate Executive",
+      content: "As someone who attends many formal events, Dress Boutique Rentals has saved me thousands while allowing me to never wear the same dress twice.",
+      avatar: "/avatar-woman-2.png",
+      event: "Charity Gala"
     },
     {
-      name: "Emily Rodriguez",
-      role: "Travel Blogger",
-      content: "I've rented from CamRent multiple times for my international trips. Their customer service is exceptional and the gear is always in perfect condition.",
-      avatar: "/avatar3.svg"
+      name: "Emma Rodriguez",
+      role: "Wedding Guest",
+      content: "The Wedding Guest Package was perfect! I received so many compliments on my dress and accessories, and the styling consultation was incredibly helpful.",
+      avatar: "/avatar-woman-3.png",
+      event: "Beach Wedding"
     },
     {
-      name: "David Thompson",
-      role: "Wedding Videographer",
-      content: "The premium packages from CamRent have everything I need for shooting weddings. Highly recommend their services!",
-      avatar: "/avatar4.svg"
+      name: "Madison Thompson",
+      role: "College Student",
+      content: "I couldn't afford to buy a designer dress for prom, but renting made it possible to wear my dream dress. The process was so easy and stress-free!",
+      avatar: "/avatar-woman-4.png",
+      event: "Senior Prom"
     }
   ];
 
   return (
-    <section className="w-full py-16 bg-gradient-to-b from-white to-[#1b3cfe]/10">
+    <section className="w-full py-16 bg-gradient-to-b from-white to-[#ff6b98]/10">
       <Container>
         <div className="flex flex-col items-center mb-10 text-center">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#1b3cfe] to-[#1b3cfe]/90 bg-clip-text text-transparent mb-3">What Our Customers Say</h2>
-          <p className="text-gray-600 max-w-2xl">Hear from photographers and videographers who have experienced our premium camera rental service</p>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 bg-clip-text text-transparent mb-3">What Our Customers Say</h2>
+          <p className="text-gray-600 max-w-2xl">Hear from women who have experienced our premium dress rental service for their special occasions</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
