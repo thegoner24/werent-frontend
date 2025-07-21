@@ -5,12 +5,39 @@ import React, { useState, useEffect } from 'react';
 import Container from './ui/Container';
 import { useAuth } from '../contexts/AuthContext';
 
-const fadeInAnimation = {
-  '@keyframes fadeIn': {
-    '0%': { opacity: 0, transform: 'translateY(-10px)' },
-    '100%': { opacity: 1, transform: 'translateY(0)' }
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+
+const menuVariants: Variants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      duration: 0.3,
+      ease: [0.16, 1, 0.3, 1],
+      staggerChildren: 0.1
+    }
   },
-  animation: 'fadeIn 0.3s ease-out forwards'
+  exit: { 
+    opacity: 0,
+    y: -20,
+    transition: { 
+      duration: 0.2,
+      ease: [0.16, 1, 0.3, 1]
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { 
+      duration: 0.2,
+      ease: [0.16, 1, 0.3, 1]
+    }
+  }
 };
 
 export default function Navbar() {
@@ -113,53 +140,120 @@ export default function Navbar() {
         </div>
       </Container>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-100 py-4 shadow-lg" style={fadeInAnimation}>
-          <Container>
-            <div className="flex flex-col space-y-4">
-              {[
-                { href: '/', label: 'Home' },
-                { href: '/about', label: 'About Us' },
-                { href: '/promo', label: 'Promo' },
-                { href: '/categories', label: 'Categories' },
-                { href: '/testimony', label: 'Testimony' },
-                { href: '/contact', label: 'Contact' }
-              ].map(({ href, label }) => (
-                <Link key={href} href={href} className="text-gray-800 hover:text-[#1b3cfe] transition-colors py-2 border-l-2 border-transparent hover:border-[#1b3cfe] pl-2">
-                  {label}
-                </Link>
-              ))}
-              <div className="pt-4 border-t border-gray-100 flex flex-col space-y-3">
-                {isLoading ? (
-                  <div className="w-6 h-6 animate-spin rounded-full border-b-2 border-purple-600"></div>
-                ) : isAuthenticated && user ? (
-                  <>
-                    <span className="text-gray-800 font-medium py-2">Hello, {user.first_name}!</span>
-                    <Link href="/dashboard" className="text-purple-600 hover:text-purple-700 transition-colors font-medium">Dashboard</Link>
-                    <button
-                      onClick={logout}
-                      className="bg-gray-600 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-all hover:shadow-lg w-full text-center font-medium"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login" className="text-gray-800 hover:text-purple-600 transition-colors font-medium">Login</Link>
-                    <Link
-                      href="/signup"
-                      className="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition-all hover:shadow-lg hover:shadow-purple-500/30 w-full text-center font-medium"
-                    >
-                      Sign up
-                    </Link>
-                  </>
-                )}
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50">
+            {/* Overlay */}
+            <motion.div 
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={toggleMobileMenu}
+            />
+            
+            {/* Menu Panel */}
+            <motion.div 
+              className="fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white shadow-xl z-50 overflow-y-auto"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={menuVariants}
+            >
+              <div className="p-6 h-full flex flex-col">
+                <div className="flex justify-between items-center mb-8">
+                  <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                    <span className="text-2xl font-bold">
+                      <span className="text-[#1b3cfe]">Cam</span>
+                      <span className="text-gray-800">Rent</span>
+                    </span>
+                  </Link>
+                  <button 
+                    onClick={toggleMobileMenu}
+                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <nav className="flex-1 space-y-2">
+                  {[
+                    { href: '/', label: 'Home', icon: '🏠' },
+                    { href: '/about', label: 'About Us', icon: 'ℹ️' },
+                    { href: '/promo', label: 'Promo', icon: '🎉' },
+                    { href: '/categories', label: 'Categories', icon: '📋' },
+                    { href: '/testimony', label: 'Testimony', icon: '⭐' },
+                    { href: '/contact', label: 'Contact', icon: '✉️' }
+                  ].map(({ href, label, icon }) => (
+                    <motion.div key={href} variants={itemVariants}>
+                      <Link 
+                        href={href} 
+                        className="flex items-center px-4 py-3 text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span className="mr-3 text-lg">{icon}</span>
+                        <span className="font-medium">{label}</span>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </nav>
+                
+                <div className="pt-6 mt-auto border-t border-gray-100">
+                  {isLoading ? (
+                    <div className="flex justify-center">
+                      <div className="w-6 h-6 animate-spin rounded-full border-b-2 border-purple-600"></div>
+                    </div>
+                  ) : isAuthenticated && user ? (
+                    <div className="space-y-4">
+                      <div className="px-4 py-2 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-500">Logged in as</p>
+                        <p className="font-medium text-gray-900">{user.first_name} {user.last_name}</p>
+                        <p className="text-sm text-gray-500">{user.email}</p>
+                      </div>
+                      <Link 
+                        href="/dashboard" 
+                        className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Go to Dashboard
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="w-full text-center text-gray-700 hover:text-red-600 transition-colors font-medium py-2"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Link
+                        href="/login"
+                        className="block text-center border border-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </Container>
-        </div>
-      )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
