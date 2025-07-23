@@ -76,7 +76,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold">
               <span className={scrolled ? 'text-[#ff6b98]' : 'text-white'}>Dress</span>
-              <span className={scrolled ? 'text-gray-800' : 'text-white/90'}>Boutique</span>
+              <span className={scrolled ? 'text-gray-800' : 'text-gray-800'}>Boutique</span>
             </span>
           </Link>
 
@@ -85,9 +85,7 @@ export default function Navbar() {
             {[
               { href: '/', label: 'Home' },
               { href: '/about', label: 'About Us' },
-              { href: '/collections', label: 'Collections' },
-              { href: '/designers', label: 'Designers' },
-              { href: '/occasions', label: 'Occasions' },
+              { href: '/shop', label: 'Shop' },
               { href: '/testimonials', label: 'Testimonials' },
               { href: '/contact', label: 'Contact' },
             ].map(({ href, label }) => (
@@ -104,14 +102,47 @@ export default function Navbar() {
               <div className="w-6 h-6 animate-spin rounded-full border-b-2 border-purple-600"></div>
             ) : isAuthenticated && user ? (
               <>
-                <span className="text-gray-800 font-medium">Hello, {user.first_name}!</span>
-                <Link href="/dashboard" className="text-purple-600 hover:text-purple-700 transition-colors font-medium">Dashboard</Link>
-                <button
-                  onClick={logout}
-                  className="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-all hover:shadow-lg font-medium"
-                >
-                  Logout
-                </button>
+                <div className="relative group inline-block text-left">
+  <button
+    type="button"
+    className="flex items-center gap-3 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 px-4 py-2 rounded-full hover:bg-purple-50 transition-colors"
+    aria-haspopup="true"
+    aria-expanded="false"
+    tabIndex={0}
+  >
+    <span className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shadow">
+      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+    </span>
+    <span className="hidden md:inline">Hello, {user.first_name}!</span>
+    <svg className="w-4 h-4 ml-1 text-purple-600 group-hover:text-purple-700 transition" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 z-50 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-all duration-200 origin-top-right border border-purple-100" role="menu" tabIndex={-1}>
+    <div className="px-6 py-4 border-b border-purple-50 flex items-center gap-3">
+      <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shadow">
+        {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+      </span>
+      <div className="flex flex-col">
+        <span className="font-semibold text-gray-900">{user.first_name} {user.last_name}</span>
+        <span className="text-xs text-gray-500">{user.email}</span>
+      </div>
+    </div>
+    <div className="py-2">
+      <Link href="/dashboard" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Dashboard</Link>
+      <Link href="/dashboard/rentals" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>My Rentals</Link>
+      <Link href="/dashboard/profile" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Profile</Link>
+      <button
+        onClick={logout}
+        className="w-full text-left px-6 py-2 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium"
+        role="menuitem"
+        tabIndex={0}
+      >
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
               </>
             ) : (
               <>
@@ -184,9 +215,7 @@ export default function Navbar() {
                   {[
                     { href: '/', label: 'Home', icon: '🏠' },
                     { href: '/about', label: 'About Us', icon: 'ℹ️' },
-                    { href: '/collections', label: 'Collections', icon: '👗' },
-                    { href: '/designers', label: 'Designers', icon: '✨' },
-                    { href: '/occasions', label: 'Occasions', icon: '🎭' },
+                    { href: '/shop', label: 'Shop', icon: '👗' },
                     { href: '/testimonials', label: 'Testimonials', icon: '⭐' },
                     { href: '/contact', label: 'Contact', icon: '✉️' }
                   ].map(({ href, label, icon }) => (
@@ -210,28 +239,36 @@ export default function Navbar() {
                     </div>
                   ) : isAuthenticated && user ? (
                     <div className="space-y-4">
-                      <div className="px-4 py-2 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Logged in as</p>
-                        <p className="font-medium text-gray-900">{user.first_name} {user.last_name}</p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
-                      </div>
-                      <Link 
-                        href="/dashboard" 
-                        className="block text-center bg-[#ff6b98] text-white px-6 py-3 rounded-lg hover:bg-[#ff6b98]/90 transition-colors font-medium"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Go to Dashboard
-                      </Link>
-                      <button
-                        onClick={() => {
-                          logout();
-                          setMobileMenuOpen(false);
-                        }}
-                        className="w-full text-center text-gray-700 hover:text-red-600 transition-colors font-medium py-2"
-                      >
-                        Logout
-                      </button>
-                    </div>
+  <div className="flex items-center gap-3 px-4 py-4 bg-gradient-to-tr from-pink-100 to-purple-100 rounded-xl shadow-sm">
+    <span className="w-12 h-12 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-xl font-bold shadow">
+      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+    </span>
+    <div className="flex flex-col">
+      <span className="font-semibold text-gray-900">{user.first_name} {user.last_name}</span>
+      <span className="text-xs text-gray-500">{user.email}</span>
+    </div>
+  </div>
+  <div className="flex flex-col gap-2 mt-2">
+    <Link href="/dashboard" className="block text-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm" onClick={() => setMobileMenuOpen(false)}>
+      Dashboard
+    </Link>
+    <Link href="/dashboard/rentals" className="block text-center bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition-colors font-medium shadow-sm" onClick={() => setMobileMenuOpen(false)}>
+      My Rentals
+    </Link>
+    <Link href="/dashboard/profile" className="block text-center bg-purple-100 text-purple-700 px-6 py-3 rounded-lg hover:bg-purple-200 transition-colors font-medium shadow-sm" onClick={() => setMobileMenuOpen(false)}>
+      Profile
+    </Link>
+    <button
+      onClick={() => {
+        logout();
+        setMobileMenuOpen(false);
+      }}
+      className="w-full text-center text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium py-3 rounded-lg"
+    >
+      Logout
+    </button>
+  </div>
+</div>
                   ) : (
                     <div className="space-y-3">
                       <Link

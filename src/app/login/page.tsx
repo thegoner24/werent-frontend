@@ -83,40 +83,36 @@ export default function LoginPage() {
     e.preventDefault();
     setGeneralError('');
     setSuccessMessage('');
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Success - use auth context to store tokens and user data
+      // Use new API function
+      const loginApi = await import('../../api/login').then(({ login }) => login);
+      const data = await loginApi(formData);
+      // Success - use auth context to store tokens and user data
+      if (data.data && data.data.user && data.data.access_token && data.data.refresh_token) {
         login(data.data.user, data.data.access_token, data.data.refresh_token);
-        
         // Redirect to dashboard
         router.push('/dashboard');
       } else {
-        // Handle API errors
-        if (data.field_errors) {
-          setFieldErrors(data.field_errors);
-        } else {
-          setGeneralError(data.message || 'Login failed. Please try again.');
-        }
+        setGeneralError('Login failed. Please try again.');
       }
-    } catch (error) {
-      setGeneralError('Network error. Please check your connection and try again.');
+    } catch (error: any) {
+      try {
+        const errObj = JSON.parse(error.message);
+        if (errObj.field_errors) {
+          setFieldErrors(errObj.field_errors);
+        } else {
+          setGeneralError(errObj.message || 'Login failed. Please try again.');
+        }
+      } catch {
+        setGeneralError(error.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
