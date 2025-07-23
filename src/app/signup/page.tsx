@@ -104,40 +104,42 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setGeneralError('');
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Prepare data for API (exclude confirmPassword)
       const { confirmPassword, ...apiData } = formData;
-      
-      const response = await fetch('http://localhost:5000/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData)
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Success - redirect to login
-        router.push('/login?message=Account created successfully! Please log in.');
-      } else {
-        // Handle API errors
-        if (data.field_errors) {
-          setFieldErrors(data.field_errors);
+      // Map to backend expected keys if needed
+      const signupPayload = {
+        email: apiData.email,
+        first_name: apiData.first_name,
+        last_name: apiData.last_name,
+        password: apiData.password,
+        phone: apiData.phone
+      };
+      // Use new API function
+      await import('../../api/signup').then(({ signup }) =>
+        signup(signupPayload)
+      );
+      // Success - redirect to login
+      router.push('/login?message=Account created successfully! Please log in.');
+    } catch (error: any) {
+      // Attempt to parse error message
+      try {
+        const errObj = JSON.parse(error.message);
+        if (errObj.field_errors) {
+          setFieldErrors(errObj.field_errors);
         } else {
-          setGeneralError(data.message || 'Registration failed. Please try again.');
+          setGeneralError(errObj.message || 'Registration failed. Please try again.');
         }
+      } catch {
+        setGeneralError(error.message || 'Registration failed. Please try again.');
       }
-    } catch (error) {
-      setGeneralError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
