@@ -12,6 +12,7 @@ interface SignupFormData {
   confirmPassword: string;
   first_name: string;
   last_name: string;
+  country_code: string;
   phone: string;
 }
 
@@ -28,7 +29,8 @@ export default function SignupPage() {
     confirmPassword: '',
     first_name: '',
     last_name: '',
-    phone: ''
+    country_code: '+62',
+  phone: ''
   });
   
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -42,13 +44,15 @@ export default function SignupPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
+
     // Clear field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
@@ -73,6 +77,8 @@ export default function SignupPage() {
       errors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       errors.password = 'Password must be at least 8 characters';
+    } else if (!/[A-Z]/.test(formData.password)) {
+      errors.password = 'Password must contain at least one uppercase letter';
     }
     
     // Confirm password validation
@@ -120,7 +126,7 @@ export default function SignupPage() {
         first_name: apiData.first_name,
         last_name: apiData.last_name,
         password: apiData.password,
-        phone: apiData.phone
+        phone: apiData.country_code + apiData.phone
       };
       // Use new API function
       await import('../../api/signup').then(({ signup }) =>
@@ -281,19 +287,37 @@ export default function SignupPage() {
               {/* Phone */}
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number <span className="text-gray-500">(optional)</span>
+                  Phone Number <span className="text-gray-500">(optional, include country code)</span>
                 </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-500 ${
-                    fieldErrors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                  }`}
-                  placeholder="Phone number"
-                />
+                <div className="flex gap-2">
+                  <select
+                    name="country_code"
+                    value={formData.country_code}
+                    onChange={handleInputChange}
+                    className="px-3 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 border-gray-300"
+                  >
+                    <option value="+62">+62 (ID)</option>
+                    <option value="+1">+1 (US)</option>
+                    <option value="+44">+44 (UK)</option>
+                    <option value="+91">+91 (IN)</option>
+                    <option value="+61">+61 (AU)</option>
+                    <option value="+81">+81 (JP)</option>
+                    <option value="+65">+65 (SG)</option>
+                    <option value="+60">+60 (MY)</option>
+                    {/* Add more as needed */}
+                  </select>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-500 ${
+                      fieldErrors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
+                    placeholder="Phone number"
+                  />
+                </div>
                 {fieldErrors.phone && (
                   <p className="text-red-600 text-sm mt-1">{fieldErrors.phone}</p>
                 )}
@@ -318,6 +342,7 @@ export default function SignupPage() {
                 {fieldErrors.password && (
                   <p className="text-red-600 text-sm mt-1">{fieldErrors.password}</p>
                 )}
+                <p className="text-gray-500 text-xs mt-1">Password must be at least 8 characters and contain at least one uppercase letter.</p>
               </div>
 
               {/* Confirm Password */}
