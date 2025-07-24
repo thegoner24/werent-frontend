@@ -9,6 +9,7 @@ interface Product {
   id: number;
   name: string;
   designer: string;
+  designerPhoto: string;
   category: string;
   price: number;
   rating: number;
@@ -25,6 +26,7 @@ const mockProducts: Product[] = [
     id: 1,
     name: "Elegant Evening Gown",
     designer: "Valentino",
+    designerPhoto: "/team-1.jpg",
     category: "Evening Wear",
     price: 150,
     rating: 4.8,
@@ -56,6 +58,7 @@ const mockProducts: Product[] = [
     id: 2,
     name: "Classic Cocktail Dress",
     designer: "Chanel",
+    designerPhoto: "/team-2.jpg",
     category: "Cocktail",
     price: 120,
     rating: 4.6,
@@ -87,6 +90,7 @@ const mockProducts: Product[] = [
     id: 3,
     name: "Bohemian Maxi Dress",
     designer: "Free People",
+    designerPhoto: "/team-3.jpg",
     category: "Casual",
     price: 80,
     rating: 4.4,
@@ -223,8 +227,14 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
               {/* Designer Banner Style */}
               <div className="bg-gradient-to-r from-gray-100 to-gray-50 p-4 rounded-lg mb-4 border-l-4 border-[#ff6b98]">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">{product.designer.charAt(0)}</span>
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#ff6b98] shadow-md">
+                    <Image
+                      src={product.designerPhoto}
+                      alt={product.designer}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wide">DESIGNER</p>
