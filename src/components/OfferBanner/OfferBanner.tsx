@@ -42,22 +42,22 @@ export default function OfferBanner() {
               <div className="absolute -right-10 top-1/2 transform -translate-y-1/2 z-10">
                 <div className="relative h-64 w-64">
                   <Image
-                    src="/dress-sparkle.png"
+                    src="/team-1.jpg"
                     alt="Elegant Dress"
                     width={200}
                     height={200}
-                    className="object-contain drop-shadow-lg"
+                    className="object-contain drop-shadow-lg rounded-full"
                   />
                 </div>
               </div>
               <div className="absolute -left-20 bottom-0 z-10">
                 <div className="relative h-40 w-40">
                   <Image
-                    src="/jewelry-sparkle.png"
+                    src="/team-2.jpg"
                     alt="Elegant Jewelry"
                     width={120}
                     height={120}
-                    className="object-contain drop-shadow-lg"
+                    className="object-contain drop-shadow-lg rounded-full"
                   />
                 </div>
               </div>

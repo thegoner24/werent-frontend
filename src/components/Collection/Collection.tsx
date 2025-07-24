@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Container from '../ui/Container';
 
 interface CollectionItemProps {
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -14,9 +15,10 @@ interface CollectionItemProps {
   designer?: string;
 }
 
-const CollectionItem: React.FC<CollectionItemProps> = ({ name, price, image, available, designer }) => {
+const CollectionItem: React.FC<CollectionItemProps> = ({ id, name, price, image, available, designer }) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+    <Link href={`/products/${id}`} className="block">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
       <div className="h-36 w-full relative mb-3 group">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <Image 
@@ -32,7 +34,8 @@ const CollectionItem: React.FC<CollectionItemProps> = ({ name, price, image, ava
         <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{available} available</span>
         <span className="text-sm font-bold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 bg-clip-text text-transparent">${price}/day</span>
       </div>
-    </div>
+      </div>
+    </Link>
   );
 };
 
@@ -49,65 +52,73 @@ export default function Collection() {
   
   const collectionItems: CollectionItemProps[] = [
     {
+      id: '1',
       name: 'Sequin Evening Gown',
       price: 75,
-      image: '/evening-gown-1.png',
+      image: '/team-1.jpg',
       available: 2,
       category: 'gowns',
       designer: 'Vera Wang'
     },
     {
+      id: '2',
       name: 'Strapless Ball Gown',
       price: 85,
-      image: '/evening-gown-2.png',
+      image: '/team-2.jpg',
       available: 1,
       category: 'gowns',
       designer: 'Elie Saab'
     },
     {
+      id: '3',
       name: 'Beaded Cocktail Dress',
       price: 60,
-      image: '/cocktail-dress-1.png',
+      image: '/team-3.jpg',
       available: 3,
       category: 'cocktail',
       designer: 'Marchesa'
     },
     {
+      id: '4',
       name: 'Satin A-Line Dress',
       price: 55,
-      image: '/cocktail-dress-2.png',
+      image: '/team-4.jpg',
       available: 4,
       category: 'cocktail',
       designer: 'Valentino'
     },
     {
+      id: '5',
       name: 'Lace Wedding Gown',
       price: 120,
-      image: '/wedding-dress-1.png',
+      image: '/about-story.jpg',
       available: 1,
       category: 'wedding',
       designer: 'Monique Lhuillier'
     },
     {
+      id: '6',
       name: 'Crystal Tiara',
       price: 25,
-      image: '/accessory-1.png',
+      image: '/team-1.jpg',
       available: 5,
       category: 'accessories',
       designer: 'Swarovski'
     },
     {
+      id: '7',
       name: 'Embellished Clutch',
       price: 20,
-      image: '/accessory-2.png',
+      image: '/team-2.jpg',
       available: 6,
       category: 'accessories',
       designer: 'Jimmy Choo'
     },
     {
+      id: '8',
       name: 'Mermaid Wedding Dress',
       price: 110,
-      image: '/wedding-dress-2.png',
+      image: '/about-story.jpg',
       available: 2,
       category: 'wedding',
       designer: 'Pronovias'
