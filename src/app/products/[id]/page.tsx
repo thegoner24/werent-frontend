@@ -117,6 +117,102 @@ const mockProducts: Product[] = [
       "Season": "Spring/Summer",
       "Occasion": "Casual wear"
     }
+  },
+  {
+    id: 4,
+    name: "Luxury Ball Gown",
+    designer: "Versace",
+    designerPhoto: "/team-4.jpg",
+    category: "Evening Wear",
+    price: 200,
+    rating: 4.9,
+    reviews: 15,
+    availability: "Available",
+    images: [
+      "/team-4.jpg",
+      "/team-1.jpg",
+      "/team-2.jpg"
+    ],
+    description: "An opulent ball gown designed for the most prestigious events. Features luxurious fabrics and exquisite craftsmanship.",
+    features: [
+      "Luxury designer piece",
+      "Hand-embroidered details",
+      "Premium materials",
+      "Perfect for galas",
+      "Exclusive design"
+    ],
+    specifications: {
+      "Material": "Silk taffeta",
+      "Length": "Floor-length",
+      "Closure": "Corset back",
+      "Care": "Professional cleaning only",
+      "Season": "All seasons",
+      "Occasion": "Black-tie events"
+    }
+  },
+  {
+    id: 5,
+    name: "Modern Cocktail Dress",
+    designer: "Diane von Furstenberg",
+    designerPhoto: "/team-1.jpg",
+    category: "Cocktail",
+    price: 95,
+    rating: 4.5,
+    reviews: 28,
+    availability: "Available",
+    images: [
+      "/team-1.jpg",
+      "/team-2.jpg",
+      "/team-3.jpg"
+    ],
+    description: "A contemporary cocktail dress with a modern twist. Perfect for cocktail hours and evening parties.",
+    features: [
+      "Modern silhouette",
+      "Versatile styling",
+      "Comfortable fit",
+      "Quality construction",
+      "Timeless appeal"
+    ],
+    specifications: {
+      "Material": "Crepe",
+      "Length": "Above knee",
+      "Closure": "Side zipper",
+      "Care": "Dry clean recommended",
+      "Season": "All seasons",
+      "Occasion": "Cocktail parties"
+    }
+  },
+  {
+    id: 6,
+    name: "Summer Casual Dress",
+    designer: "Anthropologie",
+    designerPhoto: "/team-2.jpg",
+    category: "Casual",
+    price: 65,
+    rating: 4.3,
+    reviews: 41,
+    availability: "Available",
+    images: [
+      "/team-2.jpg",
+      "/team-3.jpg",
+      "/team-1.jpg"
+    ],
+    description: "A light and airy summer dress perfect for casual outings and weekend activities.",
+    features: [
+      "Lightweight fabric",
+      "Breathable material",
+      "Casual comfort",
+      "Easy care",
+      "Versatile styling"
+    ],
+    specifications: {
+      "Material": "Linen blend",
+      "Length": "Midi length",
+      "Closure": "Button front",
+      "Care": "Machine washable",
+      "Season": "Spring/Summer",
+      "Occasion": "Casual outings"
+    }
   }
 ];
 
@@ -359,6 +455,73 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               ))}
             </div>
+          </Container>
+        </div>
+        
+        {/* Related Products */}
+        <div className="border-t border-gray-200 p-8">
+          <Container>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Related Products</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {mockProducts
+                .filter(p => p.category === product.category && p.id !== product.id)
+                .slice(0, 4)
+                .map((relatedProduct) => (
+                  <Link key={relatedProduct.id} href={`/products/${relatedProduct.id}`} className="group cursor-pointer">
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                      <Image
+                        src={relatedProduct.images[0]}
+                        alt={relatedProduct.name}
+                        width={300}
+                        height={300}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="bg-pink-100 text-[#ff6b98] text-xs font-medium px-2 py-1 rounded">
+                          {relatedProduct.category}
+                        </span>
+                        <span className={`text-xs font-medium px-2 py-1 rounded ${
+                          relatedProduct.availability === 'Available' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {relatedProduct.availability}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 group-hover:text-[#ff6b98] transition-colors">
+                        {relatedProduct.name}
+                      </h4>
+                      <p className="text-sm text-gray-600">{relatedProduct.designer}</p>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < Math.floor(relatedProduct.rating) ? 'text-yellow-400' : 'text-gray-300'
+                              }`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                          <span className="ml-1 text-xs text-gray-600">
+                            {relatedProduct.rating}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-lg font-bold text-[#ff6b98]">${relatedProduct.price}/day</p>
+                    </div>
+                  </Link>
+                ))
+              }
+            </div>
+            {mockProducts.filter(p => p.category === product.category && p.id !== product.id).length === 0 && (
+              <p className="text-gray-500 text-center py-8">No related products found in this category.</p>
+            )}
           </Container>
         </div>
       </div>
