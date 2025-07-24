@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Container from '../ui/Container';
 
 interface PromoItemProps {
+  id: string;
   name: string;
   price: number;
   image: string;
@@ -12,9 +13,10 @@ interface PromoItemProps {
   occasion?: string;
 }
 
-const PromoItem: React.FC<PromoItemProps> = ({ name, price, image, available, discount, occasion }) => {
+const PromoItem: React.FC<PromoItemProps> = ({ id, name, price, image, available, discount, occasion }) => {
   return (
-    <div className="relative bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+    <Link href={`/products/${id}`} className="block">
+      <div className="relative bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
       {discount && (
         <div className="absolute top-3 left-3 bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
           {discount}% OFF
@@ -35,40 +37,45 @@ const PromoItem: React.FC<PromoItemProps> = ({ name, price, image, available, di
         <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{available} available</span>
         <span className="text-sm font-bold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 bg-clip-text text-transparent">${price}/day</span>
       </div>
-    </div>
+      </div>
+    </Link>
   );
 };
 
 export default function Promo() {
   const promoItems: PromoItemProps[] = [
     {
+      id: '1',
       name: 'Vera Wang Evening Gown',
       price: 85,
-      image: '/evening-gown.png',
+      image: '/team-1.jpg',
       available: 3,
       discount: 20,
       occasion: 'Galas & Black Tie Events'
     },
     {
+      id: '3',
       name: 'Marchesa Cocktail Dress',
       price: 65,
-      image: '/cocktail-dress.png',
+      image: '/team-3.jpg',
       available: 5,
       discount: 15,
       occasion: 'Cocktail Parties'
     },
     {
+      id: '2',
       name: 'Valentino Floral Maxi',
       price: 70,
-      image: '/floral-dress.png',
+      image: '/team-2.jpg',
       available: 2,
       discount: 10,
       occasion: 'Garden Weddings'
     },
     {
+      id: '4',
       name: 'Dior Embellished Mini',
       price: 55,
-      image: '/mini-dress.png',
+      image: '/team-4.jpg',
       available: 4,
       discount: 25,
       occasion: 'Night Out'
