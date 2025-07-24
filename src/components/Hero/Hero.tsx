@@ -124,7 +124,8 @@ export default function Hero() {
               </div>
               
               {/* Floating Elements */}
-              <div className="absolute top-4 left-4 bg-white p-3 rounded-xl shadow-lg border border-gray-100 backdrop-blur-sm bg-white/90 transform hover:-translate-y-1 transition-all duration-300">
+              <Link href="/products/1" className="absolute top-4 left-4 block">
+                <div className="bg-white p-3 rounded-xl shadow-lg border border-gray-100 backdrop-blur-sm bg-white/90 transform hover:-translate-y-1 transition-all duration-300 cursor-pointer">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-[#ff6b98]"></div>
                   <div className="text-sm font-medium text-[#ff6b98]">Vera Wang Gown</div>
@@ -151,7 +152,8 @@ export default function Hero() {
                   <span className="text-xs ml-1 text-gray-500">5.0</span>
                 </div>
                 <div className="text-xs mt-1 bg-green-50 text-green-700 px-2 py-0.5 rounded-full inline-block">Available: 3</div>
-              </div>
+                </div>
+              </Link>
               
               {/* +300 Dresses Badge */}
               <div className="absolute top-8 right-8 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-100 backdrop-blur-sm bg-white/90 transform hover:scale-105 transition-all duration-300">
