@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Container from "@/components/ui/Container";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
+import Pagination from "@/components/ui/Pagination";
 
 // Mockup filter data
 const categories = [
@@ -104,10 +105,15 @@ const ProductCardSkeleton = () => {
   );
 };
 
+const PAGE_SIZE = 2; //Change this to how many items we want to show per page
+
 const ShopPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [price, setPrice] = useState<number[]>(priceRange);
+  const [page, setPage] = useState(1);
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   
   // Simulate loading state
@@ -139,6 +145,19 @@ const ShopPage = () => {
     const matchPrice = product.price >= price[0] && product.price <= price[1];
     return matchCategory && matchBrand && matchPrice;
   });
+
+  const paginatedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  useEffect(() => {
+    setTotal(filteredProducts.length);
+  }, [filteredProducts]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategory, selectedBrand, price]);
+
+  useEffect(() => {
+    console.log("Current page:", page);
+  }, [page]);
 
   return (
     <div className="font-sans min-h-screen bg-[#ffeaf0]">
@@ -254,14 +273,14 @@ const ShopPage = () => {
                   </motion.div>
                 ))}
               </motion.div>
-            ) : filteredProducts.length > 0 ? (
+            ) : paginatedProducts.length > 0 ? (
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               >
-                {filteredProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <motion.div
                     key={product.id}
                     variants={itemVariants}
@@ -348,6 +367,12 @@ const ShopPage = () => {
             )}
           </div>
         </div>
+        <Pagination
+          currentPage={page}
+          totalItems={total}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+        />
       </Container>
     </div>
   );
