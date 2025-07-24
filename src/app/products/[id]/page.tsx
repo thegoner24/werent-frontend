@@ -19,6 +19,12 @@ interface Product {
   description: string;
   features: string[];
   specifications: Record<string, string>;
+  reviewList: Array<{
+    user: string;
+    rating: number;
+    comment: string;
+    date: string;
+  }>;
 }
 
 const mockProducts: Product[] = [
@@ -52,7 +58,19 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "All seasons",
       "Occasion": "Formal events"
-    }
+    },
+    reviewList: [
+      { user: "Sarah Johnson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding reception. The quality is exceptional and it fit like a dream.", date: "2024-01-15" },
+      { user: "Emma Davis", rating: 4, comment: "Beautiful dress, great quality fabric. Shipping was a bit slow but worth the wait.", date: "2024-01-10" },
+      { user: "Maria Rodriguez", rating: 5, comment: "Wore this to a charity gala and received so many compliments! The design is timeless.", date: "2024-01-08" },
+      { user: "Jennifer Smith", rating: 4, comment: "Excellent rental experience. The dress was in perfect condition and the alterations were spot on.", date: "2024-01-05" },
+      { user: "Amanda Wilson", rating: 5, comment: "This gown made me feel like a princess! The attention to detail is incredible.", date: "2024-01-02" },
+      { user: "Lisa Thompson", rating: 4, comment: "Great value for a designer dress. The fit was perfect and the service was excellent.", date: "2023-12-28" },
+      { user: "Rachel Green", rating: 5, comment: "Perfect for my engagement party! The dress exceeded my expectations.", date: "2023-12-25" },
+      { user: "Michelle Brown", rating: 4, comment: "Lovely dress, very elegant. Would definitely rent again for special occasions.", date: "2023-12-20" },
+      { user: "Nicole Taylor", rating: 5, comment: "Incredible quality and fit. This dress made my special day even more memorable.", date: "2023-12-18" },
+      { user: "Stephanie White", rating: 4, comment: "Beautiful gown, perfect for formal events. The rental process was smooth and professional.", date: "2023-12-15" }
+    ]
   },
   {
     id: 2,
@@ -84,7 +102,19 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "Fall/Winter",
       "Occasion": "Semi-formal events"
-    }
+    },
+    reviewList: [
+      { user: "Jessica Parker", rating: 5, comment: "Perfect cocktail dress! Wore it to a corporate event and felt so confident.", date: "2024-01-14" },
+      { user: "Ashley Miller", rating: 4, comment: "Great fit and comfortable to wear all evening. The fabric is high quality.", date: "2024-01-12" },
+      { user: "Nicole Taylor", rating: 5, comment: "This dress is so versatile! Perfect for both business and social events.", date: "2024-01-09" },
+      { user: "Stephanie White", rating: 4, comment: "Excellent rental service. The dress arrived on time and in perfect condition.", date: "2024-01-06" },
+      { user: "Katherine Lee", rating: 5, comment: "Absolutely love this dress! The design is sophisticated and the fit was perfect.", date: "2024-01-03" },
+      { user: "Victoria Clark", rating: 4, comment: "Great quality for the price. The dress looked expensive and felt comfortable.", date: "2023-12-30" },
+      { user: "Danielle Hall", rating: 5, comment: "Wore this to my sister's wedding and got so many compliments! Highly recommend.", date: "2023-12-27" },
+      { user: "Christine Adams", rating: 4, comment: "Perfect for a cocktail party. The dress is elegant and the service was great.", date: "2023-12-24" },
+      { user: "Tiffany Scott", rating: 5, comment: "This dress made me feel beautiful! The rental process was smooth and easy.", date: "2023-12-21" },
+      { user: "Melissa Johnson", rating: 4, comment: "Classic design that never goes out of style. Perfect for any formal occasion.", date: "2023-12-18" }
+    ]
   },
   {
     id: 3,
@@ -116,7 +146,19 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual wear"
-    }
+    },
+    reviewList: [
+      { user: "Olivia Martin", rating: 5, comment: "Gorgeous handbag! Perfect size and the quality is outstanding.", date: "2024-01-13" },
+      { user: "Sophia Anderson", rating: 4, comment: "Beautiful bag, great for special occasions. The leather feels luxurious.", date: "2024-01-11" },
+      { user: "Isabella Garcia", rating: 5, comment: "This bag completed my outfit perfectly! The design is classic and elegant.", date: "2024-01-08" },
+      { user: "Ava Martinez", rating: 4, comment: "Excellent quality for a rental. The bag looked brand new and was perfect for my event.", date: "2024-01-05" },
+      { user: "Mia Robinson", rating: 5, comment: "Love this handbag! It's the perfect accessory for any formal occasion.", date: "2024-01-02" },
+      { user: "Charlotte Lewis", rating: 4, comment: "Great value for a designer bag. The rental process was seamless.", date: "2023-12-29" },
+      { user: "Amelia Walker", rating: 5, comment: "This bag is stunning! Received many compliments and the quality is exceptional.", date: "2023-12-26" },
+      { user: "Harper Young", rating: 4, comment: "Perfect size and style. The bag complemented my dress beautifully.", date: "2023-12-23" },
+      { user: "Evelyn King", rating: 5, comment: "Absolutely love this handbag! The design is timeless and the quality is superb.", date: "2023-12-20" },
+      { user: "Abigail Wright", rating: 4, comment: "Great rental experience. The bag was in perfect condition and arrived on time.", date: "2023-12-17" }
+    ]
   },
   {
     id: 4,
@@ -148,7 +190,11 @@ const mockProducts: Product[] = [
       "Care": "Professional cleaning only",
       "Season": "All seasons",
       "Occasion": "Black-tie events"
-    }
+    },
+    reviewList: [
+      { user: "Emma Thompson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding.", date: "2023-10-20" },
+      { user: "Michael Brown", rating: 4, comment: "Beautiful design and quality. Highly recommend.", date: "2023-10-18" },
+    ]
   },
   {
     id: 5,
@@ -180,7 +226,11 @@ const mockProducts: Product[] = [
       "Care": "Dry clean recommended",
       "Season": "All seasons",
       "Occasion": "Cocktail parties"
-    }
+    },
+    reviewList: [
+      { user: "Sophia Lee", rating: 5, comment: "Absolutely loved this dress! It fit like a glove.", date: "2023-10-21" },
+      { user: "David Wilson", rating: 4, comment: "Very elegant and comfortable. Perfect for a cocktail event.", date: "2023-10-22" },
+    ]
   },
   {
     id: 6,
@@ -212,20 +262,55 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual outings"
-    }
+    },
+    reviewList: [
+      { user: "Emily Turner", rating: 4, comment: "Perfect summer dress! Light and comfortable, perfect for outdoor events.", date: "2024-01-12" },
+      { user: "Madison Phillips", rating: 5, comment: "Love this dress! The fabric is breathable and the fit is flattering.", date: "2024-01-10" },
+      { user: "Chloe Campbell", rating: 4, comment: "Great for summer parties. The dress is stylish and comfortable to wear.", date: "2024-01-07" },
+      { user: "Zoe Parker", rating: 5, comment: "This dress is so pretty! Perfect for garden parties and summer weddings.", date: "2024-01-04" },
+      { user: "Lily Evans", rating: 4, comment: "Excellent quality for the price. The dress looked expensive and felt comfortable.", date: "2024-01-01" },
+      { user: "Hannah Edwards", rating: 5, comment: "Wore this to a beach wedding and it was perfect! Light and elegant.", date: "2023-12-28" },
+      { user: "Layla Collins", rating: 4, comment: "Great summer dress. The fabric is high quality and the design is timeless.", date: "2023-12-25" },
+      { user: "Scarlett Stewart", rating: 5, comment: "This dress made me feel beautiful! Perfect for summer occasions.", date: "2023-12-22" },
+      { user: "Aria Sanchez", rating: 4, comment: "Lovely dress, very comfortable. Would definitely rent again for summer events.", date: "2023-12-19" },
+      { user: "Ellie Morris", rating: 5, comment: "Perfect for outdoor events! The dress is elegant and the rental service was excellent.", date: "2023-12-16" }
+    ]
   }
 ];
 
 function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [rentalDays, setRentalDays] = useState(1);
-
-  // Unwrap params using React.use()
-  const resolvedParams = use(params);
+  const { id } = use(params);
+  const product = mockProducts.find(p => p.id === parseInt(id));
   
-  // Simulate loading and find product
-  const product = mockProducts.find(p => p.id === parseInt(resolvedParams.id));
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [rentalDays, setRentalDays] = useState<number>(1);
+  const [selectedImage, setSelectedImage] = useState<number>(0);
+  
+  // Review filter state
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('recent');
+
+  // Filter and sort reviews
+  const filteredAndSortedReviews = product?.reviewList
+    ?.filter(review => {
+      if (ratingFilter === 'all') return true;
+      if (ratingFilter === '5') return review.rating === 5;
+      if (ratingFilter === '4+') return review.rating >= 4;
+      if (ratingFilter === '3+') return review.rating >= 3;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'recent') {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      } else if (sortBy === 'oldest') {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      } else if (sortBy === 'highest') {
+        return b.rating - a.rating;
+      } else if (sortBy === 'lowest') {
+        return a.rating - b.rating;
+      }
+      return 0;
+    }) || [];
 
   if (!product) {
     return (
@@ -455,6 +540,89 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               ))}
             </div>
+          </Container>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="border-t border-gray-200 p-8">
+          <Container>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Customer Reviews</h3>
+            
+            {/* Review Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Rating</label>
+                <select
+                  value={ratingFilter}
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                >
+                  <option value="all">All ratings</option>
+                  <option value="5">5 stars only</option>
+                  <option value="4+">4+ stars</option>
+                  <option value="3+">3+ stars</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                >
+                  <option value="recent">Most recent</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="highest">Highest rated</option>
+                  <option value="lowest">Lowest rated</option>
+                </select>
+              </div>
+            </div>
+            
+            {product.reviewList && product.reviewList.length > 0 ? (
+              <div className="space-y-6">
+                <div className="text-sm text-gray-600 mb-4">
+                  Showing {filteredAndSortedReviews.length} of {product.reviewList.length} reviews
+                </div>
+                {filteredAndSortedReviews.map((review, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-sm">
+                            {review.user.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{review.user}</h4>
+                          <p className="text-sm text-gray-500">{review.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="flex text-yellow-400 mr-2">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              xmlns="http://www.w3.org/2000/svg"
+                              className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-600">{review.rating}/5</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No reviews yet for this product.</p>
+              </div>
+            )}
           </Container>
         </div>
         
