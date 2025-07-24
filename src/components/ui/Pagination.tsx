@@ -48,7 +48,7 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             onClick={handlePrev}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded-l-full border border-gray-300 bg-white hover:bg-gray-100 transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`px-3 py-1 rounded-l-full border border-gray-300 bg-white transition font-medium focus:outline-none focus:ring-2 focus:ring-[#ff6b98] disabled:opacity-50 disabled:cursor-not-allowed ${currentPage !== 1 ? 'hover:bg-[#ffeaf0] hover:text-[#ff6b98]' : ''}`}
           >
             Prev
           </button>
@@ -60,10 +60,10 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(Number(pageNum))}
-                className={`px-3 py-1 rounded-full border border-gray-300 transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-400
+                className={`px-3 py-1 rounded-full border border-gray-300 transition font-medium focus:outline-none focus:ring-2 focus:ring-[#ff6b98]
                   ${currentPage === pageNum
-                    ? 'bg-blue-500 text-white font-bold border-blue-500 cursor-default'
-                    : 'bg-white text-gray-700 hover:bg-blue-100 hover:text-blue-600'}
+                    ? 'bg-[#ff6b98] text-white font-bold border-[#ff6b98] cursor-default'
+                    : 'bg-white text-gray-700 hover:bg-[#ffeaf0] hover:text-[#ff6b98]'}
                 `}
                 disabled={currentPage === pageNum}
                 style={{ minWidth: 36 }}
@@ -77,7 +77,7 @@ const Pagination: React.FC<PaginationProps> = ({
           <button
             onClick={handleNext}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded-r-full border border-gray-300 bg-white hover:bg-gray-100 transition font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`px-3 py-1 rounded-r-full border border-gray-300 bg-white transition font-medium focus:outline-none focus:ring-2 focus:ring-[#ff6b98] disabled:opacity-50 disabled:cursor-not-allowed ${currentPage !== totalPages ? 'hover:bg-[#ffeaf0] hover:text-[#ff6b98]' : ''}`}
           >
             Next
           </button>
