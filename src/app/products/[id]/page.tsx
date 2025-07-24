@@ -19,6 +19,7 @@ interface Product {
   description: string;
   features: string[];
   specifications: Record<string, string>;
+
   reviewList: Array<{
     user: string;
     rating: number;
@@ -58,6 +59,7 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "All seasons",
       "Occasion": "Formal events"
+
     },
     reviewList: [
       { user: "Sarah Johnson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding reception. The quality is exceptional and it fit like a dream.", date: "2024-01-15" },
@@ -102,6 +104,7 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "Fall/Winter",
       "Occasion": "Semi-formal events"
+
     },
     reviewList: [
       { user: "Jessica Parker", rating: 5, comment: "Perfect cocktail dress! Wore it to a corporate event and felt so confident.", date: "2024-01-14" },
@@ -146,6 +149,7 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual wear"
+
     },
     reviewList: [
       { user: "Olivia Martin", rating: 5, comment: "Gorgeous handbag! Perfect size and the quality is outstanding.", date: "2024-01-13" },
@@ -195,6 +199,7 @@ const mockProducts: Product[] = [
       { user: "Emma Thompson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding.", date: "2023-10-20" },
       { user: "Michael Brown", rating: 4, comment: "Beautiful design and quality. Highly recommend.", date: "2023-10-18" },
     ]
+
   },
   {
     id: 5,
@@ -226,11 +231,13 @@ const mockProducts: Product[] = [
       "Care": "Dry clean recommended",
       "Season": "All seasons",
       "Occasion": "Cocktail parties"
+
     },
     reviewList: [
       { user: "Sophia Lee", rating: 5, comment: "Absolutely loved this dress! It fit like a glove.", date: "2023-10-21" },
       { user: "David Wilson", rating: 4, comment: "Very elegant and comfortable. Perfect for a cocktail event.", date: "2023-10-22" },
     ]
+
   },
   {
     id: 6,
@@ -262,6 +269,7 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual outings"
+
     },
     reviewList: [
       { user: "Emily Turner", rating: 4, comment: "Perfect summer dress! Light and comfortable, perfect for outdoor events.", date: "2024-01-12" },
@@ -275,10 +283,12 @@ const mockProducts: Product[] = [
       { user: "Aria Sanchez", rating: 4, comment: "Lovely dress, very comfortable. Would definitely rent again for summer events.", date: "2023-12-19" },
       { user: "Ellie Morris", rating: 5, comment: "Perfect for outdoor events! The dress is elegant and the rental service was excellent.", date: "2023-12-16" }
     ]
+
   }
 ];
 
 function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
+
   const { id } = use(params);
   const product = mockProducts.find(p => p.id === parseInt(id));
   
@@ -311,6 +321,7 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
       }
       return 0;
     }) || [];
+
 
   if (!product) {
     return (
@@ -543,6 +554,7 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
           </Container>
         </div>
 
+
         {/* Reviews Section */}
         <div className="border-t border-gray-200 p-8">
           <Container>
@@ -625,6 +637,7 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
             )}
           </Container>
         </div>
+
         
         {/* Related Products */}
         <div className="border-t border-gray-200 p-8">
