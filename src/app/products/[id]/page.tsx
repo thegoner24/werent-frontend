@@ -538,6 +538,12 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
             reviews={product.reviewList} 
             showSubmitForm={true}
             reviewsPerPage={3}
+            requireVerification={true}
+            allowMedia={true}
+            maxPhotos={5}
+            maxVideos={2}
+            productId={product.id.toString()}
+            productName={product.name}
             onSubmitReview={async (reviewData) => {
               // In a real app, you would send this to your API
               console.log('Review submitted:', reviewData);

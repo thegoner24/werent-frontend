@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Container from '../ui/Container';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Review {
   user: string;
@@ -12,6 +13,22 @@ export interface Review {
   helpful?: number;
   reported?: boolean;
   moderated?: boolean;
+  // New fields for user integration
+  userId?: number;
+  userEmail?: string;
+  userAvatar?: string;
+  // Verification fields
+  verifiedPurchase?: boolean;
+  purchaseDate?: string;
+  orderId?: string;
+  // Media fields
+  photos?: string[];
+  videos?: string[];
+  // Additional metadata
+  productId?: string;
+  productName?: string;
+  helpfulVotes?: string[]; // Array of user IDs who voted helpful
+  reportedBy?: string[]; // Array of user IDs who reported
 }
 
 interface ReviewsProps {
@@ -26,6 +43,13 @@ interface ReviewsProps {
   onModerateReview?: (reviewId: string, action: 'approve' | 'reject') => void;
   isAdmin?: boolean;
   reviewsPerPage?: number;
+  // New props for enhanced functionality
+  requireVerification?: boolean;
+  allowMedia?: boolean;
+  maxPhotos?: number;
+  maxVideos?: number;
+  productId?: string;
+  productName?: string;
 }
 
 const StarRating: React.FC<{ rating: number; size?: 'sm' | 'md' | 'lg' }> = ({ 
@@ -55,13 +79,81 @@ const StarRating: React.FC<{ rating: number; size?: 'sm' | 'md' | 'lg' }> = ({
   );
 };
 
+const MediaGallery: React.FC<{ 
+  photos?: string[]; 
+  videos?: string[];
+  onRemove?: (type: 'photo' | 'video', index: number) => void;
+  isEditable?: boolean;
+}> = ({ photos = [], videos = [], onRemove, isEditable = false }) => {
+  const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+
+  if (photos.length === 0 && videos.length === 0) return null;
+
+  return (
+    <div className="mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {photos.map((photo, index) => (
+          <div key={`photo-${index}`} className="relative group">
+            <img
+              src={photo}
+              alt={`Review photo ${index + 1}`}
+              className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setSelectedMedia(photo)}
+            />
+            {isEditable && onRemove && (
+              <button
+                onClick={() => onRemove('photo', index)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+        {videos.map((video, index) => (
+          <div key={`video-${index}`} className="relative group">
+            <video
+              src={video}
+              className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setSelectedMedia(video)}
+              controls
+            />
+            {isEditable && onRemove && (
+              <button
+                onClick={() => onRemove('video', index)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Media Modal */}
+      {selectedMedia && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setSelectedMedia(null)}>
+          <div className="max-w-4xl max-h-full p-4">
+            {selectedMedia.includes('.mp4') || selectedMedia.includes('.webm') ? (
+              <video src={selectedMedia} controls className="max-w-full max-h-full" />
+            ) : (
+              <img src={selectedMedia} alt="Full size" className="max-w-full max-h-full object-contain" />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ReviewCard: React.FC<{ 
   review: Review; 
   onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void;
   onReportReview?: (reviewId: string, reason: string) => void;
   onModerateReview?: (reviewId: string, action: 'approve' | 'reject') => void;
   isAdmin?: boolean;
-}> = ({ review, onVoteHelpful, onReportReview, onModerateReview, isAdmin }) => {
+  currentUserId?: number;
+}> = ({ review, onVoteHelpful, onReportReview, onModerateReview, isAdmin, currentUserId }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [hasVoted, setHasVoted] = useState(false);
@@ -87,6 +179,9 @@ const ReviewCard: React.FC<{
     }
   };
 
+  const hasVotedHelpful = review.helpfulVotes?.includes(currentUserId?.toString() || '');
+  const hasReported = review.reportedBy?.includes(currentUserId?.toString() || '');
+
   return (
     <div className={`border border-gray-200 rounded-lg p-6 bg-white hover:shadow-md transition-shadow ${
       review.moderated ? 'opacity-60' : ''
@@ -98,69 +193,93 @@ const ReviewCard: React.FC<{
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-3">
+      {/* Review Header */}
+      <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
-              {review.user.split(' ').map(n => n[0]).join('')}
+              {review.userAvatar ? (
+                <img src={review.userAvatar} alt={review.user} className="w-full h-full rounded-full object-cover" />
+              ) : (
+                review.user.split(' ').map(n => n[0]).join('')
+              )}
             </span>
           </div>
           <div>
-            <h4 className="font-semibold text-gray-900">{review.user}</h4>
+            <div className="flex items-center space-x-2">
+              <h4 className="font-semibold text-gray-900">{review.user}</h4>
+              {review.verifiedPurchase && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Verified Purchase
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-500">{review.date}</p>
+            {review.purchaseDate && (
+              <p className="text-xs text-gray-400">Purchased: {review.purchaseDate}</p>
+            )}
           </div>
         </div>
-        <div className="flex items-center">
-          <div className="mr-2">
-            <StarRating rating={review.rating} />
-          </div>
+        <div className="flex items-center space-x-2">
+          <StarRating rating={review.rating} />
           <span className="text-sm text-gray-600">{review.rating}/5</span>
         </div>
       </div>
-      
+
+      {/* Review Content */}
       <p className="text-gray-700 leading-relaxed mb-4">{review.comment}</p>
+
+      {/* Media Gallery */}
+      {(review.photos && review.photos.length > 0) || (review.videos && review.videos.length > 0) ? (
+        <MediaGallery photos={review.photos} videos={review.videos} />
+      ) : null}
 
       {/* Review Actions */}
       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
         <div className="flex items-center space-x-4">
-          {/* Helpful Voting */}
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleVoteHelpful(true)}
-              disabled={hasVoted}
-              className="flex items-center space-x-1 text-sm text-gray-600 hover:text-[#ff6b98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-              </svg>
-              <span>Helpful</span>
-            </button>
-            {review.helpful && review.helpful > 0 && (
-              <span className="text-sm text-gray-500">({review.helpful})</span>
-            )}
-          </div>
-
-          {/* Report Button */}
+          <button
+            onClick={() => handleVoteHelpful(true)}
+            disabled={hasVotedHelpful}
+            className={`flex items-center space-x-1 text-sm ${
+              hasVotedHelpful 
+                ? 'text-green-600 font-medium' 
+                : 'text-gray-600 hover:text-green-600'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+            </svg>
+            <span>Helpful ({review.helpful || 0})</span>
+          </button>
+          
           <button
             onClick={() => setShowReportModal(true)}
-            className="text-sm text-gray-600 hover:text-red-600"
+            disabled={hasReported}
+            className={`text-sm ${
+              hasReported 
+                ? 'text-red-600 font-medium' 
+                : 'text-gray-600 hover:text-red-600'
+            }`}
           >
-            Report
+            {hasReported ? 'Reported' : 'Report'}
           </button>
         </div>
 
-        {/* Admin Moderation Actions */}
-        {isAdmin && review.moderated && (
+        {/* Admin Actions */}
+        {isAdmin && (
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleModerate('approve')}
-              className="px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="px-3 py-1 text-xs bg-green-500 text-white rounded-md hover:bg-green-600"
             >
               Approve
             </button>
             <button
               onClick={() => handleModerate('reject')}
-              className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700"
+              className="px-3 py-1 text-xs bg-red-500 text-white rounded-md hover:bg-red-600"
             >
               Reject
             </button>
@@ -177,10 +296,10 @@ const ReviewCard: React.FC<{
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               placeholder="Please provide a reason for reporting this review..."
-              className="w-full p-3 border border-gray-300 rounded-md mb-4 resize-none"
-              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+              rows={4}
             />
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 mt-4">
               <button
                 onClick={() => setShowReportModal(false)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
@@ -189,8 +308,7 @@ const ReviewCard: React.FC<{
               </button>
               <button
                 onClick={handleReport}
-                disabled={!reportReason.trim()}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
               >
                 Report
               </button>
@@ -202,94 +320,241 @@ const ReviewCard: React.FC<{
   );
 };
 
-const ReviewForm: React.FC<{ onSubmit: (review: Omit<Review, 'date'>) => void }> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState({
-    user: '',
-    rating: 0,
-    comment: ''
-  });
-  const [hoveredRating, setHoveredRating] = useState(0);
+const ReviewForm: React.FC<{ 
+  onSubmit: (review: Omit<Review, 'date'>) => void;
+  requireVerification?: boolean;
+  allowMedia?: boolean;
+  maxPhotos?: number;
+  maxVideos?: number;
+  productId?: string;
+  productName?: string;
+}> = ({ 
+  onSubmit, 
+  requireVerification = false, 
+  allowMedia = false, 
+  maxPhotos = 5, 
+  maxVideos = 2,
+  productId,
+  productName
+}) => {
+  const { user: authUser, isAuthenticated } = useAuth();
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
+  const [verifiedPurchase, setVerifiedPurchase] = useState(false);
+  const [purchaseDate, setPurchaseDate] = useState('');
+  const [orderId, setOrderId] = useState('');
+
+  const handleFileUpload = (files: FileList, type: 'photo' | 'video') => {
+    const maxFiles = type === 'photo' ? maxPhotos : maxVideos;
+    const currentFiles = type === 'photo' ? photos : videos;
+    
+    if (currentFiles.length + files.length > maxFiles) {
+      alert(`You can only upload up to ${maxFiles} ${type}s`);
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        if (type === 'photo') {
+          setPhotos(prev => [...prev, result]);
+        } else {
+          setVideos(prev => [...prev, result]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveMedia = (type: 'photo' | 'video', index: number) => {
+    if (type === 'photo') {
+      setPhotos(prev => prev.filter((_, i) => i !== index));
+    } else {
+      setVideos(prev => prev.filter((_, i) => i !== index));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.user.trim() || !formData.comment.trim() || formData.rating === 0) {
-      alert('Please fill in all fields and select a rating.');
+    if (rating === 0 || !comment.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (requireVerification && !verifiedPurchase) {
+      alert('Please verify your purchase before submitting a review');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
-      setFormData({ user: '', rating: 0, comment: '' });
-      setHoveredRating(0);
+      const reviewData: Omit<Review, 'date'> = {
+        user: authUser ? `${authUser.first_name} ${authUser.last_name}` : 'Anonymous',
+        rating,
+        comment: comment.trim(),
+        id: Date.now().toString(),
+        helpful: 0,
+        reported: false,
+        moderated: false,
+        // User integration
+        userId: authUser?.id,
+        userEmail: authUser?.email,
+        userAvatar: authUser ? undefined : undefined, // Could be set from user profile
+        // Verification
+        verifiedPurchase,
+        purchaseDate: verifiedPurchase ? purchaseDate : undefined,
+        orderId: verifiedPurchase ? orderId : undefined,
+        // Media
+        photos: photos.length > 0 ? photos : undefined,
+        videos: videos.length > 0 ? videos : undefined,
+        // Product info
+        productId,
+        productName
+      };
+
+      await onSubmit(reviewData);
+      
+      // Reset form
+      setRating(0);
+      setComment('');
+      setPhotos([]);
+      setVideos([]);
+      setVerifiedPurchase(false);
+      setPurchaseDate('');
+      setOrderId('');
     } catch (error) {
       console.error('Error submitting review:', error);
+      alert('Failed to submit review. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="bg-gray-50 rounded-lg p-6 mb-6">
-      <h4 className="text-lg font-semibold text-gray-900 mb-4">Write a Review</h4>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Your Name *
-          </label>
-          <input
-            type="text"
-            value={formData.user}
-            onChange={(e) => setFormData({ ...formData, user: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
-            placeholder="Enter your name"
-            required
-          />
+  if (!isAuthenticated && requireVerification) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="text-center py-8">
+          <div className="text-6xl mb-4">🔒</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Login Required</h3>
+          <p className="text-gray-600 mb-4">You need to be logged in to write a verified review.</p>
+          <button className="bg-[#ff6b98] text-white px-6 py-2 rounded-md hover:bg-[#ff6b98]/90">
+            Login to Review
+          </button>
         </div>
+      </div>
+    );
+  }
 
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h3 className="text-xl font-semibold text-gray-900 mb-6">Write a Review</h3>
+      {productName && (
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600">Reviewing: <span className="font-medium text-gray-900">{productName}</span></p>
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* User Info */}
+        {authUser && (
+          <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+            <div className="w-8 h-8 bg-[#ff6b98] rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-semibold">
+                {authUser.first_name.charAt(0)}{authUser.last_name.charAt(0)}
+              </span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                {authUser.first_name} {authUser.last_name}
+              </p>
+              <p className="text-xs text-gray-600">{authUser.email}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Verification Section */}
+        {requireVerification && (
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <input
+                type="checkbox"
+                id="verifiedPurchase"
+                checked={verifiedPurchase}
+                onChange={(e) => setVerifiedPurchase(e.target.checked)}
+                className="rounded border-gray-300 text-[#ff6b98] focus:ring-[#ff6b98]"
+              />
+              <label htmlFor="verifiedPurchase" className="text-sm font-medium text-gray-700">
+                I have purchased this product
+              </label>
+            </div>
+            
+            {verifiedPurchase && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Purchase Date
+                  </label>
+                  <input
+                    type="date"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Order ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={orderId}
+                    onChange={(e) => setOrderId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                    placeholder="Enter your order ID"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Rating */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Rating *
           </label>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
-                onClick={() => setFormData({ ...formData, rating: star })}
-                onMouseEnter={() => setHoveredRating(star)}
-                onMouseLeave={() => setHoveredRating(0)}
-                className="focus:outline-none"
+                onClick={() => setRating(star)}
+                className={`text-2xl transition-colors ${
+                  star <= rating ? 'text-yellow-400' : 'text-gray-300'
+                } hover:text-yellow-400`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-8 w-8 ${
-                    star <= (hoveredRating || formData.rating) 
-                      ? "text-yellow-400" 
-                      : "text-gray-300"
-                  } transition-colors duration-200`}
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+                ★
               </button>
             ))}
-            <span className="ml-2 text-sm text-gray-600">
-              {formData.rating > 0 ? `${formData.rating}/5` : 'Select rating'}
+            <span className="text-sm text-gray-600 ml-2">
+              {rating > 0 ? `${rating} star${rating > 1 ? 's' : ''}` : 'Select rating'}
             </span>
           </div>
         </div>
 
+        {/* Comment */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Your Review *
           </label>
           <textarea
-            value={formData.comment}
-            onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98] resize-none"
             rows={4}
             placeholder="Share your experience with this product..."
@@ -297,15 +562,63 @@ const ReviewForm: React.FC<{ onSubmit: (review: Omit<Review, 'date'>) => void }>
           />
         </div>
 
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={isSubmitting || !formData.user.trim() || !formData.comment.trim() || formData.rating === 0}
-            className="bg-[#ff6b98] text-white px-6 py-2 rounded-md hover:bg-[#ff6b98]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Review'}
-          </button>
-        </div>
+        {/* Media Upload */}
+        {allowMedia && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Photos (Optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => e.target.files && handleFileUpload(e.target.files, 'photo')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                disabled={photos.length >= maxPhotos}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {photos.length}/{maxPhotos} photos uploaded
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Videos (Optional)
+              </label>
+              <input
+                type="file"
+                accept="video/*"
+                multiple
+                onChange={(e) => e.target.files && handleFileUpload(e.target.files, 'video')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                disabled={videos.length >= maxVideos}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {videos.length}/{maxVideos} videos uploaded
+              </p>
+            </div>
+
+            {/* Media Preview */}
+            {(photos.length > 0 || videos.length > 0) && (
+              <MediaGallery 
+                photos={photos} 
+                videos={videos} 
+                onRemove={handleRemoveMedia}
+                isEditable={true}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isSubmitting || rating === 0 || !comment.trim() || (requireVerification && !verifiedPurchase)}
+          className="w-full bg-[#ff6b98] text-white py-3 px-6 rounded-md font-semibold hover:bg-[#ff6b98]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Review'}
+        </button>
       </form>
     </div>
   );
@@ -411,8 +724,15 @@ export default function Reviews({
   onReportReview,
   onModerateReview,
   isAdmin = false,
-  reviewsPerPage = 3
+  reviewsPerPage = 3,
+  requireVerification = false,
+  allowMedia = false,
+  maxPhotos = 5,
+  maxVideos = 2,
+  productId,
+  productName
 }: ReviewsProps) {
+  const { user: authUser } = useAuth();
   const [ratingFilter, setRatingFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('recent');
   const [currentPage, setCurrentPage] = useState(1);
@@ -498,7 +818,17 @@ export default function Reviews({
         <h3 className="text-xl font-semibold text-gray-900 mb-6">{title}</h3>
         
         {/* Review Submission Form */}
-        {showSubmitForm && <ReviewForm onSubmit={handleSubmitReview} />}
+        {showSubmitForm && (
+          <ReviewForm 
+            onSubmit={handleSubmitReview}
+            requireVerification={requireVerification}
+            allowMedia={allowMedia}
+            maxPhotos={maxPhotos}
+            maxVideos={maxVideos}
+            productId={productId}
+            productName={productName}
+          />
+        )}
         
         {/* Reviews Summary */}
         {reviews.length > 0 && <ReviewsSummary reviews={reviews} />}
@@ -555,6 +885,7 @@ export default function Reviews({
                 onReportReview={handleReportReview}
                 onModerateReview={handleModerateReview}
                 isAdmin={isAdmin}
+                currentUserId={authUser?.id}
               />
             ))}
             
