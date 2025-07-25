@@ -533,7 +533,18 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
 
 
         {/* Reviews Section */}
-        {product.reviewList && <Reviews reviews={product.reviewList} />}
+        {product.reviewList && (
+          <Reviews 
+            reviews={product.reviewList} 
+            showSubmitForm={true}
+            onSubmitReview={async (reviewData) => {
+              // In a real app, you would send this to your API
+              console.log('Review submitted:', reviewData);
+              // For demo purposes, we'll just log it
+              alert('Review submitted successfully! (Check console for details)');
+            }}
+          />
+        )}
 
         
         {/* Related Products */}
