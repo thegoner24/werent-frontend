@@ -8,6 +8,10 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
+  id?: string;
+  helpful?: number;
+  reported?: boolean;
+  moderated?: boolean;
 }
 
 interface ReviewsProps {
@@ -17,6 +21,11 @@ interface ReviewsProps {
   showSubmitForm?: boolean;
   className?: string;
   onSubmitReview?: (review: Omit<Review, 'date'>) => void;
+  onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void;
+  onReportReview?: (reviewId: string, reason: string) => void;
+  onModerateReview?: (reviewId: string, action: 'approve' | 'reject') => void;
+  isAdmin?: boolean;
+  reviewsPerPage?: number;
 }
 
 const StarRating: React.FC<{ rating: number; size?: 'sm' | 'md' | 'lg' }> = ({ 
@@ -46,9 +55,49 @@ const StarRating: React.FC<{ rating: number; size?: 'sm' | 'md' | 'lg' }> = ({
   );
 };
 
-const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
+const ReviewCard: React.FC<{ 
+  review: Review; 
+  onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void;
+  onReportReview?: (reviewId: string, reason: string) => void;
+  onModerateReview?: (reviewId: string, action: 'approve' | 'reject') => void;
+  isAdmin?: boolean;
+}> = ({ review, onVoteHelpful, onReportReview, onModerateReview, isAdmin }) => {
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [hasVoted, setHasVoted] = useState(false);
+
+  const handleVoteHelpful = (isHelpful: boolean) => {
+    if (review.id && onVoteHelpful && !hasVoted) {
+      onVoteHelpful(review.id, isHelpful);
+      setHasVoted(true);
+    }
+  };
+
+  const handleReport = () => {
+    if (review.id && onReportReview && reportReason.trim()) {
+      onReportReview(review.id, reportReason);
+      setShowReportModal(false);
+      setReportReason('');
+    }
+  };
+
+  const handleModerate = (action: 'approve' | 'reject') => {
+    if (review.id && onModerateReview) {
+      onModerateReview(review.id, action);
+    }
+  };
+
   return (
-    <div className="border border-gray-200 rounded-lg p-6 bg-white hover:shadow-md transition-shadow">
+    <div className={`border border-gray-200 rounded-lg p-6 bg-white hover:shadow-md transition-shadow ${
+      review.moderated ? 'opacity-60' : ''
+    }`}>
+      {/* Moderation Status */}
+      {review.moderated && (
+        <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-sm text-yellow-800">This review is pending moderation</p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
@@ -68,7 +117,87 @@ const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
           <span className="text-sm text-gray-600">{review.rating}/5</span>
         </div>
       </div>
-      <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+      
+      <p className="text-gray-700 leading-relaxed mb-4">{review.comment}</p>
+
+      {/* Review Actions */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center space-x-4">
+          {/* Helpful Voting */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleVoteHelpful(true)}
+              disabled={hasVoted}
+              className="flex items-center space-x-1 text-sm text-gray-600 hover:text-[#ff6b98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+              </svg>
+              <span>Helpful</span>
+            </button>
+            {review.helpful && review.helpful > 0 && (
+              <span className="text-sm text-gray-500">({review.helpful})</span>
+            )}
+          </div>
+
+          {/* Report Button */}
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="text-sm text-gray-600 hover:text-red-600"
+          >
+            Report
+          </button>
+        </div>
+
+        {/* Admin Moderation Actions */}
+        {isAdmin && review.moderated && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleModerate('approve')}
+              className="px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => handleModerate('reject')}
+              className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Reject
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Report Review</h3>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Please provide a reason for reporting this review..."
+              className="w-full p-3 border border-gray-300 rounded-md mb-4 resize-none"
+              rows={3}
+            />
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                disabled={!reportReason.trim()}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              >
+                Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -229,16 +358,64 @@ const ReviewsSummary: React.FC<{ reviews: Review[] }> = ({ reviews }) => {
   );
 };
 
+const Pagination: React.FC<{
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}> = ({ currentPage, totalPages, onPageChange }) => {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex items-center justify-center space-x-2 mt-6">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+      
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        <button
+          key={page}
+          onClick={() => onPageChange(page)}
+          className={`px-3 py-2 text-sm rounded-md ${
+            page === currentPage
+              ? 'bg-[#ff6b98] text-white'
+              : 'border border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          {page}
+        </button>
+      ))}
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
 export default function Reviews({ 
   reviews, 
   title = "Customer Reviews", 
   showFilters = true,
   showSubmitForm = false,
   className = "",
-  onSubmitReview
+  onSubmitReview,
+  onVoteHelpful,
+  onReportReview,
+  onModerateReview,
+  isAdmin = false,
+  reviewsPerPage = 3
 }: ReviewsProps) {
   const [ratingFilter, setRatingFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('recent');
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter and sort reviews
   const filteredAndSortedReviews = useMemo(() => {
@@ -259,10 +436,19 @@ export default function Reviews({
           return b.rating - a.rating;
         } else if (sortBy === 'lowest') {
           return a.rating - b.rating;
+        } else if (sortBy === 'helpful') {
+          return (b.helpful || 0) - (a.helpful || 0);
         }
         return 0;
       });
   }, [reviews, ratingFilter, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedReviews.length / reviewsPerPage);
+  const paginatedReviews = filteredAndSortedReviews.slice(
+    (currentPage - 1) * reviewsPerPage,
+    currentPage * reviewsPerPage
+  );
 
   const handleSubmitReview = async (reviewData: Omit<Review, 'date'>) => {
     if (onSubmitReview) {
@@ -271,10 +457,38 @@ export default function Reviews({
       // Default behavior - add to local state (for demo purposes)
       const newReview: Review = {
         ...reviewData,
-        date: new Date().toISOString().split('T')[0]
+        id: Date.now().toString(),
+        date: new Date().toISOString().split('T')[0],
+        helpful: 0,
+        reported: false,
+        moderated: false
       };
       console.log('New review submitted:', newReview);
       // In a real app, you would send this to your API
+    }
+  };
+
+  const handleVoteHelpful = (reviewId: string, isHelpful: boolean) => {
+    if (onVoteHelpful) {
+      onVoteHelpful(reviewId, isHelpful);
+    } else {
+      console.log('Vote helpful:', { reviewId, isHelpful });
+    }
+  };
+
+  const handleReportReview = (reviewId: string, reason: string) => {
+    if (onReportReview) {
+      onReportReview(reviewId, reason);
+    } else {
+      console.log('Report review:', { reviewId, reason });
+    }
+  };
+
+  const handleModerateReview = (reviewId: string, action: 'approve' | 'reject') => {
+    if (onModerateReview) {
+      onModerateReview(reviewId, action);
+    } else {
+      console.log('Moderate review:', { reviewId, action });
     }
   };
 
@@ -320,6 +534,7 @@ export default function Reviews({
                 <option value="oldest">Oldest first</option>
                 <option value="highest">Highest rated</option>
                 <option value="lowest">Lowest rated</option>
+                <option value="helpful">Most helpful</option>
               </select>
             </div>
           </div>
@@ -329,11 +544,26 @@ export default function Reviews({
         {reviews.length > 0 ? (
           <div className="space-y-6">
             <div className="text-sm text-gray-600 mb-4">
-              Showing {filteredAndSortedReviews.length} of {reviews.length} reviews
+              Showing {paginatedReviews.length} of {filteredAndSortedReviews.length} reviews
+              {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
             </div>
-            {filteredAndSortedReviews.map((review, index) => (
-              <ReviewCard key={index} review={review} />
+            {paginatedReviews.map((review, index) => (
+              <ReviewCard 
+                key={review.id || index} 
+                review={review}
+                onVoteHelpful={handleVoteHelpful}
+                onReportReview={handleReportReview}
+                onModerateReview={handleModerateReview}
+                isAdmin={isAdmin}
+              />
             ))}
+            
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         ) : (
           <div className="text-center py-8">

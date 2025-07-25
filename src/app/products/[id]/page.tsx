@@ -537,12 +537,28 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
           <Reviews 
             reviews={product.reviewList} 
             showSubmitForm={true}
+            reviewsPerPage={3}
             onSubmitReview={async (reviewData) => {
               // In a real app, you would send this to your API
               console.log('Review submitted:', reviewData);
-              // For demo purposes, we'll just log it
               alert('Review submitted successfully! (Check console for details)');
             }}
+            onVoteHelpful={async (reviewId, isHelpful) => {
+              // In a real app, you would update the helpful count in your API
+              console.log('Vote helpful:', { reviewId, isHelpful });
+              alert(`Marked review as ${isHelpful ? 'helpful' : 'not helpful'}`);
+            }}
+            onReportReview={async (reviewId, reason) => {
+              // In a real app, you would send this to your moderation system
+              console.log('Report review:', { reviewId, reason });
+              alert('Review reported successfully! Our team will review it.');
+            }}
+            onModerateReview={async (reviewId, action) => {
+              // In a real app, you would update the review status in your API
+              console.log('Moderate review:', { reviewId, action });
+              alert(`Review ${action}ed successfully!`);
+            }}
+            isAdmin={false} // Set to true for admin users
           />
         )}
 
