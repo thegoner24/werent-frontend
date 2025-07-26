@@ -8,6 +8,7 @@ import OverviewTab from './OverviewTab';
 import RentalsTab from './RentalsTab';
 import PaymentsTab from './PaymentsTab';
 import ProfileTab from './ProfileTab';
+import ReviewsTab from './ReviewsTab';
 
 interface User {
   id: number;
@@ -51,13 +52,13 @@ export default function DashboardPage() {
   }
 
   // Tab navigation via URL
-  const validTabs = ['overview', 'rentals', 'payments', 'profile'] as const;
+  const validTabs = ['overview', 'rentals', 'payments', 'profile', 'reviews'] as const;
   type TabKey = typeof validTabs[number];
   const [activeTab, setActiveTab] = React.useState<TabKey>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab && ['overview', 'rentals', 'payments', 'profile'].includes(tab)) {
+      if (tab && ['overview', 'rentals', 'payments', 'profile', 'reviews'].includes(tab)) {
         return tab as TabKey;
       }
     }
@@ -107,6 +108,12 @@ export default function DashboardPage() {
                 Payment Methods
               </button>
               <button
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'reviews' ? 'bg-gradient-to-r from-orange-400 to-red-500 text-white shadow' : 'text-gray-700 hover:bg-orange-50'}`}
+                onClick={() => handleTabChange('reviews')}
+              >
+                My Reviews
+              </button>
+              <button
                 className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'profile' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
                 onClick={() => handleTabChange('profile')}
               >
@@ -120,6 +127,7 @@ export default function DashboardPage() {
             {activeTab === 'overview' && <OverviewTab user={user} handleLogout={handleLogout} />}
             {activeTab === 'rentals' && <RentalsTab />}
             {activeTab === 'payments' && <PaymentsTab />}
+            {activeTab === 'reviews' && <ReviewsTab user={user} />}
             {activeTab === 'profile' && <ProfileTab />}
           </div>
         </div>

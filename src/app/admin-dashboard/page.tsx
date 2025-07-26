@@ -7,12 +7,13 @@ import Link from 'next/link';
 import ProductsTab from './ProductsTab';
 import CategoriesTab from './CategoriesTab';
 import BrandsTab from './BrandsTab';
+import ReviewsTab from './ReviewsTab';
 
 export default function AdminDashboard() {
   const router = useRouter();
   
   // State for active tab
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('reviews');
   
   // Handle tab change
   const handleTabChange = (tab: string) => {
@@ -43,25 +44,31 @@ export default function AdminDashboard() {
           <aside className="w-full md:w-64 mb-8 md:mb-0">
             <nav className="bg-white rounded-2xl shadow-lg p-6 flex md:flex-col gap-4 md:gap-0">
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'products' ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-pink-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'reviews' ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-pink-50'}`}
+                onClick={() => handleTabChange('reviews')}
+              >
+                Reviews
+              </button>
+              <button
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'products' ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-blue-50'}`}
                 onClick={() => handleTabChange('products')}
               >
                 Products
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'categories' ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-blue-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'categories' ? 'bg-gradient-to-r from-green-400 to-teal-400 text-white shadow' : 'text-gray-700 hover:bg-green-50'}`}
                 onClick={() => handleTabChange('categories')}
               >
                 Categories
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'brands' ? 'bg-gradient-to-r from-green-400 to-teal-400 text-white shadow' : 'text-gray-700 hover:bg-green-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'brands' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
                 onClick={() => handleTabChange('brands')}
               >
                 Brands
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'settings' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'settings' ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow' : 'text-gray-700 hover:bg-gray-50'}`}
                 onClick={() => handleTabChange('settings')}
               >
                 Settings
@@ -71,6 +78,7 @@ export default function AdminDashboard() {
 
           {/* Main Content */}
           <div className="flex-1">
+            {activeTab === 'reviews' && <ReviewsTab />}
             {activeTab === 'products' && <ProductsTab />}
             {activeTab === 'categories' && <CategoriesTab />}
             {activeTab === 'brands' && <BrandsTab />}
