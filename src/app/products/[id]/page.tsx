@@ -19,6 +19,7 @@ interface Product {
   description: string;
   features: string[];
   specifications: Record<string, string>;
+}
 
   reviewList: Array<{
     user: string;
@@ -26,6 +27,7 @@ interface Product {
     comment: string;
     date: string;
   }>;
+
 }
 
 const mockProducts: Product[] = [
@@ -60,6 +62,8 @@ const mockProducts: Product[] = [
       "Season": "All seasons",
       "Occasion": "Formal events"
 
+    }
+
     },
     reviewList: [
       { user: "Sarah Johnson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding reception. The quality is exceptional and it fit like a dream.", date: "2024-01-15" },
@@ -73,6 +77,7 @@ const mockProducts: Product[] = [
       { user: "Nicole Taylor", rating: 5, comment: "Incredible quality and fit. This dress made my special day even more memorable.", date: "2023-12-18" },
       { user: "Stephanie White", rating: 4, comment: "Beautiful gown, perfect for formal events. The rental process was smooth and professional.", date: "2023-12-15" }
     ]
+
   },
   {
     id: 2,
@@ -105,6 +110,9 @@ const mockProducts: Product[] = [
       "Season": "Fall/Winter",
       "Occasion": "Semi-formal events"
 
+    }
+
+
     },
     reviewList: [
       { user: "Jessica Parker", rating: 5, comment: "Perfect cocktail dress! Wore it to a corporate event and felt so confident.", date: "2024-01-14" },
@@ -118,6 +126,7 @@ const mockProducts: Product[] = [
       { user: "Tiffany Scott", rating: 5, comment: "This dress made me feel beautiful! The rental process was smooth and easy.", date: "2023-12-21" },
       { user: "Melissa Johnson", rating: 4, comment: "Classic design that never goes out of style. Perfect for any formal occasion.", date: "2023-12-18" }
     ]
+
   },
   {
     id: 3,
@@ -149,6 +158,8 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual wear"
+    }
+
 
     },
     reviewList: [
@@ -194,6 +205,8 @@ const mockProducts: Product[] = [
       "Care": "Professional cleaning only",
       "Season": "All seasons",
       "Occasion": "Black-tie events"
+    }
+
     },
     reviewList: [
       { user: "Emma Thompson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding.", date: "2023-10-20" },
@@ -232,6 +245,9 @@ const mockProducts: Product[] = [
       "Season": "All seasons",
       "Occasion": "Cocktail parties"
 
+    }
+
+
     },
     reviewList: [
       { user: "Sophia Lee", rating: 5, comment: "Absolutely loved this dress! It fit like a glove.", date: "2023-10-21" },
@@ -269,6 +285,8 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual outings"
+    }
+
 
     },
     reviewList: [
@@ -283,11 +301,19 @@ const mockProducts: Product[] = [
       { user: "Aria Sanchez", rating: 4, comment: "Lovely dress, very comfortable. Would definitely rent again for summer events.", date: "2023-12-19" },
       { user: "Ellie Morris", rating: 5, comment: "Perfect for outdoor events! The dress is elegant and the rental service was excellent.", date: "2023-12-16" }
     ]
-
   }
 ];
 
 function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [rentalDays, setRentalDays] = useState(1);
+
+  // Unwrap params using React.use()
+  const resolvedParams = use(params);
+  
+  // Simulate loading and find product
+  const product = mockProducts.find(p => p.id === parseInt(resolvedParams.id));
 
   const { id } = use(params);
   const product = mockProducts.find(p => p.id === parseInt(id));
@@ -321,7 +347,6 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
       }
       return 0;
     }) || [];
-
 
   if (!product) {
     return (
@@ -637,7 +662,6 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
             )}
           </Container>
         </div>
-
         
         {/* Related Products */}
         <div className="border-t border-gray-200 p-8">
