@@ -20,8 +20,6 @@ interface Product {
   description: string;
   features: string[];
   specifications: Record<string, string>;
-}
-
   reviewList: Array<{
     user: string;
     rating: number;
@@ -44,7 +42,6 @@ interface Product {
     helpfulVotes?: string[];
     reportedBy?: string[];
   }>;
-
 }
 
 const mockProducts: Product[] = [
@@ -78,9 +75,6 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "All seasons",
       "Occasion": "Formal events"
-
-    }
-
     },
     reviewList: [
       { 
@@ -323,10 +317,6 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "Fall/Winter",
       "Occasion": "Semi-formal events"
-
-    }
-
-
     },
     reviewList: [
       { 
@@ -567,9 +557,6 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual wear"
-    }
-
-
     },
     reviewList: [
       { user: "Olivia Martin", rating: 5, comment: "Gorgeous handbag! Perfect size and the quality is outstanding.", date: "2024-01-13" },
@@ -614,8 +601,6 @@ const mockProducts: Product[] = [
       "Care": "Professional cleaning only",
       "Season": "All seasons",
       "Occasion": "Black-tie events"
-    }
-
     },
     reviewList: [
       { user: "Emma Thompson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding.", date: "2023-10-20" },
@@ -653,10 +638,6 @@ const mockProducts: Product[] = [
       "Care": "Dry clean recommended",
       "Season": "All seasons",
       "Occasion": "Cocktail parties"
-
-    }
-
-
     },
     reviewList: [
       { user: "Sophia Lee", rating: 5, comment: "Absolutely loved this dress! It fit like a glove.", date: "2023-10-21" },
@@ -694,9 +675,6 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual outings"
-    }
-
-
     },
     reviewList: [
       { user: "Emily Turner", rating: 4, comment: "Perfect summer dress! Light and comfortable, perfect for outdoor events.", date: "2024-01-12" },
@@ -708,30 +686,42 @@ const mockProducts: Product[] = [
       { user: "Layla Collins", rating: 4, comment: "Great summer dress. The fabric is high quality and the design is timeless.", date: "2023-12-25" },
       { user: "Scarlett Stewart", rating: 5, comment: "This dress made me feel beautiful! Perfect for summer occasions.", date: "2023-12-22" },
       { user: "Aria Sanchez", rating: 4, comment: "Lovely dress, very comfortable. Would definitely rent again for summer events.", date: "2023-12-19" },
-      { user: "Ellie Morris", rating: 5, comment: "Perfect for outdoor events! The dress is elegant and the rental service was excellent.", date: "2023-12-16" }
     ]
   }
 ];
 
 function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [rentalDays, setRentalDays] = useState(1);
-
   // Unwrap params using React.use()
   const resolvedParams = use(params);
-  
+
   // Simulate loading and find product
   const product = mockProducts.find(p => p.id === parseInt(resolvedParams.id));
 
-  const { id } = use(params);
-  const product = mockProducts.find(p => p.id === parseInt(id));
-  
+  const [selectedImage, setSelectedImage] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [rentalDays, setRentalDays] = useState<number>(1);
-  const [selectedImage, setSelectedImage] = useState<number>(0);
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('recent');
   
-
+  // Filter and sort reviews
+  const filteredAndSortedReviews = product?.reviewList ? [...product.reviewList].filter((review) => {
+    if (ratingFilter === 'all') return true;
+    if (ratingFilter === '5') return review.rating === 5;
+    if (ratingFilter === '4+') return review.rating >= 4;
+    if (ratingFilter === '3+') return review.rating >= 3;
+    return true;
+  }).sort((a, b) => {
+    if (sortBy === 'recent') {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    } else if (sortBy === 'oldest') {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    } else if (sortBy === 'highest') {
+      return b.rating - a.rating;
+    } else if (sortBy === 'lowest') {
+      return a.rating - b.rating;
+    }
+    return 0;
+  }) : [];
 
   if (!product) {
     return (
@@ -1042,13 +1032,13 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
                 <div className="text-sm text-gray-600 mb-4">
                   Showing {filteredAndSortedReviews.length} of {product.reviewList.length} reviews
                 </div>
-                {filteredAndSortedReviews.map((review, index) => (
+                {filteredAndSortedReviews.map((review: { user: string; rating: number; comment: string; date: string; id?: string; helpful?: number; }, index: number) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
                           <span className="text-white font-semibold text-sm">
-                            {review.user.split(' ').map(n => n[0]).join('')}
+                            {review.user.split(' ').map((n: string) => n[0]).join('')}
                           </span>
                         </div>
                         <div>
