@@ -4,6 +4,7 @@ import { useState, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Container from '@/components/ui/Container';
+import Reviews from '@/components/Reviews';
 
 interface Product {
   id: number;
@@ -26,6 +27,22 @@ interface Product {
     rating: number;
     comment: string;
     date: string;
+    id?: string;
+    helpful?: number;
+    reported?: boolean;
+    moderated?: boolean;
+    userId?: number;
+    userEmail?: string;
+    userAvatar?: string;
+    verifiedPurchase?: boolean;
+    purchaseDate?: string;
+    orderId?: string;
+    photos?: string[];
+    videos?: string[];
+    productId?: string;
+    productName?: string;
+    helpfulVotes?: string[];
+    reportedBy?: string[];
   }>;
 
 }
@@ -66,16 +83,213 @@ const mockProducts: Product[] = [
 
     },
     reviewList: [
-      { user: "Sarah Johnson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding reception. The quality is exceptional and it fit like a dream.", date: "2024-01-15" },
-      { user: "Emma Davis", rating: 4, comment: "Beautiful dress, great quality fabric. Shipping was a bit slow but worth the wait.", date: "2024-01-10" },
-      { user: "Maria Rodriguez", rating: 5, comment: "Wore this to a charity gala and received so many compliments! The design is timeless.", date: "2024-01-08" },
-      { user: "Jennifer Smith", rating: 4, comment: "Excellent rental experience. The dress was in perfect condition and the alterations were spot on.", date: "2024-01-05" },
-      { user: "Amanda Wilson", rating: 5, comment: "This gown made me feel like a princess! The attention to detail is incredible.", date: "2024-01-02" },
-      { user: "Lisa Thompson", rating: 4, comment: "Great value for a designer dress. The fit was perfect and the service was excellent.", date: "2023-12-28" },
-      { user: "Rachel Green", rating: 5, comment: "Perfect for my engagement party! The dress exceeded my expectations.", date: "2023-12-25" },
-      { user: "Michelle Brown", rating: 4, comment: "Lovely dress, very elegant. Would definitely rent again for special occasions.", date: "2023-12-20" },
-      { user: "Nicole Taylor", rating: 5, comment: "Incredible quality and fit. This dress made my special day even more memorable.", date: "2023-12-18" },
-      { user: "Stephanie White", rating: 4, comment: "Beautiful gown, perfect for formal events. The rental process was smooth and professional.", date: "2023-12-15" }
+      { 
+        id: "1",
+        user: "Sarah Johnson", 
+        rating: 5, 
+        comment: "Absolutely stunning! This gown was perfect for my wedding reception. The quality is exceptional and it fit like a dream.", 
+        date: "2024-01-15",
+        helpful: 12,
+        reported: false,
+        moderated: false,
+        userId: 1,
+        userEmail: "sarah.johnson@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-10",
+        orderId: "ORD-2024-001",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["2", "3", "4"],
+        reportedBy: []
+      },
+      { 
+        id: "2",
+        user: "Emma Davis", 
+        rating: 4, 
+        comment: "Beautiful dress, great quality fabric. Shipping was a bit slow but worth the wait.", 
+        date: "2024-01-10",
+        helpful: 8,
+        reported: false,
+        moderated: false,
+        userId: 2,
+        userEmail: "emma.davis@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-05",
+        orderId: "ORD-2024-002",
+        videos: [
+          "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+        ],
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["1", "5"],
+        reportedBy: []
+      },
+      { 
+        id: "3",
+        user: "Maria Rodriguez", 
+        rating: 5, 
+        comment: "Wore this to a charity gala and received so many compliments! The design is timeless.", 
+        date: "2024-01-08",
+        helpful: 15,
+        reported: false,
+        moderated: false,
+        userId: 3,
+        userEmail: "maria.rodriguez@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-03",
+        orderId: "ORD-2024-003",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        videos: [
+          "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+        ],
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["1", "2", "4", "5"],
+        reportedBy: []
+      },
+      { 
+        id: "4",
+        user: "Jennifer Smith", 
+        rating: 4, 
+        comment: "Excellent rental experience. The dress was in perfect condition and the alterations were spot on.", 
+        date: "2024-01-05",
+        helpful: 6,
+        reported: false,
+        moderated: false,
+        userId: 4,
+        userEmail: "jennifer.smith@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-01",
+        orderId: "ORD-2024-004",
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["3"],
+        reportedBy: []
+      },
+      { 
+        id: "5",
+        user: "Amanda Wilson", 
+        rating: 5, 
+        comment: "This gown made me feel like a princess! The attention to detail is incredible.", 
+        date: "2024-01-02",
+        helpful: 18,
+        reported: false,
+        moderated: false,
+        userId: 5,
+        userEmail: "amanda.wilson@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-28",
+        orderId: "ORD-2023-045",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["1", "2", "3", "4", "6"],
+        reportedBy: []
+      },
+      { 
+        id: "6",
+        user: "Lisa Thompson", 
+        rating: 4, 
+        comment: "Great value for a designer dress. The fit was perfect and the service was excellent.", 
+        date: "2023-12-28",
+        helpful: 4,
+        reported: false,
+        moderated: false,
+        verifiedPurchase: false,
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["7"],
+        reportedBy: []
+      },
+      { 
+        id: "7",
+        user: "Rachel Green", 
+        rating: 5, 
+        comment: "Perfect for my engagement party! The dress exceeded my expectations.", 
+        date: "2023-12-25",
+        helpful: 10,
+        reported: false,
+        moderated: false,
+        userId: 7,
+        userEmail: "rachel.green@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-20",
+        orderId: "ORD-2023-040",
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["1", "3"],
+        reportedBy: []
+      },
+      { 
+        id: "8",
+        user: "Michelle Brown", 
+        rating: 4, 
+        comment: "Lovely dress, very elegant. Would definitely rent again for special occasions.", 
+        date: "2023-12-20",
+        helpful: 7,
+        reported: false,
+        moderated: false,
+        userId: 8,
+        userEmail: "michelle.brown@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-15",
+        orderId: "ORD-2023-035",
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["2"],
+        reportedBy: []
+      },
+      { 
+        id: "9",
+        user: "Nicole Taylor", 
+        rating: 5, 
+        comment: "Incredible quality and fit. This dress made my special day even more memorable.", 
+        date: "2023-12-18",
+        helpful: 14,
+        reported: false,
+        moderated: false,
+        userId: 9,
+        userEmail: "nicole.taylor@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-10",
+        orderId: "ORD-2023-030",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["1", "4", "5"],
+        reportedBy: []
+      },
+      { 
+        id: "10",
+        user: "Stephanie White", 
+        rating: 4, 
+        comment: "Beautiful gown, perfect for formal events. The rental process was smooth and professional.", 
+        date: "2023-12-15",
+        helpful: 5,
+        reported: false,
+        moderated: false,
+        userId: 10,
+        userEmail: "stephanie.white@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-05",
+        orderId: "ORD-2023-025",
+        productId: "1",
+        productName: "Elegant Evening Gown",
+        helpfulVotes: ["3"],
+        reportedBy: []
+      }
     ]
 
   },
@@ -115,16 +329,211 @@ const mockProducts: Product[] = [
 
     },
     reviewList: [
-      { user: "Jessica Parker", rating: 5, comment: "Perfect cocktail dress! Wore it to a corporate event and felt so confident.", date: "2024-01-14" },
-      { user: "Ashley Miller", rating: 4, comment: "Great fit and comfortable to wear all evening. The fabric is high quality.", date: "2024-01-12" },
-      { user: "Nicole Taylor", rating: 5, comment: "This dress is so versatile! Perfect for both business and social events.", date: "2024-01-09" },
-      { user: "Stephanie White", rating: 4, comment: "Excellent rental service. The dress arrived on time and in perfect condition.", date: "2024-01-06" },
-      { user: "Katherine Lee", rating: 5, comment: "Absolutely love this dress! The design is sophisticated and the fit was perfect.", date: "2024-01-03" },
-      { user: "Victoria Clark", rating: 4, comment: "Great quality for the price. The dress looked expensive and felt comfortable.", date: "2023-12-30" },
-      { user: "Danielle Hall", rating: 5, comment: "Wore this to my sister's wedding and got so many compliments! Highly recommend.", date: "2023-12-27" },
-      { user: "Christine Adams", rating: 4, comment: "Perfect for a cocktail party. The dress is elegant and the service was great.", date: "2023-12-24" },
-      { user: "Tiffany Scott", rating: 5, comment: "This dress made me feel beautiful! The rental process was smooth and easy.", date: "2023-12-21" },
-      { user: "Melissa Johnson", rating: 4, comment: "Classic design that never goes out of style. Perfect for any formal occasion.", date: "2023-12-18" }
+      { 
+        id: "11",
+        user: "Jessica Parker", 
+        rating: 5, 
+        comment: "Perfect cocktail dress! Wore it to a corporate event and felt so confident.", 
+        date: "2024-01-14",
+        helpful: 9,
+        reported: false,
+        moderated: false,
+        userId: 11,
+        userEmail: "jessica.parker@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-10",
+        orderId: "ORD-2024-005",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["1", "3"],
+        reportedBy: []
+      },
+      { 
+        id: "12",
+        user: "Ashley Miller", 
+        rating: 4, 
+        comment: "Great fit and comfortable to wear all evening. The fabric is high quality.", 
+        date: "2024-01-12",
+        helpful: 6,
+        reported: false,
+        moderated: false,
+        userId: 12,
+        userEmail: "ashley.miller@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-08",
+        orderId: "ORD-2024-006",
+        videos: [
+          "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+        ],
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["2"],
+        reportedBy: []
+      },
+      { 
+        id: "13",
+        user: "Nicole Taylor", 
+        rating: 5, 
+        comment: "This dress is so versatile! Perfect for both business and social events.", 
+        date: "2024-01-09",
+        helpful: 11,
+        reported: false,
+        moderated: false,
+        userId: 13,
+        userEmail: "nicole.taylor@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-05",
+        orderId: "ORD-2024-007",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["1", "4", "5"],
+        reportedBy: []
+      },
+      { 
+        id: "14",
+        user: "Stephanie White", 
+        rating: 4, 
+        comment: "Excellent rental service. The dress arrived on time and in perfect condition.", 
+        date: "2024-01-06",
+        helpful: 4,
+        reported: false,
+        moderated: false,
+        userId: 14,
+        userEmail: "stephanie.white@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2024-01-02",
+        orderId: "ORD-2024-008",
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["3"],
+        reportedBy: []
+      },
+      { 
+        id: "15",
+        user: "Katherine Lee", 
+        rating: 5, 
+        comment: "Absolutely love this dress! The design is sophisticated and the fit was perfect.", 
+        date: "2024-01-03",
+        helpful: 13,
+        reported: false,
+        moderated: false,
+        userId: 15,
+        userEmail: "katherine.lee@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-30",
+        orderId: "ORD-2023-050",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        videos: [
+          "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+        ],
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["1", "2", "4"],
+        reportedBy: []
+      },
+      { 
+        id: "16",
+        user: "Victoria Clark", 
+        rating: 4, 
+        comment: "Great quality for the price. The dress looked expensive and felt comfortable.", 
+        date: "2023-12-30",
+        helpful: 5,
+        reported: false,
+        moderated: false,
+        verifiedPurchase: false,
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["6"],
+        reportedBy: []
+      },
+      { 
+        id: "17",
+        user: "Danielle Hall", 
+        rating: 5, 
+        comment: "Wore this to my sister's wedding and got so many compliments! Highly recommend.", 
+        date: "2023-12-27",
+        helpful: 8,
+        reported: false,
+        moderated: false,
+        userId: 17,
+        userEmail: "danielle.hall@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-25",
+        orderId: "ORD-2023-045",
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["1", "3"],
+        reportedBy: []
+      },
+      { 
+        id: "18",
+        user: "Christine Adams", 
+        rating: 4, 
+        comment: "Perfect for a cocktail party. The dress is elegant and the service was great.", 
+        date: "2023-12-24",
+        helpful: 6,
+        reported: false,
+        moderated: false,
+        userId: 18,
+        userEmail: "christine.adams@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-20",
+        orderId: "ORD-2023-040",
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["2"],
+        reportedBy: []
+      },
+      { 
+        id: "19",
+        user: "Tiffany Scott", 
+        rating: 5, 
+        comment: "This dress made me feel beautiful! The rental process was smooth and easy.", 
+        date: "2023-12-21",
+        helpful: 10,
+        reported: false,
+        moderated: false,
+        userId: 19,
+        userEmail: "tiffany.scott@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-17",
+        orderId: "ORD-2023-035",
+        photos: [
+          "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop"
+        ],
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["1", "4"],
+        reportedBy: []
+      },
+      { 
+        id: "20",
+        user: "Melissa Johnson", 
+        rating: 4, 
+        comment: "Classic design that never goes out of style. Perfect for any formal occasion.", 
+        date: "2023-12-18",
+        helpful: 7,
+        reported: false,
+        moderated: false,
+        userId: 20,
+        userEmail: "melissa.johnson@email.com",
+        verifiedPurchase: true,
+        purchaseDate: "2023-12-15",
+        orderId: "ORD-2023-030",
+        productId: "2",
+        productName: "Classic Cocktail Dress",
+        helpfulVotes: ["3"],
+        reportedBy: []
+      }
     ]
 
   },
@@ -322,31 +731,7 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const [rentalDays, setRentalDays] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState<number>(0);
   
-  // Review filter state
-  const [ratingFilter, setRatingFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('recent');
 
-  // Filter and sort reviews
-  const filteredAndSortedReviews = product?.reviewList
-    ?.filter(review => {
-      if (ratingFilter === 'all') return true;
-      if (ratingFilter === '5') return review.rating === 5;
-      if (ratingFilter === '4+') return review.rating >= 4;
-      if (ratingFilter === '3+') return review.rating >= 3;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'recent') {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      } else if (sortBy === 'oldest') {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      } else if (sortBy === 'highest') {
-        return b.rating - a.rating;
-      } else if (sortBy === 'lowest') {
-        return a.rating - b.rating;
-      }
-      return 0;
-    }) || [];
 
   if (!product) {
     return (
@@ -581,6 +966,43 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
 
 
         {/* Reviews Section */}
+
+        {product.reviewList && (
+          <Reviews 
+            reviews={product.reviewList} 
+            showSubmitForm={true}
+            reviewsPerPage={3}
+            requireVerification={true}
+            allowMedia={true}
+            maxPhotos={5}
+            maxVideos={2}
+            productId={product.id.toString()}
+            productName={product.name}
+            onSubmitReview={async (reviewData) => {
+              // In a real app, you would send this to your API
+              console.log('Review submitted:', reviewData);
+              alert('Review submitted successfully! (Check console for details)');
+            }}
+            onVoteHelpful={async (reviewId, isHelpful) => {
+              // In a real app, you would update the helpful count in your API
+              console.log('Vote helpful:', { reviewId, isHelpful });
+              alert(`Marked review as ${isHelpful ? 'helpful' : 'not helpful'}`);
+            }}
+            onReportReview={async (reviewId, reason) => {
+              // In a real app, you would send this to your moderation system
+              console.log('Report review:', { reviewId, reason });
+              alert('Review reported successfully! Our team will review it.');
+            }}
+            onModerateReview={async (reviewId, action) => {
+              // In a real app, you would update the review status in your API
+              console.log('Moderate review:', { reviewId, action });
+              alert(`Review ${action}ed successfully!`);
+            }}
+            isAdmin={false} // Set to true for admin users
+          />
+        )}
+
+
         <div className="border-t border-gray-200 p-8">
           <Container>
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Customer Reviews</h3>
@@ -662,6 +1084,7 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
             )}
           </Container>
         </div>
+
         
         {/* Related Products */}
         <div className="border-t border-gray-200 p-8">
