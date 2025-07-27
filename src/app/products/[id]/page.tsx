@@ -20,6 +20,7 @@ interface Product {
   description: string;
   features: string[];
   specifications: Record<string, string>;
+}
 
   reviewList: Array<{
     user: string;
@@ -43,6 +44,7 @@ interface Product {
     helpfulVotes?: string[];
     reportedBy?: string[];
   }>;
+
 }
 
 const mockProducts: Product[] = [
@@ -76,6 +78,8 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "All seasons",
       "Occasion": "Formal events"
+
+    }
 
     },
     reviewList: [
@@ -287,6 +291,7 @@ const mockProducts: Product[] = [
         reportedBy: []
       }
     ]
+
   },
   {
     id: 2,
@@ -318,6 +323,9 @@ const mockProducts: Product[] = [
       "Care": "Dry clean only",
       "Season": "Fall/Winter",
       "Occasion": "Semi-formal events"
+
+    }
+
 
     },
     reviewList: [
@@ -527,6 +535,7 @@ const mockProducts: Product[] = [
         reportedBy: []
       }
     ]
+
   },
   {
     id: 3,
@@ -558,6 +567,8 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual wear"
+    }
+
 
     },
     reviewList: [
@@ -603,6 +614,8 @@ const mockProducts: Product[] = [
       "Care": "Professional cleaning only",
       "Season": "All seasons",
       "Occasion": "Black-tie events"
+    }
+
     },
     reviewList: [
       { user: "Emma Thompson", rating: 5, comment: "Absolutely stunning! This gown was perfect for my wedding.", date: "2023-10-20" },
@@ -641,6 +654,9 @@ const mockProducts: Product[] = [
       "Season": "All seasons",
       "Occasion": "Cocktail parties"
 
+    }
+
+
     },
     reviewList: [
       { user: "Sophia Lee", rating: 5, comment: "Absolutely loved this dress! It fit like a glove.", date: "2023-10-21" },
@@ -678,6 +694,8 @@ const mockProducts: Product[] = [
       "Care": "Machine washable",
       "Season": "Spring/Summer",
       "Occasion": "Casual outings"
+    }
+
 
     },
     reviewList: [
@@ -692,11 +710,19 @@ const mockProducts: Product[] = [
       { user: "Aria Sanchez", rating: 4, comment: "Lovely dress, very comfortable. Would definitely rent again for summer events.", date: "2023-12-19" },
       { user: "Ellie Morris", rating: 5, comment: "Perfect for outdoor events! The dress is elegant and the rental service was excellent.", date: "2023-12-16" }
     ]
-
   }
 ];
 
 function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [rentalDays, setRentalDays] = useState(1);
+
+  // Unwrap params using React.use()
+  const resolvedParams = use(params);
+  
+  // Simulate loading and find product
+  const product = mockProducts.find(p => p.id === parseInt(resolvedParams.id));
 
   const { id } = use(params);
   const product = mockProducts.find(p => p.id === parseInt(id));
@@ -705,7 +731,6 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const [rentalDays, setRentalDays] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState<number>(0);
   
-
 
 
   if (!product) {
@@ -941,6 +966,7 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
 
 
         {/* Reviews Section */}
+
         {product.reviewList && (
           <Reviews 
             reviews={product.reviewList} 
@@ -975,6 +1001,89 @@ function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
             isAdmin={false} // Set to true for admin users
           />
         )}
+
+
+        <div className="border-t border-gray-200 p-8">
+          <Container>
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Customer Reviews</h3>
+            
+            {/* Review Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Rating</label>
+                <select
+                  value={ratingFilter}
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                >
+                  <option value="all">All ratings</option>
+                  <option value="5">5 stars only</option>
+                  <option value="4+">4+ stars</option>
+                  <option value="3+">3+ stars</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                >
+                  <option value="recent">Most recent</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="highest">Highest rated</option>
+                  <option value="lowest">Lowest rated</option>
+                </select>
+              </div>
+            </div>
+            
+            {product.reviewList && product.reviewList.length > 0 ? (
+              <div className="space-y-6">
+                <div className="text-sm text-gray-600 mb-4">
+                  Showing {filteredAndSortedReviews.length} of {product.reviewList.length} reviews
+                </div>
+                {filteredAndSortedReviews.map((review, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold text-sm">
+                            {review.user.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{review.user}</h4>
+                          <p className="text-sm text-gray-500">{review.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="flex text-yellow-400 mr-2">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              xmlns="http://www.w3.org/2000/svg"
+                              className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-600">{review.rating}/5</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No reviews yet for this product.</p>
+              </div>
+            )}
+          </Container>
+        </div>
 
         
         {/* Related Products */}
