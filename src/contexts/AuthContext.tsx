@@ -8,10 +8,14 @@ interface User {
   email: string;
   first_name: string;
   last_name: string;
-  phone?: string;
+  phone_number?: string;
+  profile_image?: string;
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  is_admin?: boolean;
+  is_verified?: boolean;
+  uuid?: string;
 }
 
 interface AuthContextType {
