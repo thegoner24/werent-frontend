@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { fetchItemById, addReviewToItem, ReviewData } from "@/api/items";
+import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData } from "@/api/items";
 import Container from "@/components/ui/Container";
 import Reviews from "@/components/Reviews";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Product {
   id: number;
@@ -35,11 +36,18 @@ interface Review {
   rating: number;
   comment?: string;
   date: string;
+  images?: string[];
+  created_at?: string;
+  updated_at?: string;
+  item_id?: number;
+  user_id?: number;
+  service_id?: number;
 }
 
 const ProductDetail = () => {
   const params = useParams();
   const id = params?.id as string; // Cast to string to fix type error
+  const { accessToken, isAuthenticated, user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -47,18 +55,37 @@ const ProductDetail = () => {
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("recent");
   
+  // Review pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [reviewsPerPage, setReviewsPerPage] = useState<number>(5);
+  const [totalReviews, setTotalReviews] = useState<number>(0);
+  const [isLoadingReviews, setIsLoadingReviews] = useState<boolean>(false);
+  
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
   const [reviewFormData, setReviewFormData] = useState<ReviewData>({
-    user: "",
+    user: "", // Will be set from authenticated user
     rating: 5,
-    comment: ""
+    comment: "",
+    review_message: "",
+    images: []
   });
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
   const [reviewSubmitError, setReviewSubmitError] = useState<string>("");
   const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize review form with user data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setReviewFormData(prevData => ({
+        ...prevData,
+        user: `${user.first_name} ${user.last_name}`.trim()
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     async function getProduct() {
@@ -67,13 +94,55 @@ const ProductDetail = () => {
       try {
         const apiData = await import('@/api/items').then(m => m.fetchItemById(id));
         const apiProduct = apiData.data;
+        
+        // Fetch reviews for this product
+        let reviewList = [];
+        try {
+          setIsLoadingReviews(true);
+          // Convert rating filter to number for API
+          let ratingParam: number | undefined = undefined;
+          if (ratingFilter === '5') ratingParam = 5;
+          else if (ratingFilter === '4+') ratingParam = 4;
+          else if (ratingFilter === '3+') ratingParam = 3;
+          
+          // Convert sort option to API parameter
+          let sortParam: 'date_asc' | 'date_desc' | 'rating_asc' | 'rating_desc' | undefined = undefined;
+          if (sortBy === 'recent') sortParam = 'date_desc';
+          else if (sortBy === 'oldest') sortParam = 'date_asc';
+          else if (sortBy === 'highest') sortParam = 'rating_desc';
+          else if (sortBy === 'lowest') sortParam = 'rating_asc';
+          
+          // Create query params object
+          const queryParams = {
+            page: currentPage,
+            limit: reviewsPerPage,
+            rating: ratingParam,
+            sort_by: sortParam
+          };
+          
+          // Pass accessToken only if it exists
+          const reviewsResponse = await fetchItemReviews(id, queryParams, accessToken || undefined);
+          if (reviewsResponse && reviewsResponse.data) {
+            reviewList = reviewsResponse.data;
+            if (reviewsResponse.meta && reviewsResponse.meta.total) {
+              setTotalReviews(reviewsResponse.meta.total);
+            }
+            console.log('Fetched reviews:', reviewList);
+          }
+        } catch (reviewError) {
+          console.error('Error fetching reviews:', reviewError);
+          // Continue with product display even if reviews fail to load
+        } finally {
+          setIsLoadingReviews(false);
+        }
+        
         setProduct({
           ...apiProduct,
           price: apiProduct.price_per_day ?? apiProduct.price,
           images: (apiProduct.images || (apiProduct.image ? [apiProduct.image] : [])).map((img: string) =>
             img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`
           ),
-          reviewList: apiProduct.reviewList || [],
+          reviewList: reviewList || apiProduct.reviewList || [],
           specifications: apiProduct.specifications || {},
           features: apiProduct.features || [],
         });
@@ -85,7 +154,7 @@ const ProductDetail = () => {
       }
     }
     if (id) getProduct();
-  }, [id]);
+  }, [id, accessToken, currentPage, reviewsPerPage, ratingFilter, sortBy]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
@@ -330,12 +399,16 @@ const ProductDetail = () => {
           </div>
           
           {/* Review List */}
-          {reviewList.length > 0 ? (
+          {isLoadingReviews ? (
+            <div className="flex justify-center items-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff6b98]"></div>
+            </div>
+          ) : reviewList.length > 0 ? (
             <div className="space-y-6">
               <div className="text-sm text-gray-600 mb-4">
-                Showing {filteredAndSortedReviews.length} of {reviewList.length} reviews
+                Showing {reviewList.length} of {totalReviews} reviews
               </div>
-              {filteredAndSortedReviews.map((review, index) => (
+              {reviewList.map((review, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
@@ -366,16 +439,132 @@ const ProductDetail = () => {
                       <span className="text-sm text-gray-600">{review.rating}/5</span>
                     </div>
                   </div>
-                  <p className="text-gray-700 leading-relaxed">{review.comment || 'No comment provided.'}</p>
+                  <p className="text-gray-700 leading-relaxed mb-4">{review.comment || 'No comment provided.'}</p>
+                  
+                  {/* Review Images */}
+                  {review.images && review.images.length > 0 && (
+                    <div className="mt-3">
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">Review Images</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {review.images.map((image, imgIndex) => (
+                          <div key={imgIndex} className="relative w-24 h-24 rounded-md overflow-hidden border border-gray-200 group cursor-pointer">
+                            <img 
+                              src={image} 
+                              alt={`Review image ${imgIndex + 1}`}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                              onClick={() => {
+                                // Create modal or lightbox effect for image viewing
+                                const modal = document.createElement('div');
+                                modal.style.position = 'fixed';
+                                modal.style.top = '0';
+                                modal.style.left = '0';
+                                modal.style.width = '100%';
+                                modal.style.height = '100%';
+                                modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                                modal.style.display = 'flex';
+                                modal.style.alignItems = 'center';
+                                modal.style.justifyContent = 'center';
+                                modal.style.zIndex = '9999';
+                                
+                                const img = document.createElement('img');
+                                img.src = image;
+                                img.style.maxWidth = '90%';
+                                img.style.maxHeight = '90%';
+                                img.style.objectFit = 'contain';
+                                
+                                modal.appendChild(img);
+                                document.body.appendChild(modal);
+                                
+                                modal.addEventListener('click', () => {
+                                  document.body.removeChild(modal);
+                                });
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white opacity-0 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                              </svg>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
+              
+              {/* Pagination Controls */}
+              {totalReviews > reviewsPerPage && (
+                <div className="flex justify-center mt-8">
+                  <nav className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                      Previous
+                    </button>
+                    
+                    {/* Page numbers */}
+                    {Array.from({ length: Math.min(5, Math.ceil(totalReviews / reviewsPerPage)) }, (_, i) => {
+                      // Calculate page numbers to show
+                      const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+                      let startPage = Math.max(1, currentPage - 2);
+                      let endPage = Math.min(totalPages, startPage + 4);
+                      
+                      // Adjust start if end is maxed out
+                      if (endPage === totalPages) {
+                        startPage = Math.max(1, endPage - 4);
+                      }
+                      
+                      const pageNum = startPage + i;
+                      if (pageNum <= endPage) {
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`px-3 py-1 rounded-md ${currentPage === pageNum ? 'bg-[#ff6b98] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      }
+                      return null;
+                    })}
+                    
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(totalReviews / reviewsPerPage)))}
+                      disabled={currentPage === Math.ceil(totalReviews / reviewsPerPage)}
+                      className={`px-3 py-1 rounded-md ${currentPage === Math.ceil(totalReviews / reviewsPerPage) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              )}
+              
+              {/* Per page selector */}
+              <div className="flex justify-end mt-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Reviews per page:</span>
+                  <select
+                    value={reviewsPerPage}
+                    onChange={(e) => {
+                      setReviewsPerPage(Number(e.target.value));
+                      setCurrentPage(1); // Reset to first page when changing items per page
+                    }}
+                    className="px-2 py-1 border border-gray-300 rounded-md text-sm"
+                  >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                  </select>
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No reviews yet for this product.</p>
-            </div>
-          )}
-
+            <div className="text-gray-500 py-8 text-center">No reviews yet. Be the first to review this product!</div>
+          )}  
           {/* Write a Review Button */}
           <div className="mt-8 text-center">
             <button 
@@ -395,7 +584,8 @@ const ProductDetail = () => {
                   <button 
                     onClick={() => {
                       setShowReviewForm(false);
-                      setReviewFormData({ user: "", rating: 5, comment: "" });
+                      setReviewFormData({ user: "", rating: 5, comment: "", review_message: "", images: [] });
+                      setSelectedImages([]);
                       setReviewSubmitError("");
                       setReviewSubmitSuccess(false);
                     }}
@@ -417,7 +607,8 @@ const ProductDetail = () => {
                     <button
                       onClick={() => {
                         setShowReviewForm(false);
-                        setReviewFormData({ user: "", rating: 5, comment: "" });
+                        setReviewFormData({ user: "", rating: 5, comment: "", review_message: "", images: [] });
+                        setSelectedImages([]);
                         setReviewSubmitError("");
                         setReviewSubmitSuccess(false);
                       }}
@@ -429,8 +620,19 @@ const ProductDetail = () => {
                 ) : (
                   <form onSubmit={async (e) => {
                     e.preventDefault();
-                    if (!reviewFormData.user.trim() || !reviewFormData.comment.trim()) {
-                      setReviewSubmitError("Please fill out all fields");
+                    const trimmedReview = reviewFormData.review_message.trim();
+                    if (!trimmedReview) {
+                      setReviewSubmitError("Please enter your review");
+                      return;
+                    }
+                    
+                    if (trimmedReview.length < 5) {
+                      setReviewSubmitError("Your review must be at least 5 characters long");
+                      return;
+                    }
+                    
+                    if (!isAuthenticated || !accessToken) {
+                      setReviewSubmitError("You must be logged in to submit a review");
                       return;
                     }
                     
@@ -438,7 +640,7 @@ const ProductDetail = () => {
                     setReviewSubmitError("");
                     
                     try {
-                      await addReviewToItem(id, reviewFormData);
+                      await addReviewToItem(id, reviewFormData, accessToken);
                       
                       // Update the product data to include the new review
                       const updatedProduct = await fetchItemById(id);
@@ -458,17 +660,7 @@ const ProductDetail = () => {
                         </div>
                       )}
                       
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                        <input
-                          type="text"
-                          value={reviewFormData.user}
-                          onChange={(e) => setReviewFormData({...reviewFormData, user: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
-                          placeholder="Enter your name"
-                          required
-                        />
-                      </div>
+
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
@@ -496,12 +688,75 @@ const ProductDetail = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
                         <textarea
-                          value={reviewFormData.comment}
-                          onChange={(e) => setReviewFormData({...reviewFormData, comment: e.target.value})}
+                          value={reviewFormData.review_message}
+                          onChange={(e) => setReviewFormData({...reviewFormData, review_message: e.target.value, comment: e.target.value})}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98] min-h-[100px]"
                           placeholder="Share your experience with this product"
                           required
                         ></textarea>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Upload Images (Optional)</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            setSelectedImages(files);
+                            
+                            // Convert images to base64
+                            Promise.all(
+                              files.map(file => {
+                                return new Promise<string>((resolve) => {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    resolve(reader.result as string);
+                                  };
+                                  reader.readAsDataURL(file);
+                                });
+                              })
+                            ).then(base64Images => {
+                              setReviewFormData({
+                                ...reviewFormData,
+                                images: base64Images
+                              });
+                            });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                        />
+                        {selectedImages.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {selectedImages.map((file, index) => (
+                              <div key={index} className="relative w-16 h-16 rounded overflow-hidden">
+                                <img 
+                                  src={URL.createObjectURL(file)} 
+                                  alt={`Preview ${index}`} 
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newImages = [...selectedImages];
+                                    newImages.splice(index, 1);
+                                    setSelectedImages(newImages);
+                                    
+                                    const newBase64Images = [...(reviewFormData.images || [])];
+                                    newBase64Images.splice(index, 1);
+                                    setReviewFormData({
+                                      ...reviewFormData,
+                                      images: newBase64Images
+                                    });
+                                  }}
+                                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex justify-end">
@@ -509,7 +764,8 @@ const ProductDetail = () => {
                           type="button"
                           onClick={() => {
                             setShowReviewForm(false);
-                            setReviewFormData({ user: "", rating: 5, comment: "" });
+                            setReviewFormData({ user: "", rating: 5, comment: "", review_message: "", images: [] });
+                            setSelectedImages([]);
                             setReviewSubmitError("");
                           }}
                           className="mr-3 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500"
