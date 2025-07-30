@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData } from "@/api/items";
+import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, Review } from "@/api/items";
 import Container from "@/components/ui/Container";
 import Reviews from "@/components/Reviews";
 import Link from "next/link";
@@ -30,20 +30,6 @@ interface Product {
   specifications?: Record<string, string>;
 }
 
-interface Review {
-  id?: number;
-  user?: string;
-  rating: number;
-  comment?: string;
-  date: string;
-  images?: string[];
-  created_at?: string;
-  updated_at?: string;
-  item_id?: number;
-  user_id?: number;
-  service_id?: number;
-}
-
 const ProductDetail = () => {
   const params = useParams();
   const id = params?.id as string; // Cast to string to fix type error
@@ -66,7 +52,6 @@ const ProductDetail = () => {
   const [reviewFormData, setReviewFormData] = useState<ReviewData>({
     user: "", // Will be set from authenticated user
     rating: 5,
-    comment: "",
     review_message: "",
     images: []
   });
@@ -584,7 +569,7 @@ const ProductDetail = () => {
                   <button 
                     onClick={() => {
                       setShowReviewForm(false);
-                      setReviewFormData({ user: "", rating: 5, comment: "", review_message: "", images: [] });
+                      setReviewFormData({ user: "", rating: 5, review_message: "", images: [] });
                       setSelectedImages([]);
                       setReviewSubmitError("");
                       setReviewSubmitSuccess(false);
@@ -607,7 +592,7 @@ const ProductDetail = () => {
                     <button
                       onClick={() => {
                         setShowReviewForm(false);
-                        setReviewFormData({ user: "", rating: 5, comment: "", review_message: "", images: [] });
+                        setReviewFormData({ user: "", rating: 5, review_message: "", images: [] });
                         setSelectedImages([]);
                         setReviewSubmitError("");
                         setReviewSubmitSuccess(false);
@@ -689,7 +674,7 @@ const ProductDetail = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
                         <textarea
                           value={reviewFormData.review_message}
-                          onChange={(e) => setReviewFormData({...reviewFormData, review_message: e.target.value, comment: e.target.value})}
+                          onChange={(e) => setReviewFormData({...reviewFormData, review_message: e.target.value})}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98] min-h-[100px]"
                           placeholder="Share your experience with this product"
                           required
@@ -764,7 +749,7 @@ const ProductDetail = () => {
                           type="button"
                           onClick={() => {
                             setShowReviewForm(false);
-                            setReviewFormData({ user: "", rating: 5, comment: "", review_message: "", images: [] });
+                            setReviewFormData({ user: "", rating: 5, review_message: "", images: [] });
                             setSelectedImages([]);
                             setReviewSubmitError("");
                           }}
