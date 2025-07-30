@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -69,19 +69,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('refresh_token', refreshToken);
   };
 
-  const logout = () => {
-    setUser(null);
-    setAccessToken(null);
-    setRefreshToken(null);
-    
-    // Clear localStorage
+  const logout = useCallback(() => {
+    // Clear all authentication data first
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     
-    // Redirect to home
-    router.push('/');
-  };
+    // Update state (this might cause a brief warning in dev mode, but it's safe to ignore)
+    setUser(null);
+    setAccessToken(null);
+    setRefreshToken(null);
+    
+    // Use a small delay to ensure state updates are processed
+    // before forcing a full page reload
+    setTimeout(() => {
+      // Redirect to home page with a full page reload
+      // This ensures a clean state and avoids any React warnings
+      window.location.href = '/';
+    }, 50);
+  }, []);
 
   const updateUser = (userData: User) => {
     setUser(userData);

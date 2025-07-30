@@ -43,7 +43,21 @@ const itemVariants: Variants = {
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { user, isAuthenticated, logout: logoutAuth, isLoading } = useAuth();
+  
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent any parent handlers from executing
+    
+    // Close mobile menu if open
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+    
+    // Call the logout function from AuthContext
+    // The actual navigation will be handled there
+    logoutAuth();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -133,7 +147,7 @@ export default function Navbar() {
       <Link href="/dashboard/rentals" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>My Rentals</Link>
       <Link href="/dashboard/profile" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Profile</Link>
       <button
-        onClick={logout}
+        onClick={handleLogout}
         className="w-full text-left px-6 py-2 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium"
         role="menuitem"
         tabIndex={0}
@@ -259,10 +273,7 @@ export default function Navbar() {
       Profile
     </Link>
     <button
-      onClick={() => {
-        logout();
-        setMobileMenuOpen(false);
-      }}
+      onClick={handleLogout}
       className="w-full text-center text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium py-3 rounded-lg"
     >
       Logout
