@@ -2,12 +2,12 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Container from '../../components/ui/Container';
 import { useAuth } from '../../contexts/AuthContext';
 import OverviewTab from './OverviewTab';
 import RentalsTab from './RentalsTab';
 import PaymentsTab from './PaymentsTab';
-import ProfileTab from './ProfileTab';
 import ReviewsTab from './ReviewsTab';
 
 interface User {
@@ -15,10 +15,14 @@ interface User {
   email: string;
   first_name: string;
   last_name: string;
-  phone?: string;
+  phone_number?: string;
+  profile_image?: string;
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  is_admin?: boolean;
+  is_verified?: boolean;
+  uuid?: string;
 }
 
 export default function DashboardPage() {
@@ -52,13 +56,13 @@ export default function DashboardPage() {
   }
 
   // Tab navigation via URL
-  const validTabs = ['overview', 'rentals', 'payments', 'profile', 'reviews'] as const;
+  const validTabs = ['overview', 'rentals', 'payments', 'reviews'] as const;
   type TabKey = typeof validTabs[number];
   const [activeTab, setActiveTab] = React.useState<TabKey>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab && ['overview', 'rentals', 'payments', 'profile', 'reviews'].includes(tab)) {
+      if (tab && ['overview', 'rentals', 'payments', 'reviews'].includes(tab)) {
         return tab as TabKey;
       }
     }
@@ -113,12 +117,12 @@ export default function DashboardPage() {
               >
                 My Reviews
               </button>
-              <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'profile' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
-                onClick={() => handleTabChange('profile')}
+              <Link 
+                href="/dashboard/profile"
+                className="w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors text-gray-700 hover:bg-purple-50 block"
               >
                 Profile
-              </button>
+              </Link>
             </nav>
           </aside>
 
@@ -128,7 +132,6 @@ export default function DashboardPage() {
             {activeTab === 'rentals' && <RentalsTab />}
             {activeTab === 'payments' && <PaymentsTab />}
             {activeTab === 'reviews' && <ReviewsTab user={user} />}
-            {activeTab === 'profile' && <ProfileTab />}
           </div>
         </div>
       </Container>

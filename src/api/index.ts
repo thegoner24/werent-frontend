@@ -6,6 +6,8 @@ export const AUTH_HEADER = 'Authorization';
 export const endpoints = {
   signup: '/api/auth/signup',
   login: '/api/auth/login',
+  profile: '/api/auth/profile',
+  items: '/api/items',
 };
 
 export const apiFetch = async (
