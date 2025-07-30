@@ -1,105 +1,51 @@
-# CamRent Frontend - AI Coding Instructions
+### General Assumption
+- **Running Environment**: Always assume the application is already running with `npm run dev`
 
-## Project Overview
-This is a **Next.js 15** camera/dress rental marketplace frontend using **TypeScript**, **Tailwind CSS 4**, and **Framer Motion**. The app follows a **dual-dashboard architecture** (user + admin) with JWT-based authentication and a **component-first design system**.
+### Error Handling & Resilience
+- **Try-Catch Blocks**: Wrap async operations and API calls with proper error handling
+- **Error Boundaries**: Use React Error Boundaries for component-level error catching
+- **Fallback UI**: Provide loading states, error states, and empty states for all data-dependent components
+- **Graceful Degradation**: App should remain functional even when non-critical features fail
+- **User Feedback**: Show meaningful error messages and success notifications
 
-## Architecture Patterns
+### Performance Optimization
+- **Code Splitting**: Use dynamic imports and Next.js automatic code splitting
+- **Image Optimization**: Use Next.js `<Image>` component with proper sizing and lazy loading
+- **Memoization**: Use `React.memo`, `useMemo`, and `useCallback` for expensive operations
+- **Bundle Analysis**: Regularly check bundle size and optimize imports
+- **Lazy Loading**: Implement lazy loading for heavy components and routes
 
-### App Router Structure
-- Uses Next.js App Router (`src/app/`) with TypeScript
-- Route-based pages: `/dashboard`, `/admin-dashboard`, `/shop`, `/products/[id]`
-- Centralized auth context wraps entire app in `layout.tsx`
-- Each major section has its own tab-based sub-components
+### Type Safety & Documentation
+- **Strict TypeScript**: Enable strict mode, no `any` types except for legitimate cases
+- **Interface Definition**: Define clear interfaces for all props, API responses, and data structures
+- **JSDoc Comments**: Document complex functions and component APIs
+- **Prop Validation**: Use TypeScript interfaces instead of PropTypes for better compile-time checking
 
-### Authentication Flow
-- **Context**: `src/contexts/AuthContext.tsx` - manages user state, tokens (access/refresh), localStorage persistence
-- **API Layer**: `src/api/` - centralized API calls with `apiFetch()` wrapper
-- **Backend**: Points to `https://werent-backend-api.onrender.com`
-- **Pattern**: Protected routes check `isAuthenticated` and redirect to `/login`
+### Code Quality & Consistency
+- **ESLint & Prettier**: Enforce consistent code style and catch potential issues
+- **Git Hooks**: Use pre-commit hooks to run linting and formatting
+- **Naming Conventions**: Use PascalCase for components, camelCase for functions/variables, UPPER_CASE for constants
+- **File Organization**: Group related files, use index.ts for clean imports
+- **Import Organization**: Sort imports (external → internal → relative), remove unused imports
 
-### Component System
-- **Container**: `src/components/ui/Container.tsx` - responsive wrapper with max-width constraints
-- **Layout**: All pages use `<Container>` + consistent header patterns with gradient backgrounds
-- **Animations**: Framer Motion variants for menu animations (see `Navbar.tsx` for patterns)
-- **Styling**: Tailwind with purple/pink gradient theme (`from-purple-600 to-pink-500`)
+### Security Best Practices
+- **Input Sanitization**: Sanitize user inputs and API responses
+- **XSS Prevention**: Use proper escaping for dynamic content
+- **Token Management**: Secure storage and handling of JWT tokens
+- **Environment Variables**: Keep sensitive data in env files, never commit secrets
+- **HTTPS**: Ensure all API calls use HTTPS in production
 
-## Key Development Workflows
+### Testing Strategy
+- **Unit Tests**: Test individual components and utility functions
+- **Integration Tests**: Test component interactions and API integrations
+- **E2E Tests**: Test critical user flows (auth, checkout, etc.)
+- **Test Coverage**: Maintain reasonable test coverage for business-critical code
+- **Mock Data**: Use consistent mock data for development and testing
 
-### Running the App
-```bash
-npm run dev --turbopack  # Uses Turbopack for faster builds
-npm run build
-npm run lint  # Next.js ESLint with TypeScript rules
-```
+### Accessibility (a11y)
+- **Semantic HTML**: Use proper HTML5 semantic elements
+- **ARIA Labels**: Add ARIA attributes for screen readers
+- **Keyboard Navigation**: Ensure all interactive elements are keyboard accessible
+- **Color Contrast**: Maintain WCAG AA color contrast ratios
+- **Focus Management**: Proper focus states and logical tab order
 
-### Component Creation Pattern
-1. Create in `src/components/[FeatureName]/[ComponentName].tsx`
-2. Use TypeScript interfaces for props (see `ContainerProps`, `AuthContextType`)
-3. Export via `index.ts` barrel files (see `src/components/Hero/index.ts`)
-4. Wrap with `Container` for consistent spacing
-
-### Page Creation Pattern
-```tsx
-// Standard page structure
-"use client";  // For client-side features
-import Container from '@/components/ui/Container';
-import { useAuth } from '@/contexts/AuthContext';
-
-export default function PageName() {
-  const { user, isAuthenticated } = useAuth();
-  
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Gradient header */}
-      <div className="h-32 bg-gradient-to-r from-purple-600 to-pink-500">
-        <Container className="h-full flex items-center justify-center">
-          <h1 className="text-3xl font-bold text-white">Page Title</h1>
-        </Container>
-      </div>
-      
-      <Container className="py-8">
-        {/* Page content */}
-      </Container>
-    </div>
-  );
-}
-```
-
-## Critical Conventions
-
-### State Management
-- **Auth**: Global context via `AuthProvider` - handles user, tokens, persistence
-- **Local State**: React useState for component-level state (tabs, modals, forms)
-- **Loading States**: Use `isLoading` pattern with spinner UI (see dashboard loading)
-
-### API Integration
-- **Centralized**: All API calls go through `src/api/` modules
-- **Error Handling**: `apiFetch()` throws errors, catch in components
-- **Headers**: Auto-attaches `Authorization: Bearer {token}` when token provided
-- **Endpoints**: Defined in `src/api/index.ts` endpoints object
-
-### TypeScript Patterns
-- **Interfaces**: Define props and data shapes (User, AuthContextType, etc.)
-- **Path Mapping**: Use `@/*` alias for `src/*` imports
-- **Strict Mode**: Enabled - handle null/undefined explicitly
-
-### Styling Conventions
-- **Theme**: Purple/pink gradients (`from-purple-600 to-pink-500`)
-- **Layout**: Always use `Container` wrapper for responsive design
-- **Responsive**: Mobile-first with `sm:`, `md:`, `lg:` breakpoints
-- **Loading**: Consistent spinner with purple accent (`border-purple-600`)
-
-### Tab-Based Dashboards
-Both `/dashboard` and `/admin-dashboard` use tab patterns:
-- State: `const [activeTab, setActiveTab] = useState('overview')`
-- Navigation: Side nav on desktop, horizontal on mobile
-- Content: Conditional rendering based on `activeTab`
-- Styling: Active tab gets gradient background, inactive gets hover states
-
-## Integration Points
-- **External API**: Backend API for auth, data (check `BASE_URL` in `src/api/index.ts`)
-- **Images**: Next.js Image component with Unsplash domain configured
-- **Fonts**: Geist Sans/Mono loaded in `layout.tsx`
-- **Icons**: SVG icons in `/public/` directory for UI elements
-
-When adding new features, follow the established patterns: TypeScript interfaces, Container wrapper, consistent auth checks, and gradient theming.
