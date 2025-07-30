@@ -28,9 +28,47 @@ export interface UpdateProfileResponse {
   success: boolean;
 }
 
+export interface ValidationErrorResponse {
+  details: {
+    field_errors: {
+      [key: string]: string[];
+    };
+  };
+  error: string;
+  error_code: string;
+  success: false;
+}
+
+export class ProfileValidationError extends Error {
+  public fieldErrors: { [key: string]: string[] };
+  
+  constructor(response: ValidationErrorResponse) {
+    super(response.error);
+    this.name = 'ProfileValidationError';
+    this.fieldErrors = response.details.field_errors;
+  }
+}
+
 export async function updateProfile(payload: UpdateProfilePayload, token: string): Promise<UpdateProfileResponse> {
-  return apiFetch(endpoints.profile, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  }, token);
+  try {
+    return await apiFetch(endpoints.profile, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }, token);
+  } catch (error) {
+    // Try to parse as validation error
+    try {
+      const errorText = error instanceof Error ? error.message : String(error);
+      const errorData = JSON.parse(errorText);
+      
+      if (errorData.error_code === 'VALIDATION_ERROR' && errorData.details?.field_errors) {
+        throw new ProfileValidationError(errorData);
+      }
+    } catch (parseError) {
+      // If parsing fails, fall through to original error
+    }
+    
+    // Re-throw original error if not a validation error
+    throw error;
+  }
 }
