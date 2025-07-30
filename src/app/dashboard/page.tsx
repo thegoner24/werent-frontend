@@ -27,7 +27,7 @@ interface User {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { user, isAuthenticated, logout, isLoading, refreshProfile } = useAuth();
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -35,6 +35,13 @@ export default function DashboardPage() {
       router.push('/login');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Refresh profile when accessing dashboard to get latest verification status
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      refreshProfile();
+    }
+  }, [isAuthenticated, isLoading, refreshProfile]);
 
   const handleLogout = () => {
     logout();

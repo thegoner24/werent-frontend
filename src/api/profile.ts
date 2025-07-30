@@ -28,6 +28,27 @@ export interface UpdateProfileResponse {
   success: boolean;
 }
 
+export interface GetProfileResponse {
+  data: {
+    user: {
+      id: number;
+      email: string;
+      first_name: string;
+      last_name: string;
+      phone_number: string;
+      profile_image?: string;
+      created_at: string;
+      updated_at: string;
+      is_active: boolean;
+      is_admin?: boolean;
+      is_verified?: boolean;
+      uuid?: string;
+    };
+  };
+  message: string;
+  success: boolean;
+}
+
 export interface ValidationErrorResponse {
   details: {
     field_errors: {
@@ -47,6 +68,12 @@ export class ProfileValidationError extends Error {
     this.name = 'ProfileValidationError';
     this.fieldErrors = response.details.field_errors;
   }
+}
+
+export async function getProfile(token: string): Promise<GetProfileResponse> {
+  return await apiFetch(endpoints.profile, {
+    method: 'GET',
+  }, token);
 }
 
 export async function updateProfile(payload: UpdateProfilePayload, token: string): Promise<UpdateProfileResponse> {
