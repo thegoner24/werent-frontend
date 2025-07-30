@@ -28,6 +28,11 @@ interface Product {
   reviewList?: Review[]; // Optional: for legacy compatibility
   features?: string[];
   specifications?: Record<string, string>;
+  size?: string; // Size from backend
+  sizes?: string[]; // Available sizes from backend
+  type?: string; // Product type from backend
+  user_id?: number; // User ID from backend
+  designer_name?: string; // Designer name from backend
 }
 
 interface Review {
@@ -87,6 +92,13 @@ const ProductDetail = () => {
     }
   }, [isAuthenticated, user]);
 
+  // Set default selected size when product is loaded
+  useEffect(() => {
+    if (product && product.size && !selectedSize) {
+      setSelectedSize(product.size);
+    }
+  }, [product, selectedSize]);
+
   useEffect(() => {
     async function getProduct() {
       setLoading(true);
@@ -145,6 +157,11 @@ const ProductDetail = () => {
           reviewList: reviewList || apiProduct.reviewList || [],
           specifications: apiProduct.specifications || {},
           features: apiProduct.features || [],
+          size: apiProduct.size,
+          sizes: apiProduct.sizes,
+          type: apiProduct.type,
+          user_id: apiProduct.user_id,
+          designer_name: apiProduct.designer_name,
         });
       } catch (e) {
         setError('Failed to load product.');
@@ -283,10 +300,29 @@ const ProductDetail = () => {
                   <span className="ml-2 text-sm text-gray-600">{(product.rating || 0).toFixed(1)} ({reviewCount} reviews)</span>
                 </div>
                 <div className="text-xl font-semibold text-[#ff6b98] mb-4">
-                  {product.price ? `₫${product.price.toLocaleString()}/day` : 'Contact for price'}
+                  {product.price ? `$${product.price.toLocaleString()}/day` : 'Contact for price'}
                 </div>
                 <div className="mb-4 text-gray-700">
                   {product.description || 'No description available.'}
+                </div>
+                
+                {/* Designer Banner */}
+                <div className="bg-gradient-to-r from-[#ff6b98] to-[#e55a87] rounded-lg p-6 mb-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        {product.brand ? product.brand.charAt(0).toUpperCase() : (product.designer_name ? product.designer_name.charAt(0).toUpperCase() : 'D')}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg text-white">
+                        {product.brand || (product.designer_name ? `Designer: ${product.designer_name}` : 'Designer Collection')}
+                      </h3>
+                      <p className="text-white/90 text-sm">
+                        {product.brand ? 'Premium brand collection' : product.user_id ? `Created by designer ID: ${product.user_id}` : 'Curated by professional interior designers'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
               {/* Rental Options */}
@@ -298,7 +334,7 @@ const ProductDetail = () => {
                   className="border rounded px-2 py-1"
                 >
                   <option value="">Select size</option>
-                  {features.map((size, idx) => (
+                  {(product.sizes || [product.size].filter(Boolean) || []).map((size, idx) => (
                     <option key={idx} value={size}>{size}</option>
                   ))}
                 </select>
@@ -312,7 +348,17 @@ const ProductDetail = () => {
                 />
                 <div className="mt-2 text-md">
                   <span className="font-semibold">Total Price: </span>
-                  <span className="text-[#ff6b98] font-bold">₫{totalPrice.toLocaleString()}</span>
+                  <span className="text-[#ff6b98] font-bold">${totalPrice.toLocaleString()}</span>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-col space-y-3 mt-6">
+                  <button className="w-full bg-[#ff6b98] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#e55a87] transition-colors">
+                    Add to Wishlist
+                  </button>
+                  <button className="w-full border-2 border-[#ff6b98] text-[#ff6b98] py-3 px-6 rounded-lg font-semibold hover:bg-[#ff6b98] hover:text-white transition-colors">
+                    Rent Now
+                  </button>
                 </div>
               </div>
               {/* Specifications */}
