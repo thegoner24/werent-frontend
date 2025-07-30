@@ -133,20 +133,16 @@ const ReviewCard: React.FC<{
 }> = ({ review, onVoteHelpful, onReportReview, onModerateReview, isAdmin, currentUserId }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
-  const [hasVotedHelpful, setHasVotedHelpful] = useState(false);
-  const [hasReported, setHasReported] = useState(false);
 
   const handleVoteHelpful = (isHelpful: boolean) => {
     if (onVoteHelpful && review.id) {
       onVoteHelpful(review.id, isHelpful);
-      setHasVotedHelpful(true);
     }
   };
 
   const handleReport = () => {
     if (onReportReview && review.id) {
       onReportReview(review.id, reportReason);
-      setHasReported(true);
       setShowReportModal(false);
       setReportReason('');
     }
@@ -158,6 +154,7 @@ const ReviewCard: React.FC<{
     }
   };
 
+  // Compute user interaction status from review data
   const hasVotedHelpful = review.helpfulVotes?.includes(currentUserId?.toString() || '');
   const hasReported = review.reportedBy?.includes(currentUserId?.toString() || '');
 
@@ -178,9 +175,9 @@ const ReviewCard: React.FC<{
           <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
               {review.userAvatar ? (
-                <img src={review.userAvatar} alt={review.user} className="w-full h-full rounded-full object-cover" />
+                <img src={review.userAvatar} alt={review.user || 'User'} className="w-full h-full rounded-full object-cover" />
               ) : (
-                review.user.split(' ').map(n => n[0]).join('')
+                (review.user || 'A').split(' ').map(n => n[0]).join('')
               )}
             </span>
           </div>
