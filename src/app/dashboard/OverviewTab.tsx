@@ -124,6 +124,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
               <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user.is_verified ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>
                 {user.is_verified ? 'Verified' : 'Unverified'}
               </span>
+              {user.is_admin && (
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                  Admin
+                </span>
+              )}
             </div>
           </div>
         </div>

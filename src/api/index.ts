@@ -7,7 +7,7 @@ export const endpoints = {
   signup: '/api/auth/signup',
   login: '/api/auth/login',
   profile: '/api/auth/profile',
-  items: '/api/items',
+  items: '/items',
 };
 
 export const apiFetch = async (

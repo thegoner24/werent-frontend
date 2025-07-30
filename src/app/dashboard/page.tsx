@@ -9,6 +9,7 @@ import OverviewTab from './OverviewTab';
 import RentalsTab from './RentalsTab';
 import PaymentsTab from './PaymentsTab';
 import ReviewsTab from './ReviewsTab';
+import AdminTab from './AdminTab';
 
 interface User {
   id: number;
@@ -63,13 +64,13 @@ export default function DashboardPage() {
   }
 
   // Tab navigation via URL
-  const validTabs = ['overview', 'rentals', 'payments', 'reviews'] as const;
+  const validTabs = ['overview', 'rentals', 'payments', 'reviews', 'admin'] as const;
   type TabKey = typeof validTabs[number];
   const [activeTab, setActiveTab] = React.useState<TabKey>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab && ['overview', 'rentals', 'payments', 'reviews'].includes(tab)) {
+      if (tab && ['overview', 'rentals', 'payments', 'reviews', 'admin'].includes(tab)) {
         return tab as TabKey;
       }
     }
@@ -124,6 +125,14 @@ export default function DashboardPage() {
               >
                 My Reviews
               </button>
+              {user.is_admin && (
+                <button
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'admin' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
+                  onClick={() => handleTabChange('admin')}
+                >
+                  Admin Panel
+                </button>
+              )}
               <Link 
                 href="/dashboard/profile"
                 className="w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors text-gray-700 hover:bg-purple-50 block"
@@ -139,6 +148,7 @@ export default function DashboardPage() {
             {activeTab === 'rentals' && <RentalsTab />}
             {activeTab === 'payments' && <PaymentsTab />}
             {activeTab === 'reviews' && <ReviewsTab user={user} />}
+            {activeTab === 'admin' && user.is_admin && <AdminTab user={user} />}
           </div>
         </div>
       </Container>
