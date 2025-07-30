@@ -49,3 +49,9 @@
 - **Color Contrast**: Maintain WCAG AA color contrast ratios
 - **Focus Management**: Proper focus states and logical tab order
 
+### Mobile-First Design
+- **Responsive Layouts**: Design layouts for mobile devices first, then scale up for larger screens
+- **Flexible Units**: Use relative units (%, rem, em) for sizing and spacing
+- **Media Queries**: Apply CSS media queries to adjust styles for tablets and desktops
+- **Touch Targets**: Ensure interactive elements are large enough for touch
+- **Performance**: Optimize for fast loading and smooth interactions on mobile devices

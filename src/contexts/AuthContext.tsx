@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { getProfile } from '../api/profile';
 
 interface User {
   id: number;
@@ -27,6 +28,7 @@ interface AuthContextType {
   login: (userData: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
   updateUser: (userData: User) => void;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -98,6 +100,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
+  const refreshProfile = useCallback(async () => {
+    if (!accessToken) {
+      return;
+    }
+
+    try {
+      const response = await getProfile(accessToken);
+      if (response.success && response.data.user) {
+        updateUser(response.data.user);
+      }
+    } catch (error) {
+      console.error('Failed to refresh profile:', error);
+      // Don't throw error to avoid breaking the UI
+      // The user will continue with their cached profile data
+    }
+  }, [accessToken]);
+
   const isAuthenticated = !!user && !!accessToken;
 
   const value: AuthContextType = {
@@ -109,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     updateUser,
+    refreshProfile,
   };
 
   return (

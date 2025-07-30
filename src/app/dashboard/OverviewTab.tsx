@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProfileAvatar from '../../components/ui/ProfileAvatar';
+import { resendVerification } from '../../api/verification';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface User {
   id: number;
@@ -22,8 +24,53 @@ interface OverviewTabProps {
   handleLogout: () => void;
 }
 
-const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => (
-  <>
+const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
+  const { accessToken, refreshProfile } = useAuth();
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleResendVerification = async () => {
+    if (!accessToken) return;
+    
+    setIsResendingVerification(true);
+    setVerificationMessage(null);
+    
+    try {
+      const response = await resendVerification(accessToken);
+      setVerificationMessage({ 
+        type: 'success', 
+        text: response.message || 'Verification email sent successfully!' 
+      });
+      
+      // Clear the success message after 5 seconds
+      setTimeout(() => {
+        setVerificationMessage(null);
+      }, 5000);
+      
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send verification email. Please try again.';
+      setVerificationMessage({ 
+        type: 'error', 
+        text: errorMessage
+      });
+    } finally {
+      setIsResendingVerification(false);
+    }
+  };
+
+  // Refresh profile every 30 seconds if user is not verified (to check for verification status)
+  useEffect(() => {
+    if (!user?.is_verified && accessToken) {
+      const interval = setInterval(() => {
+        refreshProfile();
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [user?.is_verified, accessToken, refreshProfile]);
+
+  return (
+    <>
     {/* Header */}
     <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
       <div className="flex items-center justify-between">
@@ -70,9 +117,69 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => (
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">Account Status</label>
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{user.is_active ? 'Active' : 'Inactive'}</span>
+            <div className="flex flex-wrap gap-2">
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
+                {user.is_active ? 'Active' : 'Inactive'}
+              </span>
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user.is_verified ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                {user.is_verified ? 'Verified' : 'Unverified'}
+              </span>
+              {user.is_admin && (
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                  Admin
+                </span>
+              )}
+            </div>
           </div>
         </div>
+        
+        {/* Verification Notice */}
+        {!user.is_verified && (
+          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  Email Verification Required
+                </h3>
+                <p className="mt-1 text-sm text-yellow-700">
+                  Please verify your email address to access all features and ensure account security. 
+                  {!user.is_verified && " Your verification status will update automatically."}
+                </p>
+                {verificationMessage && (
+                  <div className={`mt-2 p-2 rounded text-sm ${
+                    verificationMessage.type === 'success' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {verificationMessage.text}
+                  </div>
+                )}
+                <div className="mt-3">
+                  <button
+                    onClick={handleResendVerification}
+                    disabled={isResendingVerification}
+                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isResendingVerification ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Sending...
+                      </div>
+                    ) : (
+                      'Resend Verification'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="mt-6">
           <Link 
             href="/dashboard/profile"
@@ -142,7 +249,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => (
         </button>
       </div>
     </div>
-  </>
-);
+    </>
+  );
+};
 
 export default OverviewTab;
