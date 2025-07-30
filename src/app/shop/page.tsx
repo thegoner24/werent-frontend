@@ -1,107 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { fetchItems } from "@/api/items";
 import Container from "@/components/ui/Container";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import Pagination from "@/components/ui/Pagination";
 
-// Mockup filter data
-const categories = [
-  "Evening Dresses",
-  "Casual Wear",
-  "Formal Attire",
-  "Accessories",
-  "Designer Brands",
-  "Wedding Collection",
-];
-const brands = ["Gucci", "Prada", "Versace", "Dior", "Chanel", "Louis Vuitton"];
-const priceRange = [0, 300];
+// Filter data will be derived from API items
 
-// Mockup product data
-const products = [
-  {
-    id: 1,
-    name: "Elegant Evening Gown",
-    price: 85.0,
-    image: "/shop/mock-sofa.jpg",
-    category: "Evening Dresses",
-    brand: "Gucci",
-    rating: 4.8,
-    reviews: [
-      { user: "Sarah Johnson", rating: 5, comment: "Absolutely stunning! Perfect for my wedding reception. The quality is exceptional and it fit like a dream.", date: "2024-01-15" },
-      { user: "Emma Davis", rating: 4, comment: "Beautiful dress, great quality fabric. Shipping was a bit slow but worth the wait.", date: "2024-01-10" },
-      { user: "Maria Rodriguez", rating: 5, comment: "Wore this to a charity gala and received so many compliments! The design is timeless.", date: "2024-01-08" },
-      { user: "Jennifer Smith", rating: 4, comment: "Excellent rental experience. The dress was in perfect condition and the alterations were spot on.", date: "2024-01-05" },
-      { user: "Amanda Wilson", rating: 5, comment: "This gown made me feel like a princess! The attention to detail is incredible.", date: "2024-01-02" },
-      { user: "Lisa Thompson", rating: 4, comment: "Great value for a designer dress. The fit was perfect and the service was excellent.", date: "2023-12-28" },
-      { user: "Rachel Green", rating: 5, comment: "Perfect for my engagement party! The dress exceeded my expectations.", date: "2023-12-25" },
-      { user: "Michelle Brown", rating: 4, comment: "Lovely dress, very elegant. Would definitely rent again for special occasions.", date: "2023-12-20" }
-    ]
-  },
-  {
-    id: 2,
-    name: "Cocktail Dress",
-    price: 53.0,
-    image: "/shop/mock-dining.jpg",
-    category: "Formal Attire",
-    brand: "Prada",
-    rating: 4.7,
-    reviews: [
-      { user: "Jessica Parker", rating: 5, comment: "Perfect cocktail dress! Wore it to a corporate event and felt so confident.", date: "2024-01-14" },
-      { user: "Ashley Miller", rating: 4, comment: "Great fit and comfortable to wear all evening. The fabric is high quality.", date: "2024-01-12" },
-      { user: "Nicole Taylor", rating: 5, comment: "This dress is so versatile! Perfect for both business and social events.", date: "2024-01-09" },
-      { user: "Stephanie White", rating: 4, comment: "Excellent rental service. The dress arrived on time and in perfect condition.", date: "2024-01-06" },
-      { user: "Katherine Lee", rating: 5, comment: "Absolutely love this dress! The design is sophisticated and the fit was perfect.", date: "2024-01-03" },
-      { user: "Victoria Clark", rating: 4, comment: "Great quality for the price. The dress looked expensive and felt comfortable.", date: "2023-12-30" },
-      { user: "Danielle Hall", rating: 5, comment: "Wore this to my sister's wedding and got so many compliments! Highly recommend.", date: "2023-12-27" },
-      { user: "Christine Adams", rating: 4, comment: "Perfect for a cocktail party. The dress is elegant and the service was great.", date: "2023-12-24" },
-      { user: "Tiffany Scott", rating: 5, comment: "This dress made me feel beautiful! The rental process was smooth and easy.", date: "2023-12-21" }
-    ]
-  },
-  {
-    id: 3,
-    name: "Designer Handbag",
-    price: 32.0,
-    image: "/shop/mock-chair.jpg",
-    category: "Accessories",
-    brand: "Chanel",
-    rating: 4.6,
-    reviews: [
-      { user: "Olivia Martin", rating: 5, comment: "Gorgeous handbag! Perfect size and the quality is outstanding.", date: "2024-01-13" },
-      { user: "Sophia Anderson", rating: 4, comment: "Beautiful bag, great for special occasions. The leather feels luxurious.", date: "2024-01-11" },
-      { user: "Isabella Garcia", rating: 5, comment: "This bag completed my outfit perfectly! The design is classic and elegant.", date: "2024-01-08" },
-      { user: "Ava Martinez", rating: 4, comment: "Excellent quality for a rental. The bag looked brand new and was perfect for my event.", date: "2024-01-05" },
-      { user: "Mia Robinson", rating: 5, comment: "Love this handbag! It's the perfect accessory for any formal occasion.", date: "2024-01-02" },
-      { user: "Charlotte Lewis", rating: 4, comment: "Great value for a designer bag. The rental process was seamless.", date: "2023-12-29" },
-      { user: "Amelia Walker", rating: 5, comment: "This bag is stunning! Received many compliments and the quality is exceptional.", date: "2023-12-26" },
-      { user: "Harper Young", rating: 4, comment: "Perfect size and style. The bag complemented my dress beautifully.", date: "2023-12-23" },
-      { user: "Evelyn King", rating: 5, comment: "Absolutely love this handbag! The design is timeless and the quality is superb.", date: "2023-12-20" },
-      { user: "Abigail Wright", rating: 4, comment: "Great rental experience. The bag was in perfect condition and arrived on time.", date: "2023-12-17" }
-    ]
-  },
-  {
-    id: 4,
-    name: "Summer Dress",
-    price: 28.0,
-    image: "/shop/mock-bookshelf.jpg",
-    category: "Casual Wear",
-    brand: "Dior",
-    rating: 4.5,
-    reviews: [
-      { user: "Emily Turner", rating: 4, comment: "Perfect summer dress! Light and comfortable, perfect for outdoor events.", date: "2024-01-12" },
-      { user: "Madison Phillips", rating: 5, comment: "Love this dress! The fabric is breathable and the fit is flattering.", date: "2024-01-10" },
-      { user: "Chloe Campbell", rating: 4, comment: "Great for summer parties. The dress is stylish and comfortable to wear.", date: "2024-01-07" },
-      { user: "Zoe Parker", rating: 5, comment: "This dress is so pretty! Perfect for garden parties and summer weddings.", date: "2024-01-04" },
-      { user: "Lily Evans", rating: 4, comment: "Excellent quality for the price. The dress looked expensive and felt comfortable.", date: "2024-01-01" },
-      { user: "Hannah Edwards", rating: 5, comment: "Wore this to a beach wedding and it was perfect! Light and elegant.", date: "2023-12-28" },
-      { user: "Layla Collins", rating: 4, comment: "Great summer dress. The fabric is high quality and the design is timeless.", date: "2023-12-25" },
-      { user: "Scarlett Stewart", rating: 5, comment: "This dress made me feel beautiful! Perfect for summer occasions.", date: "2023-12-22" },
-      { user: "Aria Sanchez", rating: 4, comment: "Lovely dress, very comfortable. Would definitely rent again for summer events.", date: "2023-12-19" },
-      { user: "Ellie Morris", rating: 5, comment: "Perfect for outdoor events! The dress is elegant and the rental service was excellent.", date: "2023-12-16" }
-    ]
-  },
-  // ...add more mock products as needed
-];
+
 
 // Animation variants
 const containerVariants: Variants = {
@@ -150,51 +57,66 @@ const ProductCardSkeleton = () => {
   );
 };
 
-const PAGE_SIZE = 2; //Change this to how many items we want to show per page
+const PAGE_SIZE = 9; // Show up to 9 items per page
+
+// Utility to get unique categories/brands from items
+function getUniqueValues(items: any[], key: string) {
+  return Array.from(new Set(items.map(item => item[key]).filter(Boolean)));
+}
+
+// Utility to get min/max price from items
+function getPriceRange(items: any[]) {
+  if (!items.length) return [0, 0];
+  const prices = items.map(item => item.price);
+  return [Math.min(...prices), Math.max(...prices)];
+}
+
 
 const ShopPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [price, setPrice] = useState<number[]>(priceRange);
+  const [price, setPrice] = useState<number[]>([0, 300]);
   const [page, setPage] = useState(1);
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading state
+  // Fetch items from API and filter
   useEffect(() => {
-    // Simulate API call delay
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Simulate loading when filters change
-  useEffect(() => {
-    if (!isLoading) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 800);
-      
-      return () => clearTimeout(timer);
-    }
+    setIsLoading(true);
+    fetchItems()
+      .then((data) => {
+        console.log('API response:', data);
+        const itemsArray = (data.data || []).map((item: any) => ({
+          ...item,
+          price: item.price_per_day,
+          image: (item.images && item.images.length > 0)
+            ? (item.images[0].startsWith('data:image')
+                ? item.images[0]
+                : `data:image/jpeg;base64,${item.images[0]}`)
+            : '/placeholder.png',
+        }));
+        let filtered = itemsArray;
+        if (selectedCategory) {
+          filtered = filtered.filter((item: any) => item.category === selectedCategory);
+        }
+        if (selectedBrand) {
+          filtered = filtered.filter((item: any) => item.brand === selectedBrand);
+        }
+        filtered = filtered.filter((item: any) => item.price >= price[0] && item.price <= price[1]);
+        console.log('Filtered products:', filtered);
+        setItems(filtered);
+        setTotal(filtered.length);
+        setPage(1);
+      })
+      .catch((err) => {
+        setItems([]);
+        setTotal(0);
+      })
+      .finally(() => setIsLoading(false));
   }, [selectedCategory, selectedBrand, price]);
 
-  // Filter logic (mock)
-  const filteredProducts = products.filter((product) => {
-    const matchCategory = selectedCategory ? product.category === selectedCategory : true;
-    const matchBrand = selectedBrand ? product.brand === selectedBrand : true;
-    const matchPrice = product.price >= price[0] && product.price <= price[1];
-    return matchCategory && matchBrand && matchPrice;
-  });
-
-  const paginatedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  useEffect(() => {
-    setTotal(filteredProducts.length);
-  }, [filteredProducts]);
+  const paginatedProducts = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   useEffect(() => {
     setPage(1);
@@ -240,49 +162,49 @@ const ShopPage = () => {
             <div className="mb-8">
               <h2 className="text-lg font-semibold mb-4 text-[#ff6b98]">Categories</h2>
               <ul className="space-y-2">
-                {categories.map((cat) => (
-                  <li key={cat}>
-                    <button
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${selectedCategory === cat ? "bg-[#ffeaf0] text-[#ff6b98] font-medium" : "text-gray-700 hover:bg-gray-50"}`}
-                      onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-                    >
-                      {cat}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+  {getUniqueValues(items, "category").map((cat) => (
+    <li key={cat}>
+      <button
+        className={`w-full text-left px-3 py-2 rounded-lg transition-all ${selectedCategory === cat ? "bg-[#ffeaf0] text-[#ff6b98] font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+        onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+      >
+        {cat}
+      </button>
+    </li>
+  ))}
+</ul>
             </div>
             <div className="mb-8">
               <h2 className="text-lg font-semibold mb-4 text-[#ff6b98]">Price Range</h2>
               <div className="px-2">
                 <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">${price[0]}</span>
-                  <span className="text-gray-600">${price[1]}</span>
+                  <span className="text-gray-600">${getPriceRange(items)[0]}</span>
+<span className="text-gray-600">${getPriceRange(items)[1]}</span>
                 </div>
                 <input
-                  type="range"
-                  min={priceRange[0]}
-                  max={priceRange[1]}
-                  value={price[1]}
-                  onChange={e => setPrice([price[0], Number(e.target.value)])}
-                  className="w-full accent-[#ff6b98]"
-                />
+  type="range"
+  min={getPriceRange(items)[0]}
+  max={getPriceRange(items)[1]}
+  value={price[1]}
+  onChange={e => setPrice([price[0], Number(e.target.value)])}
+  className="w-full accent-[#ff6b98]"
+/>
               </div>
             </div>
             <div>
               <h2 className="text-lg font-semibold mb-4 text-[#ff6b98]">Designers</h2>
               <ul className="space-y-2">
-                {brands.map((brand) => (
-                  <li key={brand}>
-                    <button
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${selectedBrand === brand ? "bg-[#ffeaf0] text-[#ff6b98] font-medium" : "text-gray-700 hover:bg-gray-50"}`}
-                      onClick={() => setSelectedBrand(selectedBrand === brand ? null : brand)}
-                    >
-                      {brand}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+  {getUniqueValues(items, "brand").map((brand) => (
+    <li key={brand}>
+      <button
+        className={`w-full text-left px-3 py-2 rounded-lg transition-all ${selectedBrand === brand ? "bg-[#ffeaf0] text-[#ff6b98] font-medium" : "text-gray-700 hover:bg-gray-50"}`}
+        onClick={() => setSelectedBrand(selectedBrand === brand ? null : brand)}
+      >
+        {brand}
+      </button>
+    </li>
+  ))}
+</ul>
             </div>
           </aside>
           
@@ -290,7 +212,7 @@ const ShopPage = () => {
           <div className="col-span-1 md:col-span-3">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">
-                {isLoading ? "Loading Products..." : `${filteredProducts.length} Products`}
+                {isLoading ? "Loading Products..." : `${items.length} Products`}
               </h2>
               <select
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff6b98] focus:border-[#ff6b98]"
@@ -333,8 +255,8 @@ const ShopPage = () => {
                     <Link href={`/products/${product.id}`} className="block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                       <div className="relative h-64 overflow-hidden">
                         <img
-                          src={product.image}
-                          alt={product.name}
+                          src={product.image || '/placeholder.png'}
+                          alt={product.name || 'Product'}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
                         <button 
@@ -363,7 +285,7 @@ const ShopPage = () => {
                       </div>
                       <div className="p-4">
                         <h3 className="font-medium text-gray-900">
-                          {product.name}
+                          {product.name || 'Unnamed Product'}
                         </h3>
                         <div className="flex items-center mt-1">
                           <div className="flex text-yellow-400">
@@ -371,7 +293,7 @@ const ShopPage = () => {
                               <svg
                                 key={i}
                                 xmlns="http://www.w3.org/2000/svg"
-                                className={`h-4 w-4 ${i < Math.floor(product.rating) ? "text-yellow-400" : "text-gray-300"}`}
+                                className={`h-4 w-4 ${i < Math.floor(product.rating ?? 0) ? "text-yellow-400" : "text-gray-300"}`}
                                 viewBox="0 0 20 20"
                                 fill="currentColor"
                               >
@@ -380,12 +302,12 @@ const ShopPage = () => {
                             ))}
                           </div>
                           <span className="text-gray-500 text-sm ml-1">
-                            ({product.rating})
+                            ({product.rating ?? 'N/A'})
                           </span>
                         </div>
                         <div className="mt-3 flex items-end justify-between">
                           <p className="text-lg font-semibold text-gray-900">
-                            ${product.price.toFixed(2)}
+                            ${(product.price ?? 0).toFixed(2)}
                             <span className="text-sm text-gray-500">/day</span>
                           </p>
                           <button 
@@ -417,7 +339,7 @@ const ShopPage = () => {
                   onClick={() => {
                     setSelectedCategory(null);
                     setSelectedBrand(null);
-                    setPrice(priceRange);
+                    setPrice(getPriceRange(items));
                   }}
                   className="bg-gradient-to-r from-[#ff6b98] to-[#ffd9e3] text-white px-6 py-2 rounded-lg font-medium hover:from-[#ff5c8d] hover:to-[#ff7fa0] transition-colors duration-300"
                 >
