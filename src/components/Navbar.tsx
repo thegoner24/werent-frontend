@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import Container from './ui/Container';
+import ProfileAvatar from './ui/ProfileAvatar';
 import { useAuth } from '../contexts/AuthContext';
 
 import { motion, AnimatePresence, Variants } from 'framer-motion';
@@ -124,9 +125,7 @@ export default function Navbar() {
     aria-expanded="false"
     tabIndex={0}
   >
-    <span className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shadow">
-      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
-    </span>
+    <ProfileAvatar user={user} size="md" />
     <span className="hidden md:inline">Hello, {user.first_name}!</span>
     <svg className="w-4 h-4 ml-1 text-purple-600 group-hover:text-purple-700 transition" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -134,9 +133,7 @@ export default function Navbar() {
   </button>
   <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 z-50 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto transition-all duration-200 origin-top-right border border-purple-100" role="menu" tabIndex={-1}>
     <div className="px-6 py-4 border-b border-purple-50 flex items-center gap-3">
-      <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shadow">
-        {user.first_name.charAt(0)}{user.last_name.charAt(0)}
-      </span>
+      <ProfileAvatar user={user} size="md" />
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900">{user.first_name} {user.last_name}</span>
         <span className="text-xs text-gray-500">{user.email}</span>
@@ -254,9 +251,7 @@ export default function Navbar() {
                   ) : isAuthenticated && user ? (
                     <div className="space-y-4">
   <div className="flex items-center gap-3 px-4 py-4 bg-gradient-to-tr from-pink-100 to-purple-100 rounded-xl shadow-sm">
-    <span className="w-12 h-12 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-xl font-bold shadow">
-      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
-    </span>
+    <ProfileAvatar user={user} size="lg" />
     <div className="flex flex-col">
       <span className="font-semibold text-gray-900">{user.first_name} {user.last_name}</span>
       <span className="text-xs text-gray-500">{user.email}</span>

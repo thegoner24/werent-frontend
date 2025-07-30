@@ -1,14 +1,20 @@
 import React from 'react';
+import Link from 'next/link';
+import ProfileAvatar from '../../components/ui/ProfileAvatar';
 
 interface User {
   id: number;
   email: string;
   first_name: string;
   last_name: string;
-  phone?: string;
+  phone_number?: string;
+  profile_image?: string;
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  is_admin?: boolean;
+  is_verified?: boolean;
+  uuid?: string;
 }
 
 interface OverviewTabProps {
@@ -40,10 +46,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => (
     {/* Profile Summary */}
     <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg shadow-xl p-8 mb-8 flex flex-col md:flex-row items-center md:items-start gap-8">
       <div className="flex-shrink-0 flex flex-col items-center">
-        <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white text-4xl font-bold shadow-md mb-2">
-          {user.first_name.charAt(0)}{user.last_name.charAt(0)}
-        </div>
-        <span className="text-xs text-gray-500">Member since {new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</span>
+        <ProfileAvatar 
+          user={user} 
+          size="lg"
+          className="w-28 h-28 text-4xl"
+        />
+        <span className="text-xs text-gray-500 mt-2">Member since {new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</span>
       </div>
       <div className="flex-1">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Information</h2>
@@ -58,7 +66,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => (
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">Phone Number</label>
-            <p className="text-lg text-gray-900">{user.phone || 'Not provided'}</p>
+            <p className="text-lg text-gray-900">{user.phone_number || 'Not provided'}</p>
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">Account Status</label>
@@ -66,9 +74,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => (
           </div>
         </div>
         <div className="mt-6">
-          <button className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-2 rounded-lg shadow hover:from-purple-700 hover:to-pink-600 transition-all font-semibold">
+          <Link 
+            href="/dashboard/profile"
+            className="inline-block bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-2 rounded-lg shadow hover:from-purple-700 hover:to-pink-600 transition-all font-semibold"
+          >
             Edit Profile
-          </button>
+          </Link>
         </div>
       </div>
     </div>
