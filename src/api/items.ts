@@ -22,8 +22,10 @@ export async function fetchItemById(id: string | number) {
 export interface ReviewData {
   user: string;
   rating: number;
-  comment: string;
+  comment?: string; // For backward compatibility
+  review_message: string; // Required by backend
   date?: string; // Optional as it might be set by the backend
+  images?: string[]; // Base64 encoded images
 }
 
 // Interfaces for creating items
@@ -80,20 +82,46 @@ export async function createItem(payload: CreateItemPayload, token: string): Pro
 }
 
 // Add a review to an item
-export async function addReviewToItem(itemId: string | number, reviewData: ReviewData) {
-  const response = await fetch(`https://werent-backend-api.onrender.com/items/${itemId}/reviews`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(reviewData),
-  });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Failed to add review');
+export async function addReviewToItem(itemId: string | number, reviewData: ReviewData, token: string) {
+  try {
+    return await apiFetch(`/items/${itemId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    }, token);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Failed to add review');
   }
-  
-  return response.json();
+}
+
+// Interface for review pagination and filtering
+export interface ReviewQueryParams {
+  page?: number;
+  limit?: number;
+  rating?: number;
+  sort_by?: 'date_asc' | 'date_desc' | 'rating_asc' | 'rating_desc';
+}
+
+// Fetch reviews for an item with pagination and filtering
+export async function fetchItemReviews(
+  itemId: string | number, 
+  queryParams?: ReviewQueryParams,
+  token?: string
+) {
+  try {
+    // Build query string from params
+    const queryString = queryParams ? 
+      Object.entries(queryParams)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+        .join('&') : '';
+    
+    const endpoint = `/items/${itemId}/reviews${queryString ? `?${queryString}` : ''}`;
+    
+    return await apiFetch(endpoint, {
+      method: 'GET',
+    }, token);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Failed to fetch reviews');
+  }
 }
 
