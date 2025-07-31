@@ -85,24 +85,16 @@ const ShopPage = () => {
   useEffect(() => {
     setIsLoading(true);
     fetchItems()
-      .then((data) => {
-        console.log('API response:', data);
-        const itemsArray = (data.data || []).map((item: any) => ({
-          ...item,
-          price: item.price_per_day,
-          image: (item.images && item.images.length > 0)
-            ? (item.images[0].startsWith('data:image')
-                ? item.images[0]
-                : `data:image/jpeg;base64,${item.images[0]}`)
-            : '/placeholder.png',
-        }));
+      .then((itemsArray) => {
+        console.log('API response:', itemsArray);
         let filtered = itemsArray;
-        if (selectedCategory) {
-          filtered = filtered.filter((item: any) => item.category === selectedCategory);
-        }
-        if (selectedBrand) {
-          filtered = filtered.filter((item: any) => item.brand === selectedBrand);
-        }
+        // Uncomment below if your data has these fields
+        // if (selectedCategory) {
+        //   filtered = filtered.filter((item: any) => item.category === selectedCategory);
+        // }
+        // if (selectedBrand) {
+        //   filtered = filtered.filter((item: any) => item.brand === selectedBrand);
+        // }
         filtered = filtered.filter((item: any) => item.price >= price[0] && item.price <= price[1]);
         console.log('Filtered products:', filtered);
         setItems(filtered);

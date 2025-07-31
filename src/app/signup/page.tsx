@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Container from '../../components/ui/Container';
+import PhoneNumberInput from '../../components/ui/PhoneNumberInput';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SignupFormData {
@@ -29,8 +30,8 @@ export default function SignupPage() {
     confirmPassword: '',
     first_name: '',
     last_name: '',
-    country_code: '+62',
-  phone: ''
+    country_code: '+1',
+    phone: ''
   });
   
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -98,9 +99,17 @@ export default function SignupPage() {
       errors.last_name = 'Last name is required';
     }
     
-    // Phone validation (optional)
-    if (formData.phone && !/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
-      errors.phone = 'Invalid phone number format';
+    // Phone validation (optional field, but if provided should be valid)
+    if (formData.phone.trim()) {
+      const phoneDigits = formData.phone.replace(/\D/g, ''); // Remove non-digits
+      if (phoneDigits.length < 7 || phoneDigits.length > 12) {
+        errors.phone = 'Phone number must be between 7-12 digits (excluding country code)';
+      }
+      
+      // Check if phone number contains only valid characters (digits, hyphens, parentheses)
+      if (!/^[\d\-\(\)]*$/.test(formData.phone)) {
+        errors.phone = 'Phone number can only contain digits, hyphens, and parentheses';
+      }
     }
     
     setFieldErrors(errors);
@@ -126,7 +135,7 @@ export default function SignupPage() {
         first_name: apiData.first_name,
         last_name: apiData.last_name,
         password: apiData.password,
-        phone: apiData.country_code + apiData.phone
+        phone_number: apiData.country_code + apiData.phone
       };
       // Use new API function
       await import('../../api/signup').then(({ signup }) =>
@@ -284,44 +293,35 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              {/* Phone */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number <span className="text-gray-500">(optional, include country code)</span>
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    name="country_code"
-                    value={formData.country_code}
-                    onChange={handleInputChange}
-                    className="px-3 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 border-gray-300"
-                  >
-                    <option value="+62">+62 (ID)</option>
-                    <option value="+1">+1 (US)</option>
-                    <option value="+44">+44 (UK)</option>
-                    <option value="+91">+91 (IN)</option>
-                    <option value="+61">+61 (AU)</option>
-                    <option value="+81">+81 (JP)</option>
-                    <option value="+65">+65 (SG)</option>
-                    <option value="+60">+60 (MY)</option>
-                    {/* Add more as needed */}
-                  </select>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-500 ${
-                      fieldErrors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                    }`}
-                    placeholder="Phone number"
-                  />
-                </div>
-                {fieldErrors.phone && (
-                  <p className="text-red-600 text-sm mt-1">{fieldErrors.phone}</p>
-                )}
-              </div>
+              {/* Phone Number */}
+              <PhoneNumberInput
+                countryCode={formData.country_code}
+                phoneNumber={formData.phone}
+                onCountryCodeChange={(value) => {
+                  setFormData(prev => ({ ...prev, country_code: value }));
+                  // Clear field error
+                  if (fieldErrors['phone']) {
+                    setFieldErrors(prev => ({ ...prev, phone: '' }));
+                  }
+                }}
+                onPhoneNumberChange={(value) => {
+                  setFormData(prev => ({ ...prev, phone: value }));
+                  // Clear field error
+                  if (fieldErrors['phone']) {
+                    setFieldErrors(prev => ({ ...prev, phone: '' }));
+                  }
+                }}
+                error={fieldErrors.phone}
+                label="Phone Number"
+                helperText="Enter your phone number without country code. No spaces allowed. (Optional)"
+                showPreview={true}
+                selectClassName={`px-3 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 ${
+                  fieldErrors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+                inputClassName={`flex-1 px-4 py-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-500 ${
+                  fieldErrors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                }`}
+              />
 
               {/* Password */}
               <div>

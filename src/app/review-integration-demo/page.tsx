@@ -15,7 +15,7 @@ const mockReviews: Review[] = [
     helpful: 12,
     reported: false,
     moderated: false,
-    userId: 1,
+    user_id: 1,
     userEmail: "sarah.johnson@email.com",
     verifiedPurchase: true,
     purchaseDate: "2024-01-10",
@@ -38,7 +38,7 @@ const mockReviews: Review[] = [
     helpful: 8,
     reported: false,
     moderated: false,
-    userId: 2,
+    user_id: 2,
     userEmail: "michael.chen@email.com",
     verifiedPurchase: true,
     purchaseDate: "2024-01-05",
@@ -60,7 +60,7 @@ const mockReviews: Review[] = [
     helpful: 15,
     reported: false,
     moderated: false,
-    userId: 3,
+    user_id: 3,
     userEmail: "emma.wilson@email.com",
     verifiedPurchase: true,
     purchaseDate: "2024-01-01",
@@ -100,7 +100,7 @@ const mockReviews: Review[] = [
     helpful: 18,
     reported: false,
     moderated: false,
-    userId: 5,
+    user_id: 5,
     userEmail: "lisa.rodriguez@email.com",
     verifiedPurchase: true,
     purchaseDate: "2023-12-15",
@@ -126,17 +126,17 @@ export default function ReviewIntegrationDemo() {
     alert('Review submitted successfully! (Check console for details)');
   };
 
-  const handleVoteHelpful = async (reviewId: string, isHelpful: boolean) => {
+  const handleVoteHelpful = async (reviewId: string | number, isHelpful: boolean) => {
     console.log('Vote helpful:', { reviewId, isHelpful });
     alert(`Marked review as ${isHelpful ? 'helpful' : 'not helpful'}`);
   };
 
-  const handleReportReview = async (reviewId: string, reason: string) => {
+  const handleReportReview = async (reviewId: string | number, reason: string) => {
     console.log('Report review:', { reviewId, reason });
     alert('Review reported successfully! Our team will review it.');
   };
 
-  const handleModerateReview = async (reviewId: string, action: 'approve' | 'reject') => {
+  const handleModerateReview = async (reviewId: string | number, action: 'approve' | 'reject') => {
     console.log('Moderate review:', { reviewId, action });
     alert(`Review ${action}ed successfully!`);
   };

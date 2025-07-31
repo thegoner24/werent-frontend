@@ -5,7 +5,7 @@ export interface SignupPayload {
   first_name: string;
   last_name: string;
   password: string;
-  phone: string;
+  phone_number: string;
 }
 
 export async function signup(payload: SignupPayload) {

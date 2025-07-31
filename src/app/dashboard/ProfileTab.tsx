@@ -2,43 +2,109 @@
 
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { updateProfile, UpdateProfilePayload } from '../../api/profile';
+import { updateProfile, UpdateProfilePayload, ProfileValidationError } from '../../api/profile';
+import ProfileAvatar from '../../components/ui/ProfileAvatar';
+import PhoneNumberInput, { countryCodes } from '../../components/ui/PhoneNumberInput';
+import ImageCropper from '../../components/ui/ImageCropper';
 
 const ProfileTab: React.FC = () => {
   const { user, accessToken, updateUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string[] }>({});
+  const [showImageCropper, setShowImageCropper] = useState(false);
+  const [selectedImageForCrop, setSelectedImageForCrop] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Parse existing phone number to extract country code and number
+  const parsePhoneNumber = (phoneNumber: string) => {
+    if (!phoneNumber) return { countryCode: '+1', number: '' };
+    
+    const cleanPhone = phoneNumber.replace(/\s+/g, ''); // Remove spaces
+    const matchedCode = countryCodes.find(cc => cleanPhone.startsWith(cc.code));
+    
+    if (matchedCode) {
+      return {
+        countryCode: matchedCode.code,
+        number: cleanPhone.substring(matchedCode.code.length)
+      };
+    }
+    
+    // Default to +1 if no match found
+    return { countryCode: '+1', number: cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone };
+  };
+
+  const initialPhone = parsePhoneNumber(user?.phone_number || '');
   
   // Form state
   const [formData, setFormData] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
-    phone_number: user?.phone_number || '',
+    country_code: initialPhone.countryCode,
+    phone_number: initialPhone.number,
     profile_image: user?.profile_image || ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Convert to base64
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setMessage({ type: 'error', text: 'Please select a valid image file.' });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'Image size should be less than 5MB.' });
+        return;
+      }
+
+      // Convert to base64 for cropping
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        setFormData(prev => ({
-          ...prev,
-          profile_image: result
-        }));
+        setSelectedImageForCrop(result);
+        setShowImageCropper(true);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageCrop = (croppedImageBase64: string) => {
+    setFormData(prev => ({
+      ...prev,
+      profile_image: croppedImageBase64
+    }));
+    setShowImageCropper(false);
+    setSelectedImageForCrop(null);
+    setMessage({ type: 'success', text: 'Profile image updated! Don\'t forget to save changes.' });
+  };
+
+  const handleImageCropCancel = () => {
+    setShowImageCropper(false);
+    setSelectedImageForCrop(null);
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -46,16 +112,55 @@ const ProfileTab: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
+    setFieldErrors({});
+
+    // Client-side validation
+    const clientErrors: { [key: string]: string[] } = {};
+    
+    if (!formData.first_name.trim()) {
+      clientErrors.first_name = ['First name is required'];
+    }
+    
+    if (!formData.last_name.trim()) {
+      clientErrors.last_name = ['Last name is required'];
+    }
+
+    // Phone number validation (optional field, but if provided should be valid)
+    if (formData.phone_number.trim()) {
+      const phoneDigits = formData.phone_number.replace(/\D/g, ''); // Remove non-digits
+      if (phoneDigits.length < 7 || phoneDigits.length > 12) {
+        clientErrors.phone_number = ['Phone number must be between 7-12 digits (excluding country code)'];
+      }
+      
+      // Check if phone number contains only valid characters (digits, hyphens, parentheses)
+      if (!/^[\d\-\(\)]*$/.test(formData.phone_number)) {
+        clientErrors.phone_number = ['Phone number can only contain digits, hyphens, and parentheses'];
+      }
+    }
+
+    if (Object.keys(clientErrors).length > 0) {
+      setFieldErrors(clientErrors);
+      setMessage({ 
+        type: 'error', 
+        text: 'Please fix the validation errors below.' 
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       if (!accessToken) {
         throw new Error('No access token available');
       }
 
+      const fullPhoneNumber = formData.phone_number.trim() 
+        ? `${formData.country_code}${formData.phone_number.trim()}`
+        : '';
+
       const payload: UpdateProfilePayload = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        phone_number: formData.phone_number,
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        phone_number: fullPhoneNumber,
         ...(formData.profile_image && { profile_image: formData.profile_image })
       };
 
@@ -70,13 +175,29 @@ const ProfileTab: React.FC = () => {
       }
     } catch (error) {
       console.error('Profile update error:', error);
-      setMessage({ 
-        type: 'error', 
-        text: error instanceof Error ? error.message : 'Failed to update profile' 
-      });
+      
+      if (error instanceof ProfileValidationError) {
+        // Handle validation errors
+        setFieldErrors(error.fieldErrors);
+        setMessage({ 
+          type: 'error', 
+          text: 'Please fix the validation errors below.' 
+        });
+      } else {
+        // Handle other errors
+        setMessage({ 
+          type: 'error', 
+          text: error instanceof Error ? error.message : 'Failed to update profile' 
+        });
+      }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getFieldError = (fieldName: string): string | null => {
+    const errors = fieldErrors[fieldName];
+    return errors && errors.length > 0 ? errors[0] : null;
   };
 
   if (!user) {
@@ -110,27 +231,34 @@ const ProfileTab: React.FC = () => {
             Profile Image
           </label>
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              {formData.profile_image ? (
-                <img 
-                  src={formData.profile_image} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="text-gray-400 text-2xl font-bold">
-                  {formData.first_name.charAt(0)}{formData.last_name.charAt(0)}
-                </div>
-              )}
+            <div className="w-20 h-20">
+              <ProfileAvatar 
+                user={{
+                  first_name: formData.first_name,
+                  last_name: formData.last_name,
+                  profile_image: formData.profile_image
+                }} 
+                size="lg"
+                className="w-20 h-20 text-2xl"
+              />
             </div>
-            <div>
+            <div className="flex flex-col space-y-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
               >
-                Change Photo
+                {formData.profile_image ? 'Change Photo' : 'Upload Photo'}
               </button>
+              {formData.profile_image && (
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, profile_image: '' }))}
+                  className="text-red-600 hover:text-red-700 text-sm transition-colors"
+                >
+                  Remove Photo
+                </button>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -140,6 +268,9 @@ const ProfileTab: React.FC = () => {
               />
             </div>
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Recommended: Square image, max 5MB. JPG, PNG, or GIF format.
+          </p>
         </div>
 
         {/* First Name */}
@@ -154,8 +285,15 @@ const ProfileTab: React.FC = () => {
             value={formData.first_name}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+              getFieldError('first_name') 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-300'
+            }`}
           />
+          {getFieldError('first_name') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('first_name')}</p>
+          )}
         </div>
 
         {/* Last Name */}
@@ -170,25 +308,47 @@ const ProfileTab: React.FC = () => {
             value={formData.last_name}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+              getFieldError('last_name') 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-300'
+            }`}
           />
+          {getFieldError('last_name') && (
+            <p className="mt-1 text-sm text-red-600">{getFieldError('last_name')}</p>
+          )}
         </div>
 
         {/* Phone Number */}
-        <div>
-          <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700 mb-2">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            id="phone_number"
-            name="phone_number"
-            value={formData.phone_number}
-            onChange={handleInputChange}
-            placeholder="+1234567890"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
+        <PhoneNumberInput
+          countryCode={formData.country_code}
+          phoneNumber={formData.phone_number}
+          onCountryCodeChange={(value) => {
+            setFormData(prev => ({ ...prev, country_code: value }));
+            // Clear phone number errors
+            if (fieldErrors['phone_number']) {
+              setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors['phone_number'];
+                return newErrors;
+              });
+            }
+          }}
+          onPhoneNumberChange={(value) => {
+            setFormData(prev => ({ ...prev, phone_number: value }));
+            // Clear phone number errors
+            if (fieldErrors['phone_number']) {
+              setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors['phone_number'];
+                return newErrors;
+              });
+            }
+          }}
+          error={getFieldError('phone_number') || undefined}
+          helperText="Enter your phone number without country code. No spaces allowed."
+          showPreview={true}
+        />
 
         {/* Email (Read-only) */}
         <div>
@@ -227,6 +387,14 @@ const ProfileTab: React.FC = () => {
           </button>
         </div>
       </form>
+
+      {/* Image Cropper Modal */}
+      <ImageCropper
+        isOpen={showImageCropper}
+        onClose={handleImageCropCancel}
+        onCrop={handleImageCrop}
+        selectedImage={selectedImageForCrop}
+      />
     </div>
   );
 };
