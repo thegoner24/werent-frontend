@@ -269,7 +269,7 @@ const ProductDetail = () => {
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
               <Link href="/" className="hover:text-[#ff6b98] transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/products" className="hover:text-[#ff6b98] transition-colors">Products</Link>
+              <Link href="/shop" className="hover:text-[#ff6b98] transition-colors">Products</Link>
               <span>/</span>
               <span className="text-gray-900">{product.name || 'Unknown Product'}</span>
             </nav>
@@ -451,95 +451,7 @@ const ProductDetail = () => {
                   <span className="text-[#ff6b98] font-bold">${totalPrice.toLocaleString()}</span>
                 </div>
                 
-                {/* Action Buttons */}
-                <div className="flex flex-col space-y-3 mt-6">
-                  <button className="w-full bg-[#ff6b98] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#e55a87] transition-colors">
-                    Add to Wishlist
-                  </button>
-                  <button className="w-full border-2 border-[#ff6b98] text-[#ff6b98] py-3 px-6 rounded-lg font-semibold hover:bg-[#ff6b98] hover:text-white transition-colors">
-                    Rent Now
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (!isAuthenticated) {
-                        router.push('/login?redirect=' + encodeURIComponent(`/products/${id}`));
-                        return;
-                      }
-                      
-                      // Validate dates
-                      const startDateObj = new Date(startDate);
-                      const endDateObj = new Date(endDate);
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      
-                      if (startDateObj < today) {
-                        setCartError('Start date cannot be in the past');
-                        setTimeout(() => setCartError(''), 3000);
-                        return;
-                      }
-                      
-                      if (endDateObj <= startDateObj) {
-                        setCartError('End date must be after start date');
-                        setTimeout(() => setCartError(''), 3000);
-                        return;
-                      }
-                      
-                      setIsAddingToCart(true);
-                      setCartError('');
-                      setCartSuccess(false);
-                      
-                      try {
-                        const itemId = id as string;
-                        const isInCart = isItemInCart(itemId, startDate, endDate);
-                        
-                        if (isInCart) {
-                          // Remove from cart
-                          const cartItem = getCartItemByDetails(itemId, startDate, endDate);
-                          if (cartItem) {
-                            await removeFromCart(cartItem.id);
-                            setCartSuccess(true);
-                            setTimeout(() => setCartSuccess(false), 3000);
-                          }
-                        } else {
-                          // Add to cart
-                          await addToCart({
-                            item_id: itemId,
-                            start_date: startDate,
-                            end_date: endDate,
-                            item_name: product?.name,
-                            item_brand: product?.brand,
-                            item_image: product?.images?.[0],
-                            daily_price: product?.price_per_day || 0
-                          });
-                          setCartSuccess(true);
-                          setTimeout(() => setCartSuccess(false), 3000);
-                        }
-                      } catch (error) {
-                        console.error('Error with cart action:', error);
-                        if (error instanceof Error && error.message.includes('already in cart')) {
-                          setCartError('Item with these dates is already in your cart.');
-                        } else {
-                          setCartError('Failed to update cart. Please try again.');
-                        }
-                        setTimeout(() => setCartError(''), 3000);
-                      } finally {
-                        setIsAddingToCart(false);
-                      }
-                    }}
-                    disabled={isAddingToCart}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isItemInCart(id as string, startDate, endDate)
-                        ? 'bg-red-600 text-white hover:bg-red-700'
-                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                    }`}
-                  >
-                    {isAddingToCart 
-                      ? (isItemInCart(id as string, startDate, endDate) ? 'Removing from Cart...' : 'Adding to Cart...')
-                      : (isItemInCart(id as string, startDate, endDate) ? 'Remove from Cart' : 'Add to Cart')
-                    }
-                  </button>
-                  <span className="text-[#ff6b98] font-bold">₫{((product?.price_per_day ?? 0) * rentalDays).toLocaleString()}</span>
-                </div>
+
                 
                 {/* Book Now Button */}
                 <button
