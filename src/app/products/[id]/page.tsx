@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, fetchItemsByCategory, Review as ApiReview } from "@/api/items";
 import { createBooking, BookingPayload } from "@/api/bookings";
+import { addToCart, removeFromCart, isItemInCart, getCartItemByDetails } from '@/api/cart';
 import Container from "@/components/ui/Container";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,6 +71,11 @@ const ProductDetail = () => {
   const [isBooking, setIsBooking] = useState<boolean>(false);
   const [bookingError, setBookingError] = useState<string>("");
   const [bookingSuccess, setBookingSuccess] = useState<boolean>(false);
+  
+  // Cart state
+  const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false);
+  const [cartError, setCartError] = useState<string>("");
+  const [cartSuccess, setCartSuccess] = useState<boolean>(false);
   
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
@@ -263,7 +269,7 @@ const ProductDetail = () => {
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
               <Link href="/" className="hover:text-[#ff6b98] transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/products" className="hover:text-[#ff6b98] transition-colors">Products</Link>
+              <Link href="/shop" className="hover:text-[#ff6b98] transition-colors">Products</Link>
               <span>/</span>
               <span className="text-gray-900">{product.name || 'Unknown Product'}</span>
             </nav>
@@ -445,16 +451,7 @@ const ProductDetail = () => {
                   <span className="text-[#ff6b98] font-bold">${totalPrice.toLocaleString()}</span>
                 </div>
                 
-                {/* Action Buttons */}
-                <div className="flex flex-col space-y-3 mt-6">
-                  <button className="w-full bg-[#ff6b98] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#e55a87] transition-colors">
-                    Add to Wishlist
-                  </button>
-                  <button className="w-full border-2 border-[#ff6b98] text-[#ff6b98] py-3 px-6 rounded-lg font-semibold hover:bg-[#ff6b98] hover:text-white transition-colors">
-                    Rent Now
-                  </button>
-                  <span className="text-[#ff6b98] font-bold">₫{((product?.price_per_day ?? 0) * rentalDays).toLocaleString()}</span>
-                </div>
+
                 
                 {/* Book Now Button */}
                 <button
@@ -530,6 +527,21 @@ const ProductDetail = () => {
                 {bookingSuccess && (
                   <div className="mt-2 p-3 bg-green-50 text-green-700 rounded-md text-sm">
                     Booking successful! Redirecting to your dashboard...
+                  </div>
+                )}
+                
+                {cartError && (
+                  <div className="mt-2 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                    {cartError}
+                  </div>
+                )}
+                
+                {cartSuccess && (
+                  <div className="mt-2 p-3 bg-green-50 text-green-700 rounded-md text-sm">
+                    {isItemInCart(id as string, startDate, endDate) 
+                      ? 'Item added to cart successfully!' 
+                      : 'Item removed from cart successfully!'
+                    }
                   </div>
                 )}
               </div>

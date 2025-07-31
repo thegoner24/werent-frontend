@@ -142,6 +142,7 @@ export default function Navbar() {
     <div className="py-2">
       <Link href="/dashboard" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Dashboard</Link>
       <Link href="/dashboard/rentals" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>My Rentals</Link>
+      <Link href="/cart" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>View Cart</Link>
       <Link href="/dashboard/profile" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Profile</Link>
       <button
         onClick={handleLogout}

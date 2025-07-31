@@ -11,6 +11,7 @@ export const endpoints = {
   items: '/items',
   testimonials: '/testimonial',
   bookings: '/bookings/', // Updated to use /bookings/ endpoint
+  payments: '/payments/',
 };
 
 export const apiFetch = async (
@@ -34,7 +35,11 @@ export const apiFetch = async (
   }
   
   try {
-    console.log(`API Request: ${options.method || 'GET'} ${url}`, { headers });
+    console.log(`API Request: ${options.method || 'GET'} ${url}`, { 
+      headers, 
+      body: options.body,
+      method: options.method || 'GET'
+    });
     
     const res = await fetch(url, {
       ...options,

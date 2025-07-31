@@ -52,7 +52,7 @@ export async function fetchItems() {
     : '/placeholder.png',
   name: item.name ?? item.brand ?? 'Unknown',
   rating: item.rating ?? 0,
-  price: item.price ?? 0,
+  price: item.price_per_day ?? item.price ?? 0,
   ...item,
   reviews: Array.isArray(item.reviews) ? item.reviews : [],
 }));
@@ -88,7 +88,7 @@ export async function fetchItemById(id: string | number) {
       : '/placeholder.png',
     name: item.name ?? item.brand ?? 'Unknown',
     rating: item.rating ?? 0,
-    price: item.price ?? 0,
+    price: item.price_per_day ?? item.price ?? 0,
     ...item,
     reviews: Array.isArray(item.reviews) ? item.reviews : [],
   };
