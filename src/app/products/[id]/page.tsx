@@ -5,9 +5,9 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, fetchItemsByCategory, Review } from "@/api/items";
 import Container from "@/components/ui/Container";
-import Reviews from "@/components/Reviews";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import Reviews from '@/components/Reviews';
 
 interface Product {
   id: number;
@@ -90,8 +90,7 @@ const ProductDetail = () => {
       setLoading(true);
       setError(null);
       try {
-        const apiData = await import('@/api/items').then(m => m.fetchItemById(id));
-        const apiProduct = apiData.data;
+        const apiProduct = await import('@/api/items').then(m => m.fetchItemById(id));
         
         // Fetch reviews for this product
         let reviewList = [];
@@ -401,33 +400,61 @@ const ProductDetail = () => {
               </ul>
             )}
           </div>
-          {/* Reviews */}
-          <div className="mt-8">
-            <h2 className="font-semibold mb-2">Reviews</h2>
-            {filteredAndSortedReviews.length === 0 ? (
-              <div className="text-gray-500">No reviews yet.</div>
-            ) : (
-              /* Type casting to ensure compatibility with Reviews component */
-              <Reviews reviews={filteredAndSortedReviews.map(review => ({
-                ...review,
-                id: review.id ? String(review.id) : undefined, // Convert id to string to match expected type
-                user: review.user || 'Anonymous',
-                date: review.date || new Date().toISOString(),
-                rating: review.rating || 0,
-                comment: review.comment || ''
-              }))} />
-            )}
-          </div>
         </Container>
       </div>
 
       {/* Customer Reviews Section with Filters */}
-      <div className="border-t border-gray-200 p-8">
+      <div className="border-t border-gray-200 p-8 bg-gray-50">
         <Container>
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">Customer Reviews</h3>
+          {/* Overall Rating Summary - Full Width */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 w-full mb-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+              <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-900">{(product.rating || 0).toFixed(1)}</div>
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-5 w-5 ${i < Math.round(product.rating || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">{totalReviews} reviews</div>
+                </div>
+              </div>
+              
+              <div className="flex-1 md:ml-8">
+                <div className="space-y-2">
+                  {[5, 4, 3, 2, 1].map((rating) => {
+                    const count = reviewList.filter(review => review.rating === rating).length;
+                    const percentage = reviewList.length > 0 ? (count / reviewList.length) * 100 : 0;
+                    
+                    return (
+                      <div key={rating} className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600 w-8">{rating}★</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600 w-12 text-right">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
           
           {/* Review Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-100">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Rating</label>
               <select
@@ -467,81 +494,163 @@ const ProductDetail = () => {
                 Showing {reviewList.length} of {totalReviews} reviews
               </div>
               {reviewList.map((review, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">
-                          {(review.user || 'A').charAt(0).toUpperCase()}
+                <div key={index} className="border border-gray-100 rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow duration-300 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 pb-4 border-b border-gray-100">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-[#ff6b98] to-[#ff8fab] rounded-full flex items-center justify-center shadow-sm">
+                        <span className="text-white font-semibold text-base">
+                          {(review.user_full_name || 'A').charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">{review.user || 'Anonymous'}</h4>
-                        <p className="text-sm text-gray-500">{review.date}</p>
+                        <h4 className="font-semibold text-gray-900 text-lg">{review.user_full_name || 'Anonymous'}</h4>
+                        <div className="flex items-center mt-1">
+                          <span className="text-sm text-gray-500 mr-3">{review.date ? new Date(review.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown date'}</span>
+                          <div className="flex items-center">
+                            <div className="flex text-yellow-400">
+                              {[...Array(5)].map((_, i) => (
+                                <svg
+                                  key={i}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-200"}`}
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              ))}
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 ml-2">{review.rating}/5</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                    
+                    {/* Verified Purchase Badge */}
                     <div className="flex items-center">
-                      <div className="flex text-yellow-400 mr-2">
-                        {[...Array(5)].map((_, i) => (
-                          <svg
-                            key={i}
-                            xmlns="http://www.w3.org/2000/svg"
-                            className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-600">{review.rating}/5</span>
+                      <span className="bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full border border-green-100 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Verified Purchase
+                      </span>
                     </div>
                   </div>
-                  <p className="text-gray-700 leading-relaxed mb-4">{review.comment || 'No comment provided.'}</p>
+                  
+                  <div className="prose prose-sm max-w-none mb-6">
+                    <p className="text-gray-700 leading-relaxed">{review.review_message || 'No comment provided.'}</p>
+                  </div>
                   
                   {/* Review Images */}
                   {review.images && review.images.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">Review Images</h5>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                      <h5 className="text-sm font-medium text-gray-700 mb-3">Photos from this review</h5>
+                      <div className="flex flex-wrap gap-3">
                         {review.images.map((image, imgIndex) => (
-                          <div key={imgIndex} className="relative w-24 h-24 rounded-md overflow-hidden border border-gray-200 group cursor-pointer">
-                            <img 
-                              src={image} 
-                              alt={`Review image ${imgIndex + 1}`}
-                              className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                              onClick={() => {
-                                // Create modal or lightbox effect for image viewing
-                                const modal = document.createElement('div');
-                                modal.style.position = 'fixed';
-                                modal.style.top = '0';
-                                modal.style.left = '0';
-                                modal.style.width = '100%';
-                                modal.style.height = '100%';
-                                modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                                modal.style.display = 'flex';
-                                modal.style.alignItems = 'center';
-                                modal.style.justifyContent = 'center';
-                                modal.style.zIndex = '9999';
-                                
-                                const img = document.createElement('img');
-                                img.src = image;
-                                img.style.maxWidth = '90%';
-                                img.style.maxHeight = '90%';
-                                img.style.objectFit = 'contain';
-                                
-                                modal.appendChild(img);
-                                document.body.appendChild(modal);
-                                
-                                modal.addEventListener('click', () => {
-                                  document.body.removeChild(modal);
-                                });
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white opacity-0 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                              </svg>
+                          <div key={imgIndex} className="relative group">
+                            <div className="relative w-28 h-28 rounded-lg overflow-hidden border border-gray-100 shadow-sm group cursor-pointer">
+                              <img 
+                                src={image} 
+                                alt={`Review image ${imgIndex + 1}`}
+                                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+                                onClick={() => {
+                                  // Create modal or lightbox effect for image viewing
+                                  const modal = document.createElement('div');
+                                  modal.style.position = 'fixed';
+                                  modal.style.top = '0';
+                                  modal.style.left = '0';
+                                  modal.style.width = '100%';
+                                  modal.style.height = '100%';
+                                  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                                  modal.style.display = 'flex';
+                                  modal.style.justifyContent = 'center';
+                                  modal.style.alignItems = 'center';
+                                  modal.style.zIndex = '9999';
+                                  modal.style.padding = '20px';
+                                  modal.style.cursor = 'pointer';
+                                  modal.style.backdropFilter = 'blur(5px)';
+                                  modal.style.transition = 'opacity 0.3s ease';
+                                  
+                                  const imgContainer = document.createElement('div');
+                                  imgContainer.style.position = 'relative';
+                                  imgContainer.style.maxWidth = '90%';
+                                  imgContainer.style.maxHeight = '90%';
+                                  imgContainer.style.display = 'flex';
+                                  imgContainer.style.justifyContent = 'center';
+                                  imgContainer.style.alignItems = 'center';
+                                  imgContainer.style.transition = 'transform 0.3s ease';
+                                  imgContainer.style.transform = 'scale(0.95)';
+                                  
+                                  const img = document.createElement('img');
+                                  img.src = image;
+                                  img.style.maxWidth = '100%';
+                                  img.style.maxHeight = '100%';
+                                  img.style.objectFit = 'contain';
+                                  img.style.borderRadius = '8px';
+                                  img.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
+                                  
+                                  // Close button
+                                  const closeBtn = document.createElement('button');
+                                  closeBtn.innerHTML = '&times;';
+                                  closeBtn.style.position = 'absolute';
+                                  closeBtn.style.top = '20px';
+                                  closeBtn.style.right = '20px';
+                                  closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                                  closeBtn.style.color = 'white';
+                                  closeBtn.style.border = 'none';
+                                  closeBtn.style.borderRadius = '50%';
+                                  closeBtn.style.width = '40px';
+                                  closeBtn.style.height = '40px';
+                                  closeBtn.style.fontSize = '24px';
+                                  closeBtn.style.cursor = 'pointer';
+                                  closeBtn.style.display = 'flex';
+                                  closeBtn.style.justifyContent = 'center';
+                                  closeBtn.style.alignItems = 'center';
+                                  closeBtn.style.transition = 'background 0.2s';
+                                  
+                                  closeBtn.addEventListener('mouseover', () => {
+                                    closeBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+                                  });
+                                  
+                                  closeBtn.addEventListener('mouseout', () => {
+                                    closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                                  });
+                                  
+                                  imgContainer.appendChild(img);
+                                  modal.appendChild(imgContainer);
+                                  modal.appendChild(closeBtn);
+                                  document.body.appendChild(modal);
+                                  
+                                  // Animation
+                                  setTimeout(() => {
+                                    imgContainer.style.transform = 'scale(1)';
+                                  }, 10);
+                                  
+                                  const closeModal = () => {
+                                    imgContainer.style.transform = 'scale(0.95)';
+                                    modal.style.opacity = '0';
+                                    setTimeout(() => {
+                                      document.body.removeChild(modal);
+                                    }, 300);
+                                  };
+                                  
+                                  modal.addEventListener('click', (e) => {
+                                    if (e.target === modal) {
+                                      closeModal();
+                                    }
+                                  });
+                                  
+                                  closeBtn.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    closeModal();
+                                  });
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v11.5A2.25 2.25 0 004.25 18h11.5A2.25 2.25 0 0018 15.75V4.25A2.25 2.25 0 0015.75 2H4.25zM15 5a1 1 0 00-1-1h-3a1 1 0 000 2h3a1 1 0 001-1zm-9 6a3 3 0 116 0 3 3 0 01-6 0zm9-4a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+                                </svg>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -887,6 +996,6 @@ const ProductDetail = () => {
       )}
     </div>
   );
-};
+}
 
 export default ProductDetail;
