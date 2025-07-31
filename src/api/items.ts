@@ -9,6 +9,20 @@ export async function fetchItems() {
   return response.json();
 }
 
+// Fetch items by category/type
+export async function fetchItemsByCategory(type: string, limit?: number) {
+  const queryParams = new URLSearchParams();
+  if (limit) {
+    queryParams.append('limit', limit.toString());
+  }
+  
+  const response = await fetch(`https://werent-backend-api.onrender.com/items?type=${encodeURIComponent(type)}&${queryParams.toString()}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch items by category');
+  }
+  return response.json();
+}
+
 // Fetch a single item by id
 export async function fetchItemById(id: string | number) {
   const response = await fetch(`https://werent-backend-api.onrender.com/items/${id}`);

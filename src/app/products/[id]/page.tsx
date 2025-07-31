@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData } from "@/api/items";
+import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, fetchItemsByCategory } from "@/api/items";
 import Container from "@/components/ui/Container";
 import Reviews from "@/components/Reviews";
 import Link from "next/link";
@@ -81,6 +81,7 @@ const ProductDetail = () => {
   const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   // Initialize review form with user data when authenticated
   useEffect(() => {
@@ -163,6 +164,30 @@ const ProductDetail = () => {
           user_id: apiProduct.user_id,
           designer_name: apiProduct.designer_name,
         });
+        
+        // Fetch related products by category
+        if (apiProduct.type) {
+          try {
+            const relatedData = await fetchItemsByCategory(apiProduct.type, 4);
+            if (relatedData && relatedData.data) {
+              // Filter out current product and limit to 4 items
+              const filteredRelated = relatedData.data
+                .filter((item: any) => item.id !== apiProduct.id)
+                .slice(0, 4)
+                .map((item: any) => ({
+                  ...item,
+                  price: item.price_per_day ?? item.price,
+                  images: (item.images || (item.image ? [item.image] : [])).map((img: string) =>
+                    img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`
+                  ),
+                }));
+              setRelatedProducts(filteredRelated);
+            }
+          } catch (relatedError) {
+            console.error('Error fetching related products:', relatedError);
+            // Continue without related products if fetch fails
+          }
+        }
       } catch (e) {
         setError('Failed to load product.');
         setProduct(null);
@@ -834,6 +859,45 @@ const ProductDetail = () => {
           )}
         </Container>
       </div>
+      
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div className="bg-gray-50 py-12">
+          <Container>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((relatedProduct) => (
+                <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gray-200 relative">
+                    <Image
+                      src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : '/default-image.png'}
+                      alt={relatedProduct.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-1">{relatedProduct.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{relatedProduct.brand || relatedProduct.type || 'Premium Collection'}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#ff6b98] font-bold">${relatedProduct.price}/day</span>
+                      <div className="flex items-center">
+                        <svg className="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-sm text-gray-600">{relatedProduct.rating ? relatedProduct.rating.toFixed(1) : '4.0'}</span>
+                      </div>
+                    </div>
+                    <Link href={`/products/${relatedProduct.id}`} className="mt-3 block w-full bg-[#ff6b98] text-white text-center py-2 rounded-md hover:bg-[#e55a87] transition-colors">
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </div>
+      )}
     </div>
   );
 };
