@@ -6,6 +6,14 @@ export interface BookingPayload {
   end_date: string; // Format: YYYY-MM-DD
 }
 
+export interface RefundInfo {
+  cancellation_reason: string;
+  cancelled_at: string;
+  original_total: number;
+  refund_amount: number;
+  refund_eligible: boolean;
+}
+
 export interface BookingResponse {
   id: number;
   item_id: number;
@@ -19,6 +27,7 @@ export interface BookingResponse {
   item_name?: string;
   created_at?: string;
   updated_at?: string;
+  refund_info?: RefundInfo;
 }
 
 /**
@@ -135,12 +144,12 @@ export async function getBookingById(id: number, token: string): Promise<Booking
  * Cancel a booking
  * @param id The ID of the booking to cancel
  * @param token The user's authentication token
- * @returns The updated booking
+ * @returns The updated booking with refund information
  */
 export async function cancelBooking(id: number, token: string): Promise<BookingResponse> {
   try {
     const response = await apiFetch(`${endpoints.bookings}${id}/cancel`, {
-      method: 'PUT',
+      method: 'POST',
     }, token);
     
     return response.data || response;

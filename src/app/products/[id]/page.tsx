@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, fetchItemsByCategory, Review as ApiReview } from "@/api/items";
 import { createBooking, BookingPayload } from "@/api/bookings";
+import { addToCart, removeFromCart, isItemInCart, getCartItemByDetails } from '@/api/cart';
 import Container from "@/components/ui/Container";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,6 +71,11 @@ const ProductDetail = () => {
   const [isBooking, setIsBooking] = useState<boolean>(false);
   const [bookingError, setBookingError] = useState<string>("");
   const [bookingSuccess, setBookingSuccess] = useState<boolean>(false);
+  
+  // Cart state
+  const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false);
+  const [cartError, setCartError] = useState<string>("");
+  const [cartSuccess, setCartSuccess] = useState<boolean>(false);
   
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
@@ -453,6 +459,85 @@ const ProductDetail = () => {
                   <button className="w-full border-2 border-[#ff6b98] text-[#ff6b98] py-3 px-6 rounded-lg font-semibold hover:bg-[#ff6b98] hover:text-white transition-colors">
                     Rent Now
                   </button>
+                  <button
+                    onClick={async () => {
+                      if (!isAuthenticated) {
+                        router.push('/login?redirect=' + encodeURIComponent(`/products/${id}`));
+                        return;
+                      }
+                      
+                      // Validate dates
+                      const startDateObj = new Date(startDate);
+                      const endDateObj = new Date(endDate);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      
+                      if (startDateObj < today) {
+                        setCartError('Start date cannot be in the past');
+                        setTimeout(() => setCartError(''), 3000);
+                        return;
+                      }
+                      
+                      if (endDateObj <= startDateObj) {
+                        setCartError('End date must be after start date');
+                        setTimeout(() => setCartError(''), 3000);
+                        return;
+                      }
+                      
+                      setIsAddingToCart(true);
+                      setCartError('');
+                      setCartSuccess(false);
+                      
+                      try {
+                        const itemId = id as string;
+                        const isInCart = isItemInCart(itemId, startDate, endDate);
+                        
+                        if (isInCart) {
+                          // Remove from cart
+                          const cartItem = getCartItemByDetails(itemId, startDate, endDate);
+                          if (cartItem) {
+                            await removeFromCart(cartItem.id);
+                            setCartSuccess(true);
+                            setTimeout(() => setCartSuccess(false), 3000);
+                          }
+                        } else {
+                          // Add to cart
+                          await addToCart({
+                            item_id: itemId,
+                            start_date: startDate,
+                            end_date: endDate,
+                            item_name: product?.name,
+                            item_brand: product?.brand,
+                            item_image: product?.images?.[0],
+                            daily_price: product?.price_per_day || 0
+                          });
+                          setCartSuccess(true);
+                          setTimeout(() => setCartSuccess(false), 3000);
+                        }
+                      } catch (error) {
+                        console.error('Error with cart action:', error);
+                        if (error instanceof Error && error.message.includes('already in cart')) {
+                          setCartError('Item with these dates is already in your cart.');
+                        } else {
+                          setCartError('Failed to update cart. Please try again.');
+                        }
+                        setTimeout(() => setCartError(''), 3000);
+                      } finally {
+                        setIsAddingToCart(false);
+                      }
+                    }}
+                    disabled={isAddingToCart}
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isItemInCart(id as string, startDate, endDate)
+                        ? 'bg-red-600 text-white hover:bg-red-700'
+                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                    }`}
+                  >
+                    {isAddingToCart 
+                      ? (isItemInCart(id as string, startDate, endDate) ? 'Removing from Cart...' : 'Adding to Cart...')
+                      : (isItemInCart(id as string, startDate, endDate) ? 'Remove from Cart' : 'Add to Cart')
+                    }
+                  </button>
                   <span className="text-[#ff6b98] font-bold">₫{((product?.price_per_day ?? 0) * rentalDays).toLocaleString()}</span>
                 </div>
                 
@@ -530,6 +615,21 @@ const ProductDetail = () => {
                 {bookingSuccess && (
                   <div className="mt-2 p-3 bg-green-50 text-green-700 rounded-md text-sm">
                     Booking successful! Redirecting to your dashboard...
+                  </div>
+                )}
+                
+                {cartError && (
+                  <div className="mt-2 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                    {cartError}
+                  </div>
+                )}
+                
+                {cartSuccess && (
+                  <div className="mt-2 p-3 bg-green-50 text-green-700 rounded-md text-sm">
+                    {isItemInCart(id as string, startDate, endDate) 
+                      ? 'Item added to cart successfully!' 
+                      : 'Item removed from cart successfully!'
+                    }
                   </div>
                 )}
               </div>
