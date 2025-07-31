@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CamRent - Camera Rental Made Simple",
-  description: "Rent high-quality cameras and photography equipment easily and quickly",
+  title: "DressBoutique - Dress Rental Made Simple",
+  description: "Rent high-quality designer dresses easily and quickly",
 };
 
 export default function RootLayout({
