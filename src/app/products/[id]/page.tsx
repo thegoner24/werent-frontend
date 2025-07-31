@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, Review } from "@/api/items";
+import { fetchItemById, addReviewToItem, fetchItemReviews, ReviewData, fetchItemsByCategory, Review } from "@/api/items";
 import Container from "@/components/ui/Container";
 import Reviews from "@/components/Reviews";
 import Link from "next/link";
@@ -28,6 +28,11 @@ interface Product {
   reviewList?: Review[]; // Optional: for legacy compatibility
   features?: string[];
   specifications?: Record<string, string>;
+  size?: string; // Size from backend
+  sizes?: string[]; // Available sizes from backend
+  type?: string; // Product type from backend
+  user_id?: number; // User ID from backend
+  designer_name?: string; // Designer name from backend
 }
 
 const ProductDetail = () => {
@@ -61,6 +66,7 @@ const ProductDetail = () => {
   const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   // Initialize review form with user data when authenticated
   useEffect(() => {
@@ -71,6 +77,13 @@ const ProductDetail = () => {
       }));
     }
   }, [isAuthenticated, user]);
+
+  // Set default selected size when product is loaded
+  useEffect(() => {
+    if (product && product.size && !selectedSize) {
+      setSelectedSize(product.size);
+    }
+  }, [product, selectedSize]);
 
   useEffect(() => {
     async function getProduct() {
@@ -130,7 +143,38 @@ const ProductDetail = () => {
           reviewList: reviewList || apiProduct.reviewList || [],
           specifications: apiProduct.specifications || {},
           features: apiProduct.features || [],
+          size: apiProduct.size,
+          sizes: apiProduct.sizes,
+          type: apiProduct.type,
+          user_id: apiProduct.user_id,
+          designer_name: apiProduct.designer_name,
         });
+        
+        // Fetch related products by category
+        if (apiProduct.type) {
+          try {
+            // Fetch all items and filter by type on frontend since backend filter doesn't work properly
+            const allItemsData = await import('@/api/items').then(m => m.fetchItems());
+            if (allItemsData && allItemsData.data) {
+              // Filter by same type, exclude current product, and limit to 4 items
+              const filteredRelated = allItemsData.data
+                .filter((item: any) => item.type === apiProduct.type && item.id !== apiProduct.id)
+                .slice(0, 4)
+                .map((item: any) => ({
+                  ...item,
+                  price: item.price_per_day ?? item.price,
+                  images: (item.images || (item.image ? [item.image] : [])).map((img: string) =>
+                    img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`
+                  ),
+                }));
+              setRelatedProducts(filteredRelated);
+              console.log('Related products for type:', apiProduct.type, filteredRelated);
+            }
+          } catch (relatedError) {
+            console.error('Error fetching related products:', relatedError);
+            // Continue without related products if fetch fails
+          }
+        }
       } catch (e) {
         setError('Failed to load product.');
         setProduct(null);
@@ -268,10 +312,29 @@ const ProductDetail = () => {
                   <span className="ml-2 text-sm text-gray-600">{(product.rating || 0).toFixed(1)} ({reviewCount} reviews)</span>
                 </div>
                 <div className="text-xl font-semibold text-[#ff6b98] mb-4">
-                  {product.price ? `₫${product.price.toLocaleString()}/day` : 'Contact for price'}
+                  {product.price ? `$${product.price.toLocaleString()}/day` : 'Contact for price'}
                 </div>
                 <div className="mb-4 text-gray-700">
                   {product.description || 'No description available.'}
+                </div>
+                
+                {/* Designer Banner */}
+                <div className="bg-gradient-to-r from-[#ff6b98] to-[#e55a87] rounded-lg p-6 mb-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        {product.brand ? product.brand.charAt(0).toUpperCase() : (product.designer_name ? product.designer_name.charAt(0).toUpperCase() : 'D')}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg text-white">
+                        {product.brand || (product.designer_name ? `Designer: ${product.designer_name}` : 'Designer Collection')}
+                      </h3>
+                      <p className="text-white/90 text-sm">
+                        {product.brand ? 'Premium brand collection' : product.user_id ? `Created by designer ID: ${product.user_id}` : 'Curated by professional interior designers'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
               {/* Rental Options */}
@@ -283,7 +346,7 @@ const ProductDetail = () => {
                   className="border rounded px-2 py-1"
                 >
                   <option value="">Select size</option>
-                  {features.map((size, idx) => (
+                  {(product.sizes || [product.size].filter(Boolean) || []).map((size, idx) => (
                     <option key={idx} value={size}>{size}</option>
                   ))}
                 </select>
@@ -297,7 +360,17 @@ const ProductDetail = () => {
                 />
                 <div className="mt-2 text-md">
                   <span className="font-semibold">Total Price: </span>
-                  <span className="text-[#ff6b98] font-bold">₫{totalPrice.toLocaleString()}</span>
+                  <span className="text-[#ff6b98] font-bold">${totalPrice.toLocaleString()}</span>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-col space-y-3 mt-6">
+                  <button className="w-full bg-[#ff6b98] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#e55a87] transition-colors">
+                    Add to Wishlist
+                  </button>
+                  <button className="w-full border-2 border-[#ff6b98] text-[#ff6b98] py-3 px-6 rounded-lg font-semibold hover:bg-[#ff6b98] hover:text-white transition-colors">
+                    Rent Now
+                  </button>
                 </div>
               </div>
               {/* Specifications */}
@@ -773,6 +846,45 @@ const ProductDetail = () => {
           )}
         </Container>
       </div>
+      
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div className="bg-gray-50 py-12">
+          <Container>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((relatedProduct) => (
+                <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-square bg-gray-200 relative">
+                    <Image
+                      src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : '/shop/mock-chair.jpg'}
+                      alt={relatedProduct.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-1">{relatedProduct.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{relatedProduct.brand || relatedProduct.type || 'Premium Collection'}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#ff6b98] font-bold">${relatedProduct.price}/day</span>
+                      <div className="flex items-center">
+                        <svg className="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-sm text-gray-600">{relatedProduct.rating ? relatedProduct.rating.toFixed(1) : '4.0'}</span>
+                      </div>
+                    </div>
+                    <Link href={`/products/${relatedProduct.id}`} className="mt-3 block w-full bg-[#ff6b98] text-white text-center py-2 rounded-md hover:bg-[#e55a87] transition-colors">
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </div>
+      )}
     </div>
   );
 };
