@@ -10,7 +10,7 @@ import Container from "@/components/ui/Container";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import Reviews from '@/components/Reviews';
-import { format, addDays, isBefore, isAfter, parseISO } from 'date-fns';
+import { format, addDays, isBefore, isAfter } from 'date-fns';
 
 interface Product {
   id: number;
@@ -410,12 +410,12 @@ const ProductDetail = () => {
                           setStartDate(newStartDate);
                           
                           // If end date is before new start date, update end date
-                          if (isBefore(parseISO(endDate), parseISO(newStartDate))) {
+                          if (isBefore(new Date(endDate), new Date(newStartDate))) {
                             setEndDate(newStartDate);
                           }
                           
                           // Calculate rental days including both start and end dates
-                          const days = Math.ceil((parseISO(endDate).getTime() - parseISO(newStartDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          const days = Math.ceil((new Date(endDate).getTime() - new Date(newStartDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
                           setRentalDays(Math.max(1, days));
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
@@ -432,7 +432,7 @@ const ProductDetail = () => {
                           setEndDate(newEndDate);
                           
                           // Calculate rental days including both start and end dates
-                          const days = Math.ceil((parseISO(newEndDate).getTime() - parseISO(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          const days = Math.ceil((new Date(newEndDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
                           setRentalDays(Math.max(1, days));
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
