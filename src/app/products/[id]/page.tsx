@@ -168,11 +168,12 @@ const ProductDetail = () => {
         // Fetch related products by category
         if (apiProduct.type) {
           try {
-            const relatedData = await fetchItemsByCategory(apiProduct.type, 4);
-            if (relatedData && relatedData.data) {
-              // Filter out current product and limit to 4 items
-              const filteredRelated = relatedData.data
-                .filter((item: any) => item.id !== apiProduct.id)
+            // Fetch all items and filter by type on frontend since backend filter doesn't work properly
+            const allItemsData = await import('@/api/items').then(m => m.fetchItems());
+            if (allItemsData && allItemsData.data) {
+              // Filter by same type, exclude current product, and limit to 4 items
+              const filteredRelated = allItemsData.data
+                .filter((item: any) => item.type === apiProduct.type && item.id !== apiProduct.id)
                 .slice(0, 4)
                 .map((item: any) => ({
                   ...item,
@@ -182,6 +183,7 @@ const ProductDetail = () => {
                   ),
                 }));
               setRelatedProducts(filteredRelated);
+              console.log('Related products for type:', apiProduct.type, filteredRelated);
             }
           } catch (relatedError) {
             console.error('Error fetching related products:', relatedError);
@@ -870,7 +872,7 @@ const ProductDetail = () => {
                 <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-square bg-gray-200 relative">
                     <Image
-                      src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : '/default-image.png'}
+                      src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : '/shop/mock-chair.jpg'}
                       alt={relatedProduct.name}
                       fill
                       className="object-cover"
