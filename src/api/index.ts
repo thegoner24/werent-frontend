@@ -9,6 +9,7 @@ export const endpoints = {
   profile: '/api/auth/profile',
   refresh: '/api/auth/refresh',
   items: '/items',
+  testimonials: '/testimonial',
   bookings: '/bookings/', // Updated to use /bookings/ endpoint
 };
 
