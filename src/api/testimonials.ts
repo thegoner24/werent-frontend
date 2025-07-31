@@ -17,6 +17,7 @@ export interface TestimonialData {
   rating: number;
   review_message: string;
   user_id: number;
+  user_full_name: string;
 }
 
 export interface TestimonialResponse {

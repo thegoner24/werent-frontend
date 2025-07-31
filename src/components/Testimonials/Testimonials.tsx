@@ -15,22 +15,13 @@ interface TestimonialProps {
   }>;
   user_id: number;
   item_id: number;
+  user_full_name: string;
 }
 
 // Generate a consistent avatar for a user ID
 const getAvatarForUser = (userId: number): string => {
   const avatars = ['/avatar1.svg', '/avatar2.svg', '/avatar3.svg', '/avatar4.svg'];
   return avatars[userId % avatars.length];
-};
-
-// Generate a consistent user name for a user ID
-const getNameForUser = (userId: number): string => {
-  const names = [
-    'Jessica P.', 'Sophia W.', 'Emma R.', 'Madison T.',
-    'Ashley M.', 'Taylor B.', 'Morgan K.', 'Jordan L.',
-    'Alex C.', 'Casey D.', 'Riley S.', 'Avery H.'
-  ];
-  return names[userId % names.length];
 };
 
 const TestimonialCard: React.FC<TestimonialProps> = ({ 
@@ -40,10 +31,11 @@ const TestimonialCard: React.FC<TestimonialProps> = ({
   created_at, 
   images, 
   user_id, 
-  item_id 
+  item_id,
+  user_full_name
 }) => {
   const avatar = getAvatarForUser(user_id);
-  const name = getNameForUser(user_id);
+  const name = user_full_name;
   const date = new Date(created_at).toLocaleDateString('en-US', { 
     year: 'numeric', 
     month: 'short' 
@@ -185,6 +177,7 @@ export default function Testimonials() {
                 images={testimonial.images}
                 user_id={testimonial.user_id}
                 item_id={testimonial.item_id}
+                user_full_name={testimonial.user_full_name}
               />
             ))}
           </div>
