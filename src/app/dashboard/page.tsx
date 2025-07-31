@@ -30,6 +30,20 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, logout, isLoading, refreshProfile } = useAuth();
 
+  // Tab navigation via URL - moved to top to follow Rules of Hooks
+  const validTabs = ['overview', 'rentals', 'payments', 'reviews', 'admin'] as const;
+  type TabKey = typeof validTabs[number];
+  const [activeTab, setActiveTab] = React.useState<TabKey>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab && ['overview', 'rentals', 'payments', 'reviews', 'admin'].includes(tab)) {
+        return tab as TabKey;
+      }
+    }
+    return 'overview';
+  });
+
   useEffect(() => {
     // Redirect to login if not authenticated
     if (!isLoading && !isAuthenticated) {
@@ -43,6 +57,17 @@ export default function DashboardPage() {
       refreshProfile();
     }
   }, [isAuthenticated, isLoading, refreshProfile]);
+
+  // Sync tab with URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab && validTabs.includes(tab as TabKey)) {
+        setActiveTab(tab as TabKey);
+      }
+    }
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -63,28 +88,7 @@ export default function DashboardPage() {
     return null; // Will redirect to login
   }
 
-  // Tab navigation via URL
-  const validTabs = ['overview', 'rentals', 'payments', 'reviews', 'admin'] as const;
-  type TabKey = typeof validTabs[number];
-  const [activeTab, setActiveTab] = React.useState<TabKey>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab');
-      if (tab && ['overview', 'rentals', 'payments', 'reviews', 'admin'].includes(tab)) {
-        return tab as TabKey;
-      }
-    }
-    return 'overview';
-  });
 
-  // Sync tab with URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    if (tab && validTabs.includes(tab as TabKey)) {
-      setActiveTab(tab as TabKey);
-    }
-  }, [typeof window !== 'undefined' ? window.location.search : '']);
 
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);

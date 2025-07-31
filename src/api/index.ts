@@ -7,8 +7,10 @@ export const endpoints = {
   signup: '/api/auth/signup',
   login: '/api/auth/login',
   profile: '/api/auth/profile',
+  refresh: '/api/auth/refresh',
   items: '/items',
   testimonials: '/testimonial',
+  bookings: '/bookings/', // Updated to use /bookings/ endpoint
 };
 
 export const apiFetch = async (
@@ -21,25 +23,50 @@ export const apiFetch = async (
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   };
+  
+  if (token) {
+    const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    headers[AUTH_HEADER] = formattedToken;
+  }
+  
   if (options.headers) {
     headers = Object.assign({}, headers, options.headers as Record<string, string>);
   }
-  if (token) {
-    headers[AUTH_HEADER] = `Bearer ${token}`;
+  
+  try {
+    console.log(`API Request: ${options.method || 'GET'} ${url}`, { headers });
+    
+    const res = await fetch(url, {
+      ...options,
+      headers,
+      mode: 'cors',
+      credentials: 'include',
+    });
+    
+    console.log(`API Response status: ${res.status} ${res.statusText}`);
+    
+    if (!res.ok) {
+      let errorMessage = 'API request failed';
+      try {
+        const errorText = await res.text();
+        console.error('API error response:', errorText);
+        errorMessage = errorText || errorMessage;
+      } catch (textError) {
+        console.error('Could not parse error response:', textError);
+      }
+      throw new Error(errorMessage);
+    }
+    
+    const data = await res.json();
+    console.log('API Response data:', data);
+    return data;
+  } catch (error) {
+    console.error(`API fetch error for ${endpoint}:`, error);
+    throw error;
   }
-  if (token) {
-    headers[AUTH_HEADER] = `Bearer ${token}`;
-  }
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
-  if (!res.ok) {
-    const error = await res.text();
-    console.error('API error response:', error);
-    throw new Error(error || 'API request failed');
-  }
-  return res.json();
 };
+
+// Re-export the authenticated API fetch for convenience
+export { authenticatedApiFetch } from '../utils/authMiddleware';
 
 export default BASE_URL;

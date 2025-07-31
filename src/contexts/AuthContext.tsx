@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProfile } from '../api/profile';
+import { getValidAccessToken } from '../utils/authMiddleware';
 
 interface User {
   id: number;
@@ -29,6 +30,7 @@ interface AuthContextType {
   logout: () => void;
   updateUser: (userData: User) => void;
   refreshProfile: () => Promise<void>;
+  refreshAccessToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -117,6 +119,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [accessToken]);
 
+  const refreshAccessTokenMethod = useCallback(async (): Promise<string | null> => {
+    try {
+      const newAccessToken = await getValidAccessToken();
+      if (newAccessToken) {
+        setAccessToken(newAccessToken);
+        return newAccessToken;
+      } else {
+        // If refresh failed, logout user
+        logout();
+        return null;
+      }
+    } catch (error) {
+      console.error('Failed to refresh access token:', error);
+      logout();
+      return null;
+    }
+  }, []);
+
   const isAuthenticated = !!user && !!accessToken;
 
   const value: AuthContextType = {
@@ -129,6 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     updateUser,
     refreshProfile,
+    refreshAccessToken: refreshAccessTokenMethod,
   };
 
   return (
