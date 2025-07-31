@@ -7,6 +7,7 @@ export const endpoints = {
   signup: '/api/auth/signup',
   login: '/api/auth/login',
   profile: '/api/auth/profile',
+  refresh: '/api/auth/refresh',
   items: '/items',
   bookings: '/bookings/', // Updated to use /bookings/ endpoint
 };
@@ -63,5 +64,8 @@ export const apiFetch = async (
     throw error;
   }
 };
+
+// Re-export the authenticated API fetch for convenience
+export { authenticatedApiFetch } from '../utils/authMiddleware';
 
 export default BASE_URL;
