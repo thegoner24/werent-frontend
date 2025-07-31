@@ -167,10 +167,10 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
  * @param options Request options
  * @returns Promise with parsed JSON response
  */
-export async function authenticatedApiFetch(
+export async function authenticatedApiFetch<T = Record<string, unknown>>(
   endpoint: string,
   options: RequestInit = {}
-): Promise<any> {
+): Promise<T> {
   const BASE_URL = 'https://werent-backend-api.onrender.com';
   const url = `${BASE_URL}${endpoint}`;
   

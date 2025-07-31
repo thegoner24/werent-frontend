@@ -32,7 +32,8 @@ export default function AuthenticatedApiExample() {
 
     try {
       // This will automatically handle token refresh if needed
-      const response = await api.get('/api/auth/profile');
+      type ProfileResponse = { data: { user: { email: string } } };
+      const response = await api.get<ProfileResponse>('/api/auth/profile');
       setMessage(`Profile fetched successfully: ${response.data.user.email}`);
     } catch (err) {
       setError(`API Hook Error: ${err instanceof Error ? err.message : 'Unknown error'}`);

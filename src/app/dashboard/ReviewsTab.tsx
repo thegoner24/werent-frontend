@@ -76,8 +76,8 @@ const mockUserReviews: Review[] = [
 const positiveKeywords = ['perfect', 'beautiful', 'stunning', 'excellent', 'amazing', 'love', 'great', 'wonderful', 'incredible', 'outstanding'];
 const negativeKeywords = ['disappointed', 'terrible', 'bad', 'poor', 'awful', 'hate', 'worst', 'unacceptable', 'problem', 'issue'];
 
-const getSentiment = (comment: string): 'positive' | 'negative' | 'neutral' => {
-  const lowerComment = comment.toLowerCase();
+const getSentiment = (comment: string | undefined): 'positive' | 'negative' | 'neutral' => {
+  const lowerComment = (comment || '').toLowerCase();
   const positiveCount = positiveKeywords.filter(keyword => lowerComment.includes(keyword)).length;
   const negativeCount = negativeKeywords.filter(keyword => lowerComment.includes(keyword)).length;
   
@@ -266,7 +266,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ user }) => {
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold text-sm">
-                    {userAnalytics.mostHelpfulReview.user.split(' ').map(n => n[0]).join('')}
+                    {userAnalytics.mostHelpfulReview.user?.split(' ').map((n: string) => n[0]).join('') || '?'}
                   </span>
                 </div>
                 <div>
@@ -335,7 +335,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ user }) => {
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
                       <span className="text-white font-semibold text-sm">
-                        {review.user.split(' ').map(n => n[0]).join('')}
+                        {review.user?.split(' ').map((n: string) => n[0]).join('') || '?'}
                       </span>
                     </div>
                     <div>
