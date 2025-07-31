@@ -15,8 +15,10 @@ export interface BookingResponse {
   total_price: number;
   is_paid: boolean;
   status: string;
-  created_at: string;
-  updated_at: string;
+  quantity: number;
+  item_name?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
@@ -86,6 +88,26 @@ export async function getUserBookings(token: string): Promise<BookingResponse[]>
     return response.data || response;
   } catch (error) {
     console.error('Error fetching user bookings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get bookings for a specific user by user ID
+ * @param userId The ID of the user
+ * @param token The authentication token
+ * @returns Array of user's bookings
+ */
+export async function getUserBookingsByUserId(userId: number, token: string): Promise<BookingResponse[]> {
+  try {
+    const response = await apiFetch(`${endpoints.bookings}user/${userId}`, {
+      method: 'GET',
+    }, token);
+    
+    // The API returns { data: [...], message: "...", success: true }
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error fetching bookings for user ${userId}:`, error);
     throw error;
   }
 }
