@@ -107,7 +107,7 @@ export async function updateProfile(payload: UpdateProfilePayload, token: string
  * @returns Promise with profile response
  */
 export async function getProfileAuthenticated(): Promise<GetProfileResponse> {
-  return await authenticatedApiFetch(endpoints.profile, {
+  return await authenticatedApiFetch<GetProfileResponse>(endpoints.profile, {
     method: 'GET',
   });
 }

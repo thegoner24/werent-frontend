@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import Container from '../ui/Container';
 import { useAuth } from '@/contexts/AuthContext';
 import { Review, voteReviewHelpful, reportReview, moderateReview } from '@/api/items';
@@ -71,9 +72,11 @@ const MediaGallery: React.FC<{
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {photos.map((photo, index) => (
           <div key={`photo-${index}`} className="relative group">
-            <img
+            <Image
               src={photo}
               alt={`Review photo ${index + 1}`}
+              width={100}
+              height={96}
               className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setSelectedMedia(photo)}
             />
@@ -114,7 +117,13 @@ const MediaGallery: React.FC<{
             {selectedMedia.includes('.mp4') || selectedMedia.includes('.webm') ? (
               <video src={selectedMedia} controls className="max-w-full max-h-full" />
             ) : (
-              <img src={selectedMedia} alt="Full size" className="max-w-full max-h-full object-contain" />
+              <Image 
+                src={selectedMedia} 
+                alt="Full size" 
+                width={800} 
+                height={600} 
+                className="max-w-full max-h-full object-contain" 
+              />
             )}
           </div>
         </div>
@@ -175,7 +184,13 @@ const ReviewCard: React.FC<{
           <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
               {review.userAvatar ? (
-                <img src={review.userAvatar} alt={review.user || 'User'} className="w-full h-full rounded-full object-cover" />
+                <Image 
+                  src={review.userAvatar} 
+                  alt={review.user || 'User'} 
+                  width={40} 
+                  height={40} 
+                  className="w-full h-full rounded-full object-cover" 
+                />
               ) : (
                 (review.user || 'A').split(' ').map(n => n[0]).join('')
               )}

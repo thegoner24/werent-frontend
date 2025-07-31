@@ -15,16 +15,16 @@ export function useAuthenticatedApi() {
    * @param options Request options
    * @returns Promise with API response
    */
-  const apiRequest = useCallback(async (
+  const apiRequest = useCallback(async <T = Record<string, unknown>>(
     endpoint: string,
     options: RequestInit = {}
-  ) => {
+  ): Promise<T> => {
     if (!isAuthenticated) {
       throw new Error('User is not authenticated');
     }
 
     try {
-      return await authenticatedApiFetch(endpoint, options);
+      return await authenticatedApiFetch<T>(endpoint, options);
     } catch (error) {
       // If the error indicates authentication failure, logout the user
       if (error instanceof Error && error.message.includes('Authentication failed')) {
@@ -39,8 +39,8 @@ export function useAuthenticatedApi() {
    * @param endpoint API endpoint
    * @returns Promise with API response
    */
-  const get = useCallback((endpoint: string) => {
-    return apiRequest(endpoint, { method: 'GET' });
+  const get = useCallback(<T = Record<string, unknown>>(endpoint: string): Promise<T> => {
+    return apiRequest<T>(endpoint, { method: 'GET' });
   }, [apiRequest]);
 
   /**
@@ -49,7 +49,7 @@ export function useAuthenticatedApi() {
    * @param data Request body data
    * @returns Promise with API response
    */
-  const post = useCallback((endpoint: string, data?: any) => {
+  const post = useCallback((endpoint: string, data?: Record<string, unknown>) => {
     return apiRequest(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
@@ -62,7 +62,7 @@ export function useAuthenticatedApi() {
    * @param data Request body data
    * @returns Promise with API response
    */
-  const put = useCallback((endpoint: string, data?: any) => {
+  const put = useCallback((endpoint: string, data?: Record<string, unknown>) => {
     return apiRequest(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
@@ -75,7 +75,7 @@ export function useAuthenticatedApi() {
    * @param data Request body data
    * @returns Promise with API response
    */
-  const patch = useCallback((endpoint: string, data?: any) => {
+  const patch = useCallback((endpoint: string, data?: Record<string, unknown>) => {
     return apiRequest(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
