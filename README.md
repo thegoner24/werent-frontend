@@ -166,7 +166,7 @@ The application is configured for deployment on platforms that support Next.js a
 
 A live version of the application is deployed at:
 
-**[https://werent-frontend.vercel.app](https://werent-frontend.vercel.app)**
+**[Click Here!](https://werent-frontend.vercel.app/)**
 
 This deployment is automatically updated whenever changes are pushed to the main branch of the repository. The application is hosted on Vercel, which provides seamless integration with Next.js projects.
 
