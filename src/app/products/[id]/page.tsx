@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { fetchItemById, addReviewToItem, ReviewData } from "@/api/items";
+import { createBooking, BookingPayload } from "@/api/bookings";
 import Container from "@/components/ui/Container";
 import Reviews from "@/components/Reviews";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { format, addDays, isBefore, isAfter, parseISO } from 'date-fns';
 
 interface Product {
   id: number;
@@ -16,7 +19,7 @@ interface Product {
   created_at?: string;
   description?: string;
   gender?: string;
-  image?: string; // API may return a single image string or images array
+  image?: string; // API may return a single image string
   images?: string[]; // fallback for images array
   price?: number;
   price_per_day?: number; // API field
@@ -27,6 +30,7 @@ interface Product {
   reviewList?: Review[]; // Optional: for legacy compatibility
   features?: string[];
   specifications?: Record<string, string>;
+  size?: string; // Added size field from API response
 }
 
 interface Review {
@@ -39,13 +43,23 @@ interface Review {
 
 const ProductDetail = () => {
   const params = useParams();
+  const router = useRouter();
+  const { isAuthenticated, accessToken } = useAuth();
   const id = params?.id as string; // Cast to string to fix type error
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<number>(0);
-  const [selectedSize, setSelectedSize] = useState<string>("");
   const [rentalDays, setRentalDays] = useState<number>(1);
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("recent");
+  
+  // Booking state
+  const today = new Date();
+  const tomorrow = addDays(today, 1);
+  const [startDate, setStartDate] = useState<string>(format(tomorrow, 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState<string>(format(addDays(tomorrow, 4), 'yyyy-MM-dd'));
+  const [isBooking, setIsBooking] = useState<boolean>(false);
+  const [bookingError, setBookingError] = useState<string>("");
+  const [bookingSuccess, setBookingSuccess] = useState<boolean>(false);
   
   // Review form state
   const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
@@ -106,7 +120,6 @@ const ProductDetail = () => {
     );
   }
 
-  const totalPrice = (product.price ?? 0) * rentalDays;
   const safeImages = product.images && product.images.length > 0 ? product.images : ['/default-image.png'];
   
   // Process reviews for filtering and sorting
@@ -221,30 +234,147 @@ const ProductDetail = () => {
                 </div>
               </div>
               {/* Rental Options */}
-              <div className="flex flex-col space-y-2">
-                <label className="font-medium">Size:</label>
-                <select
-                  value={selectedSize}
-                  onChange={e => setSelectedSize(e.target.value)}
-                  className="border rounded px-2 py-1"
-                >
-                  <option value="">Select size</option>
-                  {features.map((size, idx) => (
-                    <option key={idx} value={size}>{size}</option>
-                  ))}
-                </select>
-                <label className="font-medium mt-2">Rental Days:</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={rentalDays}
-                  onChange={e => setRentalDays(Number(e.target.value))}
-                  className="border rounded px-2 py-1 w-24"
-                />
+              <div className="flex flex-col space-y-4">
+                {/* Display size from API response */}
+                {product?.size && (
+                  <div className="mb-4">
+                    <span className="font-medium">Size: </span>
+                    <span className="text-gray-700">{product.size}</span>
+                  </div>
+                )}
+                
+                {/* Booking Calendar */}
+                <div className="mt-4">
+                  <h3 className="font-medium mb-2">Select Rental Dates:</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        min={format(tomorrow, 'yyyy-MM-dd')}
+                        onChange={(e) => {
+                          const newStartDate = e.target.value;
+                          setStartDate(newStartDate);
+                          
+                          // If end date is before new start date, update end date
+                          if (isBefore(parseISO(endDate), parseISO(newStartDate))) {
+                            setEndDate(newStartDate);
+                          }
+                          
+                          // Calculate rental days including both start and end dates
+                          const days = Math.ceil((parseISO(endDate).getTime() - parseISO(newStartDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          setRentalDays(Math.max(1, days));
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        min={startDate}
+                        onChange={(e) => {
+                          const newEndDate = e.target.value;
+                          setEndDate(newEndDate);
+                          
+                          // Calculate rental days including both start and end dates
+                          const days = Math.ceil((parseISO(newEndDate).getTime() - parseISO(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          setRentalDays(Math.max(1, days));
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b98]"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-2 text-md">
+                  <span className="font-semibold">Rental Period: </span>
+                  <span className="text-gray-700">{rentalDays} day{rentalDays !== 1 ? 's' : ''}</span>
+                </div>
+                
                 <div className="mt-2 text-md">
                   <span className="font-semibold">Total Price: </span>
-                  <span className="text-[#ff6b98] font-bold">₫{totalPrice.toLocaleString()}</span>
+                  <span className="text-[#ff6b98] font-bold">₫{((product?.price_per_day ?? 0) * rentalDays).toLocaleString()}</span>
                 </div>
+                
+                {/* Book Now Button */}
+                <button
+                  onClick={async () => {
+                    if (!isAuthenticated) {
+                      router.push('/login?redirect=' + encodeURIComponent(`/products/${id}`));
+                      return;
+                    }
+                    
+                    // Validate dates
+                    const startDateObj = new Date(startDate);
+                    const endDateObj = new Date(endDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (startDateObj < today) {
+                      setBookingError('Start date cannot be in the past');
+                      return;
+                    }
+                    
+                    if (endDateObj < startDateObj) { // Changed from <= to < to allow same day bookings
+                      setBookingError('End date must be equal to or after start date');
+                      return;
+                    }
+                    
+                    setIsBooking(true);
+                    setBookingError('');
+                    setBookingSuccess(false);
+                    
+                    try {
+                      if (!accessToken) {
+                        throw new Error('No access token available. Please log in again.');
+                      }
+                      
+                      const bookingPayload: BookingPayload = {
+                        item_id: Number(id),
+                        start_date: startDate,
+                        end_date: endDate
+                      };
+                      
+                      const result = await createBooking(bookingPayload, accessToken);
+                      
+                      if (result && result.id) {
+                        setBookingSuccess(true);
+                        // Optional: Redirect to bookings page or show booking details
+                        setTimeout(() => {
+                          router.push('/dashboard');
+                        }, 2000);
+                      } else {
+                        throw new Error('Booking creation failed');
+                      }
+                    } catch (error) {
+                      console.error('Booking error:', error);
+                      const errorMessage = error instanceof Error ? error.message : 'Failed to create booking';
+                      setBookingError(errorMessage);
+                      setBookingSuccess(false);
+                    } finally {
+                      setIsBooking(false);
+                    }
+                  }}
+                  disabled={isBooking || !startDate || !endDate}
+                  className={`mt-4 w-full bg-[#ff6b98] text-white py-3 rounded-md hover:bg-[#e55a87] transition-colors ${(isBooking || !startDate || !endDate) ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                  {isBooking ? 'Processing...' : 'Book Now'}
+                </button>
+                
+                {bookingError && (
+                  <div className="mt-2 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                    {bookingError}
+                  </div>
+                )}
+                
+                {bookingSuccess && (
+                  <div className="mt-2 p-3 bg-green-50 text-green-700 rounded-md text-sm">
+                    Booking successful! Redirecting to your dashboard...
+                  </div>
+                )}
               </div>
               {/* Specifications */}
               <div>
