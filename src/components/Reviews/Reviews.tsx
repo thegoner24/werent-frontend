@@ -3,33 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Container from '../ui/Container';
 import { useAuth } from '@/contexts/AuthContext';
-
-export interface Review {
-  user: string;
-  rating: number;
-  comment: string;
-  date: string;
-  id?: string;
-  helpful?: number;
-  reported?: boolean;
-  moderated?: boolean;
-  // New fields for user integration
-  userId?: number;
-  userEmail?: string;
-  userAvatar?: string;
-  // Verification fields
-  verifiedPurchase?: boolean;
-  purchaseDate?: string;
-  orderId?: string;
-  // Media fields
-  photos?: string[];
-  videos?: string[];
-  // Additional metadata
-  productId?: string;
-  productName?: string;
-  helpfulVotes?: string[]; // Array of user IDs who voted helpful
-  reportedBy?: string[]; // Array of user IDs who reported
-}
+import { Review, voteReviewHelpful, reportReview, moderateReview } from '@/api/items';
 
 interface ReviewsProps {
   reviews: Review[];
@@ -38,9 +12,9 @@ interface ReviewsProps {
   showSubmitForm?: boolean;
   className?: string;
   onSubmitReview?: (review: Omit<Review, 'date'>) => void;
-  onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void;
-  onReportReview?: (reviewId: string, reason: string) => void;
-  onModerateReview?: (reviewId: string, action: 'approve' | 'reject') => void;
+  onVoteHelpful?: (reviewId: string | number, isHelpful: boolean) => void;
+  onReportReview?: (reviewId: string | number, reason: string) => void;
+  onModerateReview?: (reviewId: string | number, action: 'approve' | 'reject') => void;
   isAdmin?: boolean;
   reviewsPerPage?: number;
   // New props for enhanced functionality
@@ -50,6 +24,9 @@ interface ReviewsProps {
   maxVideos?: number;
   productId?: string;
   productName?: string;
+  // New props for API integration
+  itemId?: string | number; // Required for API calls
+  onReviewUpdate?: () => void; // Callback to refresh reviews after actions
 }
 
 const StarRating: React.FC<{ rating: number; size?: 'sm' | 'md' | 'lg' }> = ({ 
@@ -148,25 +125,23 @@ const MediaGallery: React.FC<{
 
 const ReviewCard: React.FC<{ 
   review: Review; 
-  onVoteHelpful?: (reviewId: string, isHelpful: boolean) => void;
-  onReportReview?: (reviewId: string, reason: string) => void;
-  onModerateReview?: (reviewId: string, action: 'approve' | 'reject') => void;
+  onVoteHelpful?: (reviewId: string | number, isHelpful: boolean) => void;
+  onReportReview?: (reviewId: string | number, reason: string) => void;
+  onModerateReview?: (reviewId: string | number, action: 'approve' | 'reject') => void;
   isAdmin?: boolean;
   currentUserId?: number;
 }> = ({ review, onVoteHelpful, onReportReview, onModerateReview, isAdmin, currentUserId }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
-  const [hasVoted, setHasVoted] = useState(false);
 
   const handleVoteHelpful = (isHelpful: boolean) => {
-    if (review.id && onVoteHelpful && !hasVoted) {
+    if (onVoteHelpful && review.id) {
       onVoteHelpful(review.id, isHelpful);
-      setHasVoted(true);
     }
   };
 
   const handleReport = () => {
-    if (review.id && onReportReview && reportReason.trim()) {
+    if (onReportReview && review.id) {
       onReportReview(review.id, reportReason);
       setShowReportModal(false);
       setReportReason('');
@@ -174,11 +149,12 @@ const ReviewCard: React.FC<{
   };
 
   const handleModerate = (action: 'approve' | 'reject') => {
-    if (review.id && onModerateReview) {
+    if (onModerateReview && review.id) {
       onModerateReview(review.id, action);
     }
   };
 
+  // Compute user interaction status from review data
   const hasVotedHelpful = review.helpfulVotes?.includes(currentUserId?.toString() || '');
   const hasReported = review.reportedBy?.includes(currentUserId?.toString() || '');
 
@@ -199,9 +175,9 @@ const ReviewCard: React.FC<{
           <div className="w-10 h-10 bg-[#ff6b98] rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
               {review.userAvatar ? (
-                <img src={review.userAvatar} alt={review.user} className="w-full h-full rounded-full object-cover" />
+                <img src={review.userAvatar} alt={review.user || 'User'} className="w-full h-full rounded-full object-cover" />
               ) : (
-                review.user.split(' ').map(n => n[0]).join('')
+                (review.user || 'A').split(' ').map(n => n[0]).join('')
               )}
             </span>
           </div>
@@ -396,12 +372,13 @@ const ReviewForm: React.FC<{
         user: authUser ? `${authUser.first_name} ${authUser.last_name}` : 'Anonymous',
         rating,
         comment: comment.trim(),
+        review_message: comment.trim(), // Use both for compatibility
         id: Date.now().toString(),
         helpful: 0,
         reported: false,
         moderated: false,
         // User integration
-        userId: authUser?.id,
+        user_id: authUser?.id,
         userEmail: authUser?.email,
         userAvatar: authUser ? undefined : undefined, // Could be set from user profile
         // Verification
@@ -730,9 +707,11 @@ export default function Reviews({
   maxPhotos = 5,
   maxVideos = 2,
   productId,
-  productName
+  productName,
+  itemId, // Added itemId prop
+  onReviewUpdate // Added onReviewUpdate prop
 }: ReviewsProps) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, accessToken } = useAuth();
   const [ratingFilter, setRatingFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('recent');
   const [currentPage, setCurrentPage] = useState(1);
@@ -773,42 +752,54 @@ export default function Reviews({
   const handleSubmitReview = async (reviewData: Omit<Review, 'date'>) => {
     if (onSubmitReview) {
       await onSubmitReview(reviewData);
-    } else {
-      // Default behavior - add to local state (for demo purposes)
-      const newReview: Review = {
-        ...reviewData,
-        id: Date.now().toString(),
-        date: new Date().toISOString().split('T')[0],
-        helpful: 0,
-        reported: false,
-        moderated: false
-      };
-      console.log('New review submitted:', newReview);
-      // In a real app, you would send this to your API
     }
   };
 
-  const handleVoteHelpful = (reviewId: string, isHelpful: boolean) => {
+  const handleVoteHelpful = async (reviewId: string | number, isHelpful: boolean) => {
     if (onVoteHelpful) {
       onVoteHelpful(reviewId, isHelpful);
-    } else {
-      console.log('Vote helpful:', { reviewId, isHelpful });
+    } else if (itemId && accessToken) {
+      try {
+        await voteReviewHelpful(itemId, reviewId, isHelpful, accessToken);
+        // Refresh reviews after voting
+        if (onReviewUpdate) {
+          onReviewUpdate();
+        }
+      } catch (error) {
+        console.error('Failed to vote on review:', error);
+      }
     }
   };
 
-  const handleReportReview = (reviewId: string, reason: string) => {
+  const handleReportReview = async (reviewId: string | number, reason: string) => {
     if (onReportReview) {
       onReportReview(reviewId, reason);
-    } else {
-      console.log('Report review:', { reviewId, reason });
+    } else if (itemId && accessToken) {
+      try {
+        await reportReview(itemId, reviewId, reason, accessToken);
+        // Refresh reviews after reporting
+        if (onReviewUpdate) {
+          onReviewUpdate();
+        }
+      } catch (error) {
+        console.error('Failed to report review:', error);
+      }
     }
   };
 
-  const handleModerateReview = (reviewId: string, action: 'approve' | 'reject') => {
+  const handleModerateReview = async (reviewId: string | number, action: 'approve' | 'reject') => {
     if (onModerateReview) {
       onModerateReview(reviewId, action);
-    } else {
-      console.log('Moderate review:', { reviewId, action });
+    } else if (itemId && accessToken) {
+      try {
+        await moderateReview(itemId, reviewId, action, accessToken);
+        // Refresh reviews after moderation
+        if (onReviewUpdate) {
+          onReviewUpdate();
+        }
+      } catch (error) {
+        console.error('Failed to moderate review:', error);
+      }
     }
   };
 
