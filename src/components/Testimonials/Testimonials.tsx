@@ -62,16 +62,24 @@ const TestimonialCard: React.FC<TestimonialProps> = ({
       {images.length > 0 && (
         <div className="mb-4 flex justify-center">
           <div className="grid grid-cols-2 gap-2 max-w-32">
-            {images.slice(0, 2).map((image) => (
-              <div key={image.id} className="w-14 h-14 rounded-lg overflow-hidden relative">
-                <Image
-                  src={image.image_base64}
-                  alt="Review image"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ))}
+            {images.slice(0, 2).map((image) => {
+              // Format base64 image with proper data URL prefix (same as product details page)
+              const imageSrc = image.image_base64.startsWith('data:image') 
+                ? image.image_base64 
+                : `data:image/jpeg;base64,${image.image_base64}`;
+              
+              return (
+                <div key={image.id} className="w-14 h-14 rounded-lg overflow-hidden relative">
+                  <Image
+                    src={imageSrc}
+                    alt="Review image"
+                    fill
+                    className="object-cover"
+                    unoptimized={true}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

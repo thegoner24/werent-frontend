@@ -731,9 +731,22 @@ export default function Reviews({
   const [sortBy, setSortBy] = useState<string>('recent');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Process reviews to handle base64 images (same as product page)
+  const processedReviews = useMemo(() => {
+    return reviews.map(review => ({
+      ...review,
+      photos: review.photos?.map((photo: string) =>
+        photo.startsWith('data:image') ? photo : `data:image/jpeg;base64,${photo}`
+      ),
+      videos: review.videos?.map((video: string) =>
+        video.startsWith('data:video') ? video : `data:video/mp4;base64,${video}`
+      )
+    }));
+  }, [reviews]);
+
   // Filter and sort reviews
   const filteredAndSortedReviews = useMemo(() => {
-    return reviews
+    return processedReviews
       .filter(review => {
         if (ratingFilter === 'all') return true;
         if (ratingFilter === '5') return review.rating === 5;
@@ -837,10 +850,10 @@ export default function Reviews({
         )}
         
         {/* Reviews Summary */}
-        {reviews.length > 0 && <ReviewsSummary reviews={reviews} />}
+        {processedReviews.length > 0 && <ReviewsSummary reviews={processedReviews} />}
         
         {/* Review Filters */}
-        {showFilters && reviews.length > 0 && (
+        {showFilters && processedReviews.length > 0 && (
           <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -877,7 +890,7 @@ export default function Reviews({
         )}
         
         {/* Reviews List */}
-        {reviews.length > 0 ? (
+        {processedReviews.length > 0 ? (
           <div className="space-y-6">
             <div className="text-sm text-gray-600 mb-4">
               Showing {paginatedReviews.length} of {filteredAndSortedReviews.length} reviews
@@ -913,4 +926,4 @@ export default function Reviews({
       </Container>
     </div>
   );
-} 
+}
