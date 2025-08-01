@@ -1,4 +1,4 @@
-import { apiFetch, endpoints } from './index';
+import { apiFetch, endpoints, authenticatedApiFetch } from './index';
 
 export interface BookingPayload {
   item_id: number;
@@ -136,6 +136,55 @@ export async function getBookingById(id: number, token: string): Promise<Booking
     return response.data || response;
   } catch (error) {
     console.error(`Error fetching booking with ID ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Get all bookings (admin only)
+ * @param token The admin's authentication token (optional - will be handled by middleware)
+ * @returns Array of all bookings
+ */
+export async function getAllBookings(token?: string): Promise<BookingResponse[]> {
+  try {
+    const response = await authenticatedApiFetch<{ data?: BookingResponse[] } | BookingResponse[]>(endpoints.bookings, {
+      method: 'GET',
+    });
+    
+    // Handle both response formats
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching all bookings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Confirm a booking
+ * @param id The ID of the booking to confirm
+ * @param token The user's authentication token (optional - will be handled by middleware)
+ * @returns The updated booking
+ */
+export async function confirmBooking(id: number, token?: string): Promise<BookingResponse> {
+  try {
+    const response = await authenticatedApiFetch<{ data?: BookingResponse } | BookingResponse>(`${endpoints.bookings}${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'confirmed' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    // Handle both response formats
+    if ('data' in response && response.data) {
+      return response.data;
+    }
+    return response as BookingResponse;
+  } catch (error) {
+    console.error(`Error confirming booking with ID ${id}:`, error);
     throw error;
   }
 }

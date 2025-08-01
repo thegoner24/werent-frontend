@@ -10,43 +10,82 @@ interface RentalWithItem extends BookingResponse {
   itemBrand?: string;
   steps: string[];
   currentStep: number;
+  isGreyedOut?: boolean;
+  isCancelled?: boolean;
   penaltyFee?: number;
 }
 
-const getStatusSteps = (status: string) => {
+const getStatusSteps = (status: string, isPaid: boolean = false, isPastDue: boolean = false) => {
   const steps = ['Requested', 'Approved', 'Shipped', 'Returned'];
-  let currentStep = 0;
+  let currentStep = -1;
+  let isGreyedOut = false;
+  let isCancelled = false;
   
   switch (status.toUpperCase()) {
     case 'PENDING':
-      currentStep = 0;
+      currentStep = isPaid ? 0 : 0; // Both pending and paid transactions go to requested
       break;
-    case 'APPROVED':
     case 'CONFIRMED':
-      currentStep = 1;
-      break;
-    case 'SHIPPED':
-    case 'ACTIVE':
-      currentStep = 2;
+      currentStep = isPastDue ? 2 : 2; // Confirmed and past due go to shipped (no expedition implemented)
       break;
     case 'RETURNED':
+      currentStep = 3; // Returned state
+      break;
+    case 'CANCELLED':
+      isCancelled = true;
+      // Show progress up to the point where cancellation likely occurred
+      if (isPaid) {
+        currentStep = 1; // If paid, likely cancelled after approval
+      } else {
+        currentStep = 0; // If not paid, cancelled at request stage
+      }
+      break;
     case 'COMPLETED':
-      currentStep = 3;
+      isGreyedOut = true;
+      currentStep = -1; // Greyed out with no progress
       break;
     default:
       currentStep = 0;
   }
   
-  return { steps, currentStep };
+  return { steps, currentStep, isGreyedOut, isCancelled };
 };
 
-function RentalStepsTracker({ steps, currentStep }: { steps: string[]; currentStep: number }) {
+function RentalStepsTracker({ steps, currentStep, isGreyedOut, isCancelled }: { steps: string[]; currentStep: number; isGreyedOut?: boolean; isCancelled?: boolean }) {
   return (
     <ol className="flex items-center w-full mb-4">
       {steps.map((step, idx) => (
         <li key={step} className={`flex-1 flex items-center ${idx < steps.length - 1 ? 'after:content-[" "] after:flex-1 after:border-t-2 after:border-gray-200 after:mx-2' : ''}`}>
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${idx <= currentStep ? 'bg-purple-500 border-purple-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>{idx + 1}</div>
-          <span className={`ml-2 text-sm font-medium ${idx <= currentStep ? 'text-purple-700' : 'text-gray-400'}`}>{step}</span>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+            isGreyedOut 
+              ? 'bg-gray-200 border-gray-300 text-gray-400'
+              : isCancelled
+                ? idx <= currentStep
+                  ? 'bg-red-500 border-red-500 text-white'
+                  : 'bg-white border-gray-300 text-gray-400'
+                : idx <= currentStep 
+                  ? 'bg-purple-500 border-purple-500 text-white' 
+                  : 'bg-white border-gray-300 text-gray-400'
+          }`}>
+            {isCancelled && idx === currentStep ? (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              idx + 1
+            )}
+          </div>
+          <span className={`ml-2 text-sm font-medium ${
+            isGreyedOut 
+              ? 'text-gray-400'
+              : isCancelled
+                ? idx <= currentStep
+                  ? 'text-red-700'
+                  : 'text-gray-400'
+                : idx <= currentStep 
+                  ? 'text-purple-700' 
+                  : 'text-gray-400'
+          }`}>{step}</span>
         </li>
       ))}
     </ol>
@@ -54,7 +93,7 @@ function RentalStepsTracker({ steps, currentStep }: { steps: string[]; currentSt
 }
 
 const RentalsTab: React.FC = () => {
-  const { user, accessToken, isAuthenticated } = useAuth();
+  const { user, accessToken, isAuthenticated, refreshAccessToken } = useAuth();
   const [rentals, setRentals] = useState<RentalWithItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +103,7 @@ const RentalsTab: React.FC = () => {
 
   useEffect(() => {
     const fetchUserBookings = async () => {
-      if (!isAuthenticated || !user || !accessToken) {
+      if (!isAuthenticated || !user) {
         setLoading(false);
         return;
       }
@@ -73,24 +112,38 @@ const RentalsTab: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch user bookings
-        const bookings = await getUserBookingsByUserId(user.id, accessToken);
+        // Ensure we have a fresh access token before making the request
+        const validToken = await refreshAccessToken();
+        if (!validToken) {
+          setError('Authentication failed. Please log in again.');
+          setLoading(false);
+          return;
+        }
         
-        // Transform bookings to include status steps
-        const rentalsWithItems = bookings.map((booking) => {
-          const { steps, currentStep } = getStatusSteps(booking.status);
+        const response = await getUserBookingsByUserId(user.id, validToken);
+        
+        if (response && Array.isArray(response)) {
+          const bookingsWithItems = response.map((booking: BookingResponse) => {
+            // Check if booking is past due (end date has passed)
+            const isPastDue = new Date(booking.end_date) < new Date();
+            const { steps, currentStep, isGreyedOut, isCancelled } = getStatusSteps(booking.status, booking.is_paid, isPastDue);
+            
+            return {
+              ...booking,
+              itemName: booking.item_name || `Item #${booking.item_id}`,
+              itemBrand: '', // Brand info not available in booking response
+              steps,
+              currentStep,
+              isGreyedOut,
+              isCancelled,
+              penaltyFee: undefined, // This would come from the booking if available
+            } as RentalWithItem;
+          });
           
-          return {
-            ...booking,
-            itemName: booking.item_name || `Item #${booking.item_id}`,
-            itemBrand: '', // Brand info not available in booking response
-            steps,
-            currentStep,
-            penaltyFee: undefined, // This would come from the booking if available
-          } as RentalWithItem;
-        });
-        
-        setRentals(rentalsWithItems);
+          setRentals(bookingsWithItems);
+        } else {
+          setError('Failed to load rentals');
+        }
       } catch (err) {
         console.error('Error fetching user bookings:', err);
         setError('Failed to load your bookings. Please try again later.');
@@ -100,7 +153,7 @@ const RentalsTab: React.FC = () => {
     };
 
     fetchUserBookings();
-  }, [isAuthenticated, user, accessToken]);
+  }, [isAuthenticated, user, refreshAccessToken]);
 
   const handleCartAction = async (rental: RentalWithItem) => {
     if (!user) return;
@@ -172,7 +225,7 @@ const RentalsTab: React.FC = () => {
   };
 
   const handleCancelBooking = async (rental: RentalWithItem) => {
-    if (!accessToken) {
+    if (!isAuthenticated) {
       setError('Authentication required');
       return;
     }
@@ -181,15 +234,36 @@ const RentalsTab: React.FC = () => {
     setError(null);
 
     try {
-      const cancelledBooking = await cancelBooking(rental.id, accessToken);
+      // Ensure we have a fresh access token before making the cancel request
+      const validToken = await refreshAccessToken();
+      if (!validToken) {
+        setError('Authentication failed. Please log in again.');
+        setCancellingBooking(null);
+        return;
+      }
+      
+      const cancelledBooking = await cancelBooking(rental.id, validToken);
       
       // Update the rental in the local state
       setRentals(prevRentals => 
-        prevRentals.map(r => 
-          r.id === rental.id 
-            ? { ...r, status: cancelledBooking.status, refund_info: cancelledBooking.refund_info }
-            : r
-        )
+        prevRentals.map(r => {
+          if (r.id === rental.id) {
+            const updatedRental = { ...r, status: cancelledBooking.status, refund_info: cancelledBooking.refund_info };
+            const { steps, currentStep, isGreyedOut, isCancelled } = getStatusSteps(
+               updatedRental.status,
+               updatedRental.is_paid,
+               new Date(updatedRental.end_date) < new Date()
+             );
+            return {
+              ...updatedRental,
+              steps,
+              currentStep,
+              isGreyedOut,
+              isCancelled
+            };
+          }
+          return r;
+        })
       );
       
       setCartMessage('Booking cancelled successfully');
@@ -301,20 +375,20 @@ const RentalsTab: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
-                      rental.status === 'COMPLETED' || rental.status === 'RETURNED' 
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        rental.status === 'COMPLETED' 
                         ? 'bg-green-100 text-green-700' 
                         : rental.status === 'ACTIVE' || rental.status === 'SHIPPED'
                         ? 'bg-blue-100 text-blue-700' 
                         : rental.status === 'CONFIRMED' || rental.status === 'APPROVED'
-                        ? 'bg-yellow-100 text-yellow-700'
+                        ? (new Date(rental.end_date) < new Date() ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')
                         : rental.status === 'PAID'
                         ? 'bg-emerald-100 text-emerald-700'
                         : rental.status === 'CANCELLED'
                         ? 'bg-red-100 text-red-700'
                         : 'bg-gray-100 text-gray-700'
                     }`}>
-                      {rental.status}
+                      {rental.status === 'CONFIRMED' && new Date(rental.end_date) < new Date() ? 'PAST DUE' : rental.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -330,7 +404,7 @@ const RentalsTab: React.FC = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <RentalStepsTracker steps={rental.steps} currentStep={rental.currentStep} />
+                    <RentalStepsTracker steps={rental.steps} currentStep={rental.currentStep} isGreyedOut={rental.isGreyedOut} isCancelled={rental.isCancelled} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {rental.status === 'PENDING' ? (
@@ -350,7 +424,7 @@ const RentalsTab: React.FC = () => {
                           {cancellingBooking === String(rental.id) ? 'Cancelling...' : 'Cancel'}
                         </button>
                       </div>
-                    ) : (rental.status === 'PAID' || rental.status === 'CONFIRMED') ? (
+                    ) : rental.status === 'PAID' ? (
                       <button
                         onClick={() => handleCancelBooking(rental)}
                         disabled={cancellingBooking === String(rental.id)}
@@ -358,7 +432,7 @@ const RentalsTab: React.FC = () => {
                       >
                         {cancellingBooking === String(rental.id) ? 'Cancelling...' : 'Cancel'}
                       </button>
-                    ) : rental.status !== 'CANCELLED' ? (
+                    ) : rental.status !== 'CANCELLED' && rental.status !== 'CONFIRMED' && rental.status !== 'APPROVED' ? (
                       <button
                         onClick={() => handleCartAction(rental)}
                         disabled={addingToCart === String(rental.id)}
