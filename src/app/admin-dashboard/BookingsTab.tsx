@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
-import { getAllBookings, confirmBooking, BookingResponse } from '@/api/bookings';
+import { getAllBookings, confirmBooking, completeBooking, BookingResponse } from '@/api/bookings';
 
 export interface BookingsTabRef {
   refreshBookings: () => void;
@@ -53,6 +53,24 @@ const BookingsTab = forwardRef<BookingsTabRef>((props, ref) => {
     } catch (err) {
       console.error('Error confirming booking:', err);
       setError('Failed to confirm booking');
+    }
+  };
+
+  const handleCompleteBooking = async (bookingId: number) => {
+    try {
+      const updatedBooking = await completeBooking(bookingId);
+      
+      // Update the booking in the local state
+      setBookings(prevBookings => 
+        prevBookings.map(booking => 
+          booking.id === bookingId 
+            ? { ...booking, status: updatedBooking.status }
+            : booking
+        )
+      );
+    } catch (err) {
+      console.error('Error completing booking:', err);
+      setError('Failed to complete booking');
     }
   };
 
@@ -274,10 +292,18 @@ const BookingsTab = forwardRef<BookingsTabRef>((props, ref) => {
                   {getStatusBadge(booking.status, booking.is_paid)}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  {booking.is_paid && booking.status.toLowerCase() !== 'confirmed' && (
+                  {booking.is_paid && booking.status.toLowerCase() !== 'confirmed' && booking.status.toLowerCase() !== 'returned' && booking.status.toLowerCase() !== 'completed' && (
                     <button
                       onClick={() => handleConfirmBooking(booking.id)}
                       className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600 transition-colors"
+                    >
+                      Confirm
+                    </button>
+                  )}
+                  {booking.status.toLowerCase() === 'returned' && booking.status.toLowerCase() !== 'completed' && (
+                    <button
+                      onClick={() => handleCompleteBooking(booking.id)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition-colors"
                     >
                       Confirm
                     </button>

@@ -207,3 +207,49 @@ export async function cancelBooking(id: number, token: string): Promise<BookingR
     throw error;
   }
 }
+
+/**
+ * Finish a booking (mark as returned)
+ * @param id The ID of the booking to finish
+ * @param token The user's authentication token
+ * @returns The updated booking with RETURNED status
+ */
+export async function finishBooking(id: number, token: string): Promise<BookingResponse> {
+  try {
+    const response = await apiFetch(`${endpoints.bookings}${id}/finish`, {
+      method: 'PUT',
+    }, token);
+    
+    return response.data?.booking || response;
+  } catch (error) {
+    console.error(`Error finishing booking with ID ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Complete a booking (mark as completed)
+ * @param id The ID of the booking to complete
+ * @param token The user's authentication token (optional - will be handled by middleware)
+ * @returns The updated booking with COMPLETED status
+ */
+export async function completeBooking(id: number, token?: string): Promise<BookingResponse> {
+  try {
+    const response = await authenticatedApiFetch<{ data?: BookingResponse } | BookingResponse>(`${endpoints.bookings}${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'completed' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    // Handle both response formats
+    if ('data' in response && response.data) {
+      return response.data;
+    }
+    return response as BookingResponse;
+  } catch (error) {
+    console.error(`Error completing booking with ID ${id}:`, error);
+    throw error;
+  }
+}

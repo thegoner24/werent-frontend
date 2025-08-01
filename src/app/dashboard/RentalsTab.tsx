@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { getUserBookingsByUserId, BookingResponse, cancelBooking } from '@/api/bookings';
+import { getUserBookingsByUserId, BookingResponse, cancelBooking, finishBooking } from '@/api/bookings';
 import { addToCart, removeFromCart, isItemInCart, getCartItemByDetails } from '@/api/cart';
 
 interface RentalWithItem extends BookingResponse {
@@ -93,6 +94,7 @@ function RentalStepsTracker({ steps, currentStep, isGreyedOut, isCancelled }: { 
 }
 
 const RentalsTab: React.FC = () => {
+  const router = useRouter();
   const { user, accessToken, isAuthenticated, refreshAccessToken } = useAuth();
   const [rentals, setRentals] = useState<RentalWithItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +102,8 @@ const RentalsTab: React.FC = () => {
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null);
   const [cartMessage, setCartMessage] = useState<string | null>(null);
+  const [returningItem, setReturningItem] = useState<string | null>(null);
+  const [showReturnConfirm, setShowReturnConfirm] = useState<RentalWithItem | null>(null);
 
   useEffect(() => {
     const fetchUserBookings = async () => {
@@ -277,6 +281,52 @@ const RentalsTab: React.FC = () => {
     }
   };
 
+  const handlePayFine = (rental: RentalWithItem) => {
+    // Navigate to fine payment page with rental details
+    router.push(`/fine-payment?bookingId=${rental.id}&itemName=${encodeURIComponent(rental.itemName || '')}&totalPrice=${rental.total_price}`);
+  };
+
+  const handleReturnItem = (rental: RentalWithItem) => {
+    setShowReturnConfirm(rental);
+  };
+
+  const confirmReturnItem = async () => {
+    if (!showReturnConfirm || !accessToken) return;
+    
+    setReturningItem(String(showReturnConfirm.id));
+    try {
+      await finishBooking(showReturnConfirm.id, accessToken);
+      
+      // Update the rental status in the local state
+      setRentals(prevRentals => 
+        prevRentals.map(rental => {
+          if (rental.id === showReturnConfirm.id) {
+            const { steps, currentStep, isGreyedOut, isCancelled } = getStatusSteps('RETURNED', rental.is_paid);
+            return { 
+              ...rental, 
+              status: 'RETURNED',
+              steps,
+              currentStep,
+              isGreyedOut,
+              isCancelled
+            };
+          }
+          return rental;
+        })
+      );
+      
+      setCartMessage('Item returned successfully!');
+      setTimeout(() => setCartMessage(null), 3000);
+    } catch (error) {
+      console.error('Error returning item:', error);
+      setCartMessage('Failed to return item. Please try again.');
+      setTimeout(() => setCartMessage(null), 3000);
+    } finally {
+      setReturningItem(null);
+      setShowReturnConfirm(null);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8">
@@ -432,7 +482,22 @@ const RentalsTab: React.FC = () => {
                       >
                         {cancellingBooking === String(rental.id) ? 'Cancelling...' : 'Cancel'}
                       </button>
-                    ) : rental.status !== 'CANCELLED' && rental.status !== 'CONFIRMED' && rental.status !== 'APPROVED' ? (
+                    ) : rental.status === 'CONFIRMED' && new Date(rental.end_date) >= new Date() ? (
+                      <button
+                        onClick={() => handleReturnItem(rental)}
+                        disabled={returningItem === String(rental.id)}
+                        className="px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-green-600 text-white hover:bg-green-700"
+                      >
+                        {returningItem === String(rental.id) ? 'Returning...' : 'Return Item'}
+                      </button>
+                    ) : (rental.status === 'CONFIRMED' || rental.status === 'APPROVED') && new Date(rental.end_date) < new Date() ? (
+                      <button
+                        onClick={() => handlePayFine(rental)}
+                        className="px-4 py-2 rounded-lg font-semibold transition-colors bg-orange-600 text-white hover:bg-orange-700"
+                      >
+                        Pay Fine
+                      </button>
+                    ) : rental.status !== 'CANCELLED' && rental.status !== 'CONFIRMED' && rental.status !== 'APPROVED' && rental.status !== 'RETURNED' ? (
                       <button
                         onClick={() => handleCartAction(rental)}
                         disabled={addingToCart === String(rental.id)}
@@ -448,6 +513,35 @@ const RentalsTab: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      
+      {/* Return Item Confirmation Dialog */}
+      {showReturnConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirm Item Return
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Please confirm that you have physically returned the item "{showReturnConfirm.itemName}" and consent to mark this rental as returned.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowReturnConfirm(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmReturnItem}
+                disabled={returningItem === String(showReturnConfirm.id)}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {returningItem === String(showReturnConfirm.id) ? 'Returning...' : 'Confirm Return'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
