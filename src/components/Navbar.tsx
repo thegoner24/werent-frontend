@@ -7,6 +7,7 @@ import ProfileAvatar from './ui/ProfileAvatar';
 import { useAuth } from '../contexts/AuthContext';
 
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
 const menuVariants: Variants = {
   hidden: { opacity: 0, y: -20 },
@@ -45,6 +46,28 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, isAuthenticated, logout: logoutAuth, isLoading } = useAuth();
+  
+  // Create a ref for the portal container
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
+  
+  // Create portal container on mount
+  useEffect(() => {
+    const div = document.createElement('div');
+    div.id = 'mobile-menu-portal';
+    div.style.position = 'fixed';
+    div.style.top = '0';
+    div.style.left = '0';
+    div.style.width = '100%';
+    div.style.height = '100%';
+    div.style.zIndex = '9999';
+    div.style.pointerEvents = 'none';
+    document.body.appendChild(div);
+    setPortalContainer(div);
+    
+    return () => {
+      document.body.removeChild(div);
+    };
+  }, []);
   
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -185,29 +208,30 @@ export default function Navbar() {
         </div>
       </Container>
 
-      {/* Mobile Menu Overlay - Positioned fixed relative to viewport */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Overlay */}
-            <motion.div 
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={toggleMobileMenu}
-              style={{ position: 'fixed' }}
-            />
-            
-            {/* Menu Panel */}
-            <motion.div 
-              className="fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white shadow-xl z-[9999] overflow-y-auto"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={menuVariants}
-              style={{ position: 'fixed' }}
-            >
+      {/* Mobile Menu Overlay - Rendered in portal */}
+      {portalContainer && createPortal(
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              {/* Overlay */}
+              <motion.div 
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={toggleMobileMenu}
+                style={{ position: 'fixed', zIndex: 9998, pointerEvents: 'auto' }}
+              />
+              
+              {/* Menu Panel */}
+              <motion.div 
+                className="fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white shadow-xl overflow-y-auto"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={menuVariants}
+                style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'auto' }}
+              >
               <div className="p-6 h-full flex flex-col">
                 <div className="flex justify-between items-center mb-8">
                   <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
@@ -303,9 +327,11 @@ export default function Navbar() {
                 </div>
               </div>
             </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+            </>
+          )}
+        </AnimatePresence>,
+        portalContainer
+      )}
     </nav>
   );
 }
