@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
@@ -34,7 +34,7 @@ interface PaymentResponse {
   success: boolean;
 }
 
-const FinePaymentPage: React.FC = () => {
+const FinePaymentContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, accessToken, isAuthenticated } = useAuth();
@@ -283,6 +283,14 @@ const FinePaymentPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const FinePaymentPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><div className="text-lg">Loading...</div></div>}>
+      <FinePaymentContent />
+    </Suspense>
   );
 };
 
