@@ -2,7 +2,25 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Container from '../ui/Container';
-import { fetchTestimonials, TestimonialData } from '../../api/testimonials';
+import { apiFetch, endpoints } from '../../api/index';
+import { getUserProfileImage } from '../../api/users';
+
+// Define testimonial data interface
+type TestimonialData = {
+  review_message: string;
+  created_at: string;
+  id: number;
+  images: Array<{
+    id: number;
+    image_base64: string;
+  }>;
+  item_id: number;
+  rating: number;
+  service_id?: number;
+  updated_at?: string;
+  user_id: number;
+  user_full_name: string;
+};
 
 interface TestimonialProps {
   id: number;
@@ -34,7 +52,33 @@ const TestimonialCard: React.FC<TestimonialProps> = ({
   item_id,
   user_full_name
 }) => {
-  const avatar = getAvatarForUser(user_id);
+  const [avatarSrc, setAvatarSrc] = useState<string>(getAvatarForUser(user_id)); // Default fallback
+  
+  // Process testimonial images for avatar when component mounts
+  useEffect(() => {
+    const processTestimonialImages = async () => {
+      try {
+        // Use testimonial images if available
+        if (images && images.length > 0) {
+          // Try to use the first image if it's a valid base64 string
+          const firstImage = images[0];
+          if (firstImage && firstImage.image_base64) {
+            // Ensure it has the proper data URL prefix
+            const imageBase64 = firstImage.image_base64.startsWith('data:image') 
+              ? firstImage.image_base64 
+              : `data:image/jpeg;base64,${firstImage.image_base64}`;
+            setAvatarSrc(imageBase64);
+          }
+        }
+      } catch (error) {
+        console.error(`Error processing testimonial images for user ${user_id}:`, error);
+        // Keep the default avatar if there's an error
+      }
+    };
+    
+    processTestimonialImages();
+  }, [user_id, images]);
+  
   const name = user_full_name;
   const date = new Date(created_at).toLocaleDateString('en-US', { 
     year: 'numeric', 
@@ -45,7 +89,7 @@ const TestimonialCard: React.FC<TestimonialProps> = ({
       <div className="flex flex-col items-center text-center mb-4">
         <div className="w-16 h-16 rounded-full overflow-hidden relative mb-3 border-2 border-[#ff6b98] shadow-sm">
           <Image
-            src={avatar}
+            src={avatarSrc}
             alt={name}
             fill
             className="object-cover"
@@ -118,15 +162,27 @@ export default function Testimonials() {
     const loadTestimonials = async () => {
       try {
         setIsLoading(true);
-        const response = await fetchTestimonials();
-        if (response.success) {
+        const data = await apiFetch(endpoints.testimonials, { method: 'GET' });
+        
+        // Process the response data
+        if (Array.isArray(data)) {
           // Sort by created_at desc and take latest 4 testimonials
-          const sortedTestimonials = response.data
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          const sortedTestimonials = data
+            .sort((a: TestimonialData, b: TestimonialData) => 
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 4);
+          setTestimonials(sortedTestimonials);
+        } else if (Array.isArray(data?.data)) {
+          // Handle nested data structure if API returns {data: [...]} format
+          const sortedTestimonials = data.data
+            .sort((a: TestimonialData, b: TestimonialData) => 
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 4);
           setTestimonials(sortedTestimonials);
         } else {
-          setError('Failed to load testimonials');
+          console.error('Unexpected data format:', data);
+          setError('Failed to load testimonials: unexpected data format');
+          setTestimonials([]);
         }
       } catch (err) {
         console.error('Error fetching testimonials:', err);

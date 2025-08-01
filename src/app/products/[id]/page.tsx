@@ -93,7 +93,10 @@ const ProductDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [selectedSize, setSelectedSize] = useState<string>("");
-  
+
+  // Related products state
+  const [isLoadingRelated, setIsLoadingRelated] = useState(false);
+
   // Calculate total price
   const totalPrice = (product?.price || 0) * rentalDays;
 
@@ -162,46 +165,76 @@ const ProductDetail = () => {
           setIsLoadingReviews(false);
         }
         
-        setProduct({
+        const processedProduct = {
           ...apiProduct,
-          price: apiProduct.price_per_day ?? apiProduct.price,
-          images: (apiProduct.images || (apiProduct.image ? [apiProduct.image] : [])).map((img: string) =>
-            img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`
-          ),
-          reviewList: reviewList || apiProduct.reviewList || [],
-          specifications: apiProduct.specifications || {},
-          features: apiProduct.features || [],
-          size: apiProduct.size,
-          sizes: apiProduct.sizes,
-          type: apiProduct.type,
-          user_id: apiProduct.user_id,
-          designer_name: apiProduct.designer_name,
-        });
+          price: apiProduct.price_per_day, // Map price_per_day to price for UI consistency
+          images: Array.isArray(apiProduct.images) 
+            ? apiProduct.images.map((img: any) => {
+                if (typeof img === 'string') return img;
+                if (img && img.image_base64) {
+                  return img.image_base64.startsWith('data:image') 
+                    ? img.image_base64 
+                    : `data:image/jpeg;base64,${img.image_base64}`;
+                }
+                return '/shop/mock-chair.jpg'; // Fallback image
+              })
+            : apiProduct.image 
+              ? [apiProduct.image] 
+              : ['/shop/mock-chair.jpg'], // Fallback to single image or default
+          reviewList: reviewList || [],
+          reviews: totalReviews || 0
+        };
         
-        // Fetch related products by category
-        if (apiProduct.type) {
+        setProduct(processedProduct);
+        
+        // Fetch related products based on the product's type/category
+        if (processedProduct.type) {
+          setIsLoadingRelated(true);
           try {
-            // Fetch all items and filter by type on frontend since backend filter doesn't work properly
-            const allItemsData = await import('@/api/items').then(m => m.fetchItems());
-            if (allItemsData && allItemsData.data) {
-              // Filter by same type, exclude current product, and limit to 4 items
-              const filteredRelated = allItemsData.data
-                .filter((item: any) => item.type === apiProduct.type && item.id !== apiProduct.id)
-                .slice(0, 4)
-                .map((item: any) => ({
+            console.log('Fetching related products for type:', processedProduct.type);
+            const relatedItems = await fetchItemsByCategory(processedProduct.type, 8); // Fetch more to ensure we have enough after filtering
+            console.log('Related items fetched:', relatedItems);
+            
+            // Filter out the current product and limit to 4 items
+            const filteredRelated = relatedItems
+              .filter((item: any) => item.id !== processedProduct.id)
+              .slice(0, 4)
+              .map((item: any) => {
+                // Process images
+                let processedImages = ['/shop/mock-chair.jpg']; // Default fallback
+                
+                if (Array.isArray(item.images) && item.images.length > 0) {
+                  processedImages = item.images.map((img: any) => {
+                    if (typeof img === 'string') return img;
+                    if (img && img.image_base64) {
+                      return img.image_base64.startsWith('data:image') 
+                        ? img.image_base64 
+                        : `data:image/jpeg;base64,${img.image_base64}`;
+                    }
+                    return '/shop/mock-chair.jpg';
+                  });
+                } else if (item.image) {
+                  processedImages = [item.image];
+                }
+                
+                return {
                   ...item,
-                  price: item.price_per_day ?? item.price,
-                  images: (item.images || (item.image ? [item.image] : [])).map((img: string) =>
-                    img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`
-                  ),
-                }));
-              setRelatedProducts(filteredRelated);
-              console.log('Related products for type:', apiProduct.type, filteredRelated);
-            }
-          } catch (relatedError) {
-            console.error('Error fetching related products:', relatedError);
-            // Continue without related products if fetch fails
+                  price: item.price_per_day || item.price || 0, // Map price_per_day to price for UI consistency
+                  images: processedImages,
+                  name: item.name || item.brand || 'Product',
+                  rating: item.rating || 4.0
+                };
+              });
+              
+            console.log('Filtered related products:', filteredRelated);
+            setRelatedProducts(filteredRelated);
+          } catch (error) {
+            console.error('Error fetching related products:', error);
+          } finally {
+            setIsLoadingRelated(false);
           }
+        } else {
+          console.log('No product type available for related products');
         }
       } catch (e) {
         setError('Failed to load product.');
@@ -1038,40 +1071,83 @@ const ProductDetail = () => {
       </div>
       
       {/* Related Products Section */}
-      {relatedProducts.length > 0 && (
+      {(relatedProducts.length > 0 || isLoadingRelated) && (
         <div className="bg-gray-50 py-12">
           <Container>
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Products</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
-                <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-square bg-gray-200 relative">
-                    <Image
-                      src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : '/shop/mock-chair.jpg'}
-                      alt={relatedProduct.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{relatedProduct.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{relatedProduct.brand || relatedProduct.type || 'Premium Collection'}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#ff6b98] font-bold">${relatedProduct.price}/day</span>
-                      <div className="flex items-center">
-                        <svg className="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span className="text-sm text-gray-600">{relatedProduct.rating ? relatedProduct.rating.toFixed(1) : '4.0'}</span>
-                      </div>
-                    </div>
-                    <Link href={`/products/${relatedProduct.id}`} className="mt-3 block w-full bg-[#ff6b98] text-white text-center py-2 rounded-md hover:bg-[#e55a87] transition-colors">
-                      View Details
-                    </Link>
-                  </div>
+            <div className="flex flex-col items-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Related Products</h2>
+              {product.type && (
+                <div className="inline-block bg-[#ff6b98]/10 px-4 py-1 rounded-full">
+                  <span className="text-[#ff6b98] font-medium">{product.type}</span>
                 </div>
-              ))}
+              )}
             </div>
+            
+            {isLoadingRelated ? (
+              <div className="flex justify-center items-center h-60">
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff6b98] mb-4"></div>
+                  <p className="text-gray-500">Finding similar products...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {relatedProducts.map((relatedProduct) => (
+                  <div key={relatedProduct.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                    <Link href={`/products/${relatedProduct.id}`}>
+                      <div className="aspect-square bg-gray-200 relative overflow-hidden group">
+                        <Image
+                          src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : '/shop/mock-chair.jpg'}
+                          alt={relatedProduct.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        {relatedProduct.price && (
+                          <div className="absolute top-2 right-2 bg-[#ff6b98] text-white text-sm font-bold px-2 py-1 rounded-md">
+                            ${relatedProduct.price}/day
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 mb-1 truncate">{relatedProduct.name}</h3>
+                      <p className="text-sm text-gray-600 mb-2 truncate">{relatedProduct.brand || relatedProduct.type || 'Premium Collection'}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <svg className="h-4 w-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          <span className="text-sm text-gray-600">{relatedProduct.rating ? relatedProduct.rating.toFixed(1) : '4.0'}</span>
+                        </div>
+                        {relatedProduct.color && (
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{relatedProduct.color}</span>
+                        )}
+                      </div>
+                      <Link 
+                        href={`/products/${relatedProduct.id}`} 
+                        className="mt-3 block w-full bg-[#ff6b98] text-white text-center py-2 rounded-md hover:bg-[#e55a87] transition-colors"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {relatedProducts.length > 0 && (
+              <div className="mt-8 text-center">
+                <Link 
+                  href={`/shop?category=${encodeURIComponent(product.type || '')}`}
+                  className="inline-flex items-center text-[#ff6b98] hover:text-[#e55a87] font-medium"
+                >
+                  View all {product.type} products
+                  <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            )}
           </Container>
         </div>
       )}
