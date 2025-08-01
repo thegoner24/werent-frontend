@@ -1,9 +1,17 @@
-import { apiFetch, endpoints } from './index';
+import { apiFetch, endpoints, authenticatedApiFetch } from './index';
 
 export interface BookingPayload {
   item_id: number;
   start_date: string; // Format: YYYY-MM-DD
   end_date: string; // Format: YYYY-MM-DD
+}
+
+export interface RefundInfo {
+  cancellation_reason: string;
+  cancelled_at: string;
+  original_total: number;
+  refund_amount: number;
+  refund_eligible: boolean;
 }
 
 export interface BookingResponse {
@@ -19,6 +27,7 @@ export interface BookingResponse {
   item_name?: string;
   created_at?: string;
   updated_at?: string;
+  refund_info?: RefundInfo;
 }
 
 /**
@@ -132,20 +141,115 @@ export async function getBookingById(id: number, token: string): Promise<Booking
 }
 
 /**
+ * Get all bookings (admin only)
+ * @param token The admin's authentication token (optional - will be handled by middleware)
+ * @returns Array of all bookings
+ */
+export async function getAllBookings(token?: string): Promise<BookingResponse[]> {
+  try {
+    const response = await authenticatedApiFetch<{ data?: BookingResponse[] } | BookingResponse[]>(endpoints.bookings, {
+      method: 'GET',
+    });
+    
+    // Handle both response formats
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response.data || [];
+  } catch (error) {
+    console.error('Error fetching all bookings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Confirm a booking
+ * @param id The ID of the booking to confirm
+ * @param token The user's authentication token (optional - will be handled by middleware)
+ * @returns The updated booking
+ */
+export async function confirmBooking(id: number, token?: string): Promise<BookingResponse> {
+  try {
+    const response = await authenticatedApiFetch<{ data?: BookingResponse } | BookingResponse>(`${endpoints.bookings}${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'confirmed' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    // Handle both response formats
+    if ('data' in response && response.data) {
+      return response.data;
+    }
+    return response as BookingResponse;
+  } catch (error) {
+    console.error(`Error confirming booking with ID ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Cancel a booking
  * @param id The ID of the booking to cancel
  * @param token The user's authentication token
- * @returns The updated booking
+ * @returns The updated booking with refund information
  */
 export async function cancelBooking(id: number, token: string): Promise<BookingResponse> {
   try {
     const response = await apiFetch(`${endpoints.bookings}${id}/cancel`, {
-      method: 'PUT',
+      method: 'POST',
     }, token);
     
     return response.data || response;
   } catch (error) {
     console.error(`Error cancelling booking with ID ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Finish a booking (mark as returned)
+ * @param id The ID of the booking to finish
+ * @param token The user's authentication token
+ * @returns The updated booking with RETURNED status
+ */
+export async function finishBooking(id: number, token: string): Promise<BookingResponse> {
+  try {
+    const response = await apiFetch(`${endpoints.bookings}${id}/finish`, {
+      method: 'PUT',
+    }, token);
+    
+    return response.data?.booking || response;
+  } catch (error) {
+    console.error(`Error finishing booking with ID ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Complete a booking (mark as completed)
+ * @param id The ID of the booking to complete
+ * @param token The user's authentication token (optional - will be handled by middleware)
+ * @returns The updated booking with COMPLETED status
+ */
+export async function completeBooking(id: number, token?: string): Promise<BookingResponse> {
+  try {
+    const response = await authenticatedApiFetch<{ data?: BookingResponse } | BookingResponse>(`${endpoints.bookings}${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'completed' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    // Handle both response formats
+    if ('data' in response && response.data) {
+      return response.data;
+    }
+    return response as BookingResponse;
+  } catch (error) {
+    console.error(`Error completing booking with ID ${id}:`, error);
     throw error;
   }
 }

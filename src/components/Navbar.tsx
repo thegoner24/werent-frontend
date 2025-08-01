@@ -140,8 +140,10 @@ export default function Navbar() {
       </div>
     </div>
     <div className="py-2">
+      <Link href="/admin-dashboard" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Admin Dashboard</Link>
       <Link href="/dashboard" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Dashboard</Link>
       <Link href="/dashboard/rentals" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>My Rentals</Link>
+      <Link href="/cart" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>View Cart</Link>
       <Link href="/dashboard/profile" className="block px-6 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors font-medium" role="menuitem" tabIndex={0}>Profile</Link>
       <button
         onClick={handleLogout}
@@ -258,6 +260,9 @@ export default function Navbar() {
     </div>
   </div>
   <div className="flex flex-col gap-2 mt-2">
+    <Link href="/admin-dashboard" className="block text-center bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium shadow-sm" onClick={() => setMobileMenuOpen(false)}>
+      Admin Dashboard
+    </Link>
     <Link href="/dashboard" className="block text-center bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm" onClick={() => setMobileMenuOpen(false)}>
       Dashboard
     </Link>

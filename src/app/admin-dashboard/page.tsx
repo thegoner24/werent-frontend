@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@/components/ui/Container';
 import Link from 'next/link';
@@ -8,9 +8,11 @@ import ProductsTab from './ProductsTab';
 import CategoriesTab from './CategoriesTab';
 import BrandsTab from './BrandsTab';
 import ReviewsTab from './ReviewsTab';
+import BookingsTab, { BookingsTabRef } from './BookingsTab';
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const bookingsTabRef = useRef<BookingsTabRef>(null);
   
   // State for active tab
   const [activeTab, setActiveTab] = useState('reviews');
@@ -18,6 +20,11 @@ export default function AdminDashboard() {
   // Handle tab change
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    
+    // Refresh bookings data when bookings tab is activated
+    if (tab === 'bookings' && bookingsTabRef.current) {
+      bookingsTabRef.current.refreshBookings();
+    }
   };
 
   return (
@@ -68,6 +75,12 @@ export default function AdminDashboard() {
                 Brands
               </button>
               <button
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'bookings' ? 'bg-gradient-to-r from-orange-400 to-red-400 text-white shadow' : 'text-gray-700 hover:bg-orange-50'}`}
+                onClick={() => handleTabChange('bookings')}
+              >
+                Bookings
+              </button>
+              <button
                 className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'settings' ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow' : 'text-gray-700 hover:bg-gray-50'}`}
                 onClick={() => handleTabChange('settings')}
               >
@@ -82,6 +95,7 @@ export default function AdminDashboard() {
             {activeTab === 'products' && <ProductsTab />}
             {activeTab === 'categories' && <CategoriesTab />}
             {activeTab === 'brands' && <BrandsTab />}
+            {activeTab === 'bookings' && <BookingsTab ref={bookingsTabRef} />}
             {activeTab === 'settings' && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6">Settings</h2>
