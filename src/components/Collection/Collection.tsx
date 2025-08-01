@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Container from '../ui/Container';
+import { fetchItems } from '../../api/items';
 
 interface CollectionItemProps {
   id: string;
@@ -13,12 +14,13 @@ interface CollectionItemProps {
   available: number;
   category: string;
   designer?: string;
+  rating?: number;
 }
 
 const CollectionItem: React.FC<CollectionItemProps> = ({ id, name, price, image, available, designer }) => {
   return (
-    <Link href={`/products/${id}`} className="block">
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+    <Link href={`/products/${id}`} className="block w-full h-full">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-5 flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer h-full">
       <div className="h-36 w-full relative mb-3 group">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <Image 
@@ -28,9 +30,9 @@ const CollectionItem: React.FC<CollectionItemProps> = ({ id, name, price, image,
           className="object-contain p-2 z-10 relative drop-shadow-md group-hover:scale-110 transition-transform duration-300"
         />
       </div>
-      <h3 className="text-base font-medium text-gray-800">{name}</h3>
-      {designer && <p className="text-xs text-gray-500">By {designer}</p>}
-      <div className="flex justify-between items-center mt-3">
+      <h3 className="text-base font-medium text-gray-800 line-clamp-2 h-12">{name}</h3>
+      {designer && <p className="text-xs text-gray-500 mb-2">By {designer}</p>}
+      <div className="flex justify-between items-center mt-auto">
         <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{available} available</span>
         <span className="text-sm font-bold bg-gradient-to-r from-[#ff6b98] to-[#ff6b98]/90 bg-clip-text text-transparent">${price}/day</span>
       </div>
@@ -41,6 +43,41 @@ const CollectionItem: React.FC<CollectionItemProps> = ({ id, name, price, image,
 
 export default function Collection() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [items, setItems] = useState<CollectionItemProps[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Fetch items from backend
+  useEffect(() => {
+    const getItems = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const fetchedItems = await fetchItems();
+        
+        // Map backend data to component props
+        const mappedItems: CollectionItemProps[] = fetchedItems.map((item: any) => ({
+          id: item.id?.toString() || '',
+          name: item.name || 'Unknown Item',
+          price: item.price || 0,
+          image: item.image || '/placeholder.png',
+          available: item.quantity || 0,
+          category: item.type?.toLowerCase() || 'all',
+          designer: item.brand || undefined,
+          rating: item.rating || 0
+        }));
+        
+        setItems(mappedItems);
+      } catch (err) {
+        console.error('Error fetching items:', err);
+        setError('Failed to load items. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    getItems();
+  }, []);
   
   const categories = [
     { id: 'all', name: 'All' },
@@ -50,84 +87,12 @@ export default function Collection() {
     { id: 'accessories', name: 'Accessories' }
   ];
   
-  const collectionItems: CollectionItemProps[] = [
-    {
-      id: '1',
-      name: 'Sequin Evening Gown',
-      price: 75,
-      image: '/team-1.jpg',
-      available: 2,
-      category: 'gowns',
-      designer: 'Vera Wang'
-    },
-    {
-      id: '2',
-      name: 'Strapless Ball Gown',
-      price: 85,
-      image: '/team-2.jpg',
-      available: 1,
-      category: 'gowns',
-      designer: 'Elie Saab'
-    },
-    {
-      id: '3',
-      name: 'Beaded Cocktail Dress',
-      price: 60,
-      image: '/team-3.jpg',
-      available: 3,
-      category: 'cocktail',
-      designer: 'Marchesa'
-    },
-    {
-      id: '4',
-      name: 'Satin A-Line Dress',
-      price: 55,
-      image: '/team-4.jpg',
-      available: 4,
-      category: 'cocktail',
-      designer: 'Valentino'
-    },
-    {
-      id: '5',
-      name: 'Lace Wedding Gown',
-      price: 120,
-      image: '/about-story.jpg',
-      available: 1,
-      category: 'wedding',
-      designer: 'Monique Lhuillier'
-    },
-    {
-      id: '6',
-      name: 'Crystal Tiara',
-      price: 25,
-      image: '/team-1.jpg',
-      available: 5,
-      category: 'accessories',
-      designer: 'Swarovski'
-    },
-    {
-      id: '7',
-      name: 'Embellished Clutch',
-      price: 20,
-      image: '/team-2.jpg',
-      available: 6,
-      category: 'accessories',
-      designer: 'Jimmy Choo'
-    },
-    {
-      id: '8',
-      name: 'Mermaid Wedding Dress',
-      price: 110,
-      image: '/about-story.jpg',
-      available: 2,
-      category: 'wedding',
-      designer: 'Pronovias'
-    }
-  ];
+  // Filter items based on selected category and limit to 6 items
   
-  const filteredItems = activeCategory === 'all' 
-    ? collectionItems 
-    : collectionItems.filter(item => item.category === activeCategory);
+  const filteredItems = (activeCategory === 'all' 
+    ? items 
+    : items.filter(item => item.category === activeCategory))
+    .slice(0, 8); // Limit to 6 items
 
   return (
     <section className="w-full py-16 bg-gradient-to-b from-white to-[#ff6b98]/10">
@@ -174,11 +139,31 @@ export default function Collection() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredItems.map((item, index) => (
-            <CollectionItem key={index} {...item} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ff6b98]"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-500">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-[#ff6b98] text-white rounded-lg hover:bg-[#ff6b98]/90 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No items found in this category.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredItems.map((item, index) => (
+              <CollectionItem key={index} {...item} />
+            ))}
+          </div>
+        )}
       </Container>
     </section>
   );

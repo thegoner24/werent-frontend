@@ -69,7 +69,29 @@ export async function fetchItemsByCategory(type: string, limit?: number) {
   if (!response.ok) {
     throw new Error('Failed to fetch items by category');
   }
-  return response.json();
+  
+  const responseData = await response.json();
+  
+  // Handle different response structures (data property or direct array)
+  const items = responseData.data || responseData;
+  
+  if (!Array.isArray(items)) {
+    console.error('Unexpected response format for items by category:', responseData);
+    return [];
+  }
+  
+  return items.map((item: any, idx: number) => ({
+    id: item.id ?? idx,
+    image: item.image ?? '/placeholder.png',
+    images: item.images ?? [],
+    name: item.name ?? item.brand ?? 'Unknown',
+    rating: item.rating ?? 0,
+    price: item.price_per_day ?? item.price ?? 0,
+    type: item.type ?? type,
+    brand: item.brand ?? '',
+    color: item.color ?? '',
+    ...item
+  }));
 }
 
 // Fetch a single item by id
