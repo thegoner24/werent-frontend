@@ -84,7 +84,7 @@ export default function Navbar() {
   const buttonShadowClass = scrolled ? 'hover:shadow-[#ff6b98]/30' : 'hover:shadow-white/30';
 
   return (
-    <nav className={`w-full py-4 sticky top-0 z-[1000] transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-md backdrop-blur-sm' : 'bg-[#ff6b98]'}`}>
+    <nav className={`w-full py-4 sticky top-0 z-[999] transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-md backdrop-blur-sm' : 'bg-[#ff6b98]'}`}>
       <Container>
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -185,26 +185,28 @@ export default function Navbar() {
         </div>
       </Container>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - Positioned fixed relative to viewport */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50">
+          <>
             {/* Overlay */}
             <motion.div 
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={toggleMobileMenu}
+              style={{ position: 'fixed' }}
             />
             
             {/* Menu Panel */}
             <motion.div 
-              className="fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white shadow-xl z-50 overflow-y-auto"
+              className="fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white shadow-xl z-[9999] overflow-y-auto"
               initial="hidden"
               animate="visible"
               exit="exit"
               variants={menuVariants}
+              style={{ position: 'fixed' }}
             >
               <div className="p-6 h-full flex flex-col">
                 <div className="flex justify-between items-center mb-8">
@@ -301,7 +303,7 @@ export default function Navbar() {
                 </div>
               </div>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
     </nav>

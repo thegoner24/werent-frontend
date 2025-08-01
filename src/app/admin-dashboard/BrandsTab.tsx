@@ -128,8 +128,8 @@ export default function BrandsTab() {
         </div>
       )}
       
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Manage Brands</h2>
+      <div className="bg-white rounded-2xl shadow-lg p-3 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 sm:mb-6">Manage Brands</h2>
         
         {isInitialLoading ? (
           <div className="py-12 flex flex-col items-center justify-center">
@@ -139,8 +139,8 @@ export default function BrandsTab() {
         ) : (
           <>
             {/* Add new brand form */}
-            <form onSubmit={handleAddBrand} className="mb-8">
-              <div className="flex gap-4">
+            <form onSubmit={handleAddBrand} className="mb-4 sm:mb-8">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                 <input
                   type="text"
                   value={newBrand}
@@ -152,7 +152,7 @@ export default function BrandsTab() {
                 />
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+                  className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2 sm:mt-0"
                   disabled={isLoading}
                 >
                   {isLoading && (
@@ -172,8 +172,8 @@ export default function BrandsTab() {
             </form>
             
             {/* Brands list */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 mb-2">Current Brands</h3>
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-1 sm:mb-2">Current Brands</h3>
               
               {brands.length === 0 ? (
                 <div className="py-8 text-center border border-dashed border-gray-300 rounded-lg">
@@ -225,9 +225,9 @@ export default function BrandsTab() {
                           </button>
                         </div>
                       ) : (
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                           <span className="text-gray-800">{brand}</span>
-                          <div className="flex gap-3">
+                          <div className="flex gap-3 mt-1 sm:mt-0">
                             <button
                               onClick={() => handleStartEdit(index)}
                               className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1"

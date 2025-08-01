@@ -99,39 +99,39 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 md:py-12">
       <Container>
-        <div className="flex flex-col md:flex-row max-w-6xl mx-auto gap-8">
+        <div className="flex flex-col md:flex-row max-w-6xl mx-auto gap-4 sm:gap-6 md:gap-8">
           {/* Side Navigation */}
           <aside className="w-full md:w-64 mb-8 md:mb-0">
-            <nav className="bg-white rounded-2xl shadow-lg p-6 flex md:flex-col gap-4 md:gap-0">
+            <nav className="bg-white rounded-2xl shadow-lg p-6 flex flex-col sm:flex-row md:flex-col gap-4 sm:gap-2 md:gap-0 overflow-x-auto">
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'overview' ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-pink-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 sm:mb-0 md:mb-2 ${activeTab === 'overview' ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-pink-50'}`}
                 onClick={() => handleTabChange('overview')}
               >
                 Overview
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'rentals' ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-blue-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 sm:mb-0 md:mb-2 ${activeTab === 'rentals' ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-blue-50'}`}
                 onClick={() => handleTabChange('rentals')}
               >
                 My Rentals
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'payments' ? 'bg-gradient-to-r from-green-400 to-teal-400 text-white shadow' : 'text-gray-700 hover:bg-green-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 sm:mb-0 md:mb-2 ${activeTab === 'payments' ? 'bg-gradient-to-r from-green-400 to-teal-400 text-white shadow' : 'text-gray-700 hover:bg-green-50'}`}
                 onClick={() => handleTabChange('payments')}
               >
                 Payment Methods
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'reviews' ? 'bg-gradient-to-r from-orange-400 to-red-500 text-white shadow' : 'text-gray-700 hover:bg-orange-50'}`}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 sm:mb-0 md:mb-2 ${activeTab === 'reviews' ? 'bg-gradient-to-r from-orange-400 to-red-500 text-white shadow' : 'text-gray-700 hover:bg-orange-50'}`}
                 onClick={() => handleTabChange('reviews')}
               >
                 My Reviews
               </button>
               {user.is_admin && (
                 <button
-                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'admin' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 sm:mb-0 md:mb-2 ${activeTab === 'admin' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
                   onClick={() => handleTabChange('admin')}
                 >
                   Admin Panel

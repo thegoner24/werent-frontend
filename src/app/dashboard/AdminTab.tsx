@@ -116,7 +116,7 @@ const AdminTab: React.FC<AdminTabProps> = ({ user }) => {
 
   if (!user.is_admin) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,9 +131,9 @@ const AdminTab: React.FC<AdminTabProps> = ({ user }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Add New Item</h2>
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Add New Item</h2>
         <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
           Admin Only
         </span>
@@ -149,9 +149,9 @@ const AdminTab: React.FC<AdminTabProps> = ({ user }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Basic Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
               Item Name *
@@ -357,7 +357,7 @@ const AdminTab: React.FC<AdminTabProps> = ({ user }) => {
           {images.length > 0 && (
             <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Images ({images.length})</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 {images.map((image, index) => (
                   <div key={index} className="relative">
                     <img
@@ -380,11 +380,11 @@ const AdminTab: React.FC<AdminTabProps> = ({ user }) => {
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <button
             type="submit"
             disabled={isLoading}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`w-full sm:w-auto px-6 py-2 rounded-lg font-medium transition-colors ${
               isLoading
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white'
