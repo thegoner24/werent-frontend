@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with background gradient */}
-      <div className="relative h-32 flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-500">
+      <div className="relative h-28 sm:h-32 flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-500">
         <div className="absolute inset-0 opacity-20">
           {/* Pattern overlay */}
           <div className="absolute inset-0" style={{
@@ -38,50 +38,50 @@ export default function AdminDashboard() {
           }} />
         </div>
         <div className="relative z-10 text-center text-white">
-          <h1 className="text-3xl font-bold mb-2 drop-shadow-lg">Admin Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 drop-shadow-lg">Admin Dashboard</h1>
           <div className="text-sm opacity-90">
             <Link href="/" className="hover:underline">Home</Link> / <span>Admin</span>
           </div>
         </div>
       </div>
       
-      <Container className="py-8">
-        <div className="flex flex-col md:flex-row max-w-6xl mx-auto gap-8">
+      <Container className="py-4 sm:py-6 md:py-8">
+        <div className="flex flex-col md:flex-row max-w-6xl mx-auto gap-4 sm:gap-6 md:gap-8">
           {/* Side Navigation */}
-          <aside className="w-full md:w-64 mb-8 md:mb-0">
-            <nav className="bg-white rounded-2xl shadow-lg p-6 flex md:flex-col gap-4 md:gap-0">
+          <aside className="w-full md:w-64 mb-4 sm:mb-6 md:mb-0">
+            <nav className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-wrap md:flex-col gap-2 sm:gap-4 md:gap-0 overflow-x-auto">
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'reviews' ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-pink-50'}`}
+                className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold transition-colors mb-1 sm:mb-2 md:mb-0 text-sm sm:text-base ${activeTab === 'reviews' ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-pink-50'}`}
                 onClick={() => handleTabChange('reviews')}
               >
                 Reviews
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'products' ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-blue-50'}`}
+                className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold transition-colors mb-1 sm:mb-2 md:mb-0 text-sm sm:text-base ${activeTab === 'products' ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow' : 'text-gray-700 hover:bg-blue-50'}`}
                 onClick={() => handleTabChange('products')}
               >
                 Products
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'categories' ? 'bg-gradient-to-r from-green-400 to-teal-400 text-white shadow' : 'text-gray-700 hover:bg-green-50'}`}
+                className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold transition-colors mb-1 sm:mb-2 md:mb-0 text-sm sm:text-base ${activeTab === 'categories' ? 'bg-gradient-to-r from-green-400 to-teal-400 text-white shadow' : 'text-gray-700 hover:bg-green-50'}`}
                 onClick={() => handleTabChange('categories')}
               >
                 Categories
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'brands' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
+                className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold transition-colors mb-1 sm:mb-2 md:mb-0 text-sm sm:text-base ${activeTab === 'brands' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow' : 'text-gray-700 hover:bg-purple-50'}`}
                 onClick={() => handleTabChange('brands')}
               >
                 Brands
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors mb-2 md:mb-0 ${activeTab === 'bookings' ? 'bg-gradient-to-r from-orange-400 to-red-400 text-white shadow' : 'text-gray-700 hover:bg-orange-50'}`}
+                className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold transition-colors mb-1 sm:mb-2 md:mb-0 text-sm sm:text-base ${activeTab === 'bookings' ? 'bg-gradient-to-r from-orange-400 to-red-400 text-white shadow' : 'text-gray-700 hover:bg-orange-50'}`}
                 onClick={() => handleTabChange('bookings')}
               >
                 Bookings
               </button>
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'settings' ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow' : 'text-gray-700 hover:bg-gray-50'}`}
+                className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base ${activeTab === 'settings' ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow' : 'text-gray-700 hover:bg-gray-50'}`}
                 onClick={() => handleTabChange('settings')}
               >
                 Settings

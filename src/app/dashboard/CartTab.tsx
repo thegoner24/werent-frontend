@@ -174,8 +174,8 @@ const CartTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <div className="flex justify-between items-center mb-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Shopping Cart</h2>
           <div className="text-sm text-gray-500">
             {getCartItemCount()} item(s) • Total: ${getCartTotal().toFixed(2)}
@@ -211,7 +211,7 @@ const CartTab: React.FC = () => {
         ) : (
           <>
             {/* Cart Controls */}
-            <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-4">
                 <label className="flex items-center">
                   <input
@@ -230,18 +230,18 @@ const CartTab: React.FC = () => {
                   </span>
                 )}
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                 <button
                   onClick={handleClearCart}
                   disabled={isClearing || cartItems.length === 0}
-                  className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   {isClearing ? 'Clearing...' : 'Clear Cart'}
                 </button>
                 <button
                   onClick={showPayment ? handleCheckout : handleProceedToPayment}
                   disabled={isCheckingOut || selectedItems.size === 0}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   {isCheckingOut ? (
                      'Processing Payment...'
@@ -307,8 +307,8 @@ const CartTab: React.FC = () => {
             {/* Cart Items */}
             <div className="space-y-4">
               {cartItems.map((item) => (
-                <div key={item.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-4">
+                <div key={item.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-4 gap-2 sm:gap-0 w-full">
                     <input
                       type="checkbox"
                       checked={selectedItems.has(item.id)}
@@ -320,11 +320,11 @@ const CartTab: React.FC = () => {
                       <img
                         src={item.item_image}
                         alt={item.item_name || 'Item'}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        className="w-20 h-20 sm:w-16 sm:h-16 object-cover rounded-lg"
                       />
                     )}
                     
-                    <div className="flex-1">
+                    <div className="flex-1 w-full sm:w-auto">
                       <h3 className="font-semibold text-gray-900">
                         {item.item_name || `Item #${item.item_id}`}
                       </h3>

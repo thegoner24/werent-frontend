@@ -210,8 +210,8 @@ const ProfileTab: React.FC = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Profile Settings</h2>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Profile Settings</h2>
       </div>
 
       {message && (
@@ -224,13 +224,13 @@ const ProfileTab: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Profile Image */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Profile Image
           </label>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4">
             <div className="w-20 h-20">
               <ProfileAvatar 
                 user={{
@@ -242,11 +242,11 @@ const ProfileTab: React.FC = () => {
                 className="w-20 h-20 text-2xl"
               />
             </div>
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm w-full sm:w-auto"
               >
                 {formData.profile_image ? 'Change Photo' : 'Upload Photo'}
               </button>
@@ -366,11 +366,11 @@ const ProfileTab: React.FC = () => {
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-center sm:justify-end">
           <button
             type="submit"
             disabled={isLoading}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`w-full sm:w-auto px-6 py-2 rounded-lg font-medium transition-colors ${
               isLoading
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white'

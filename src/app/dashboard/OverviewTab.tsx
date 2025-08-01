@@ -72,10 +72,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
   return (
     <>
     {/* Header */}
-    <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-      <div className="flex items-center justify-between">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
             Welcome back, {user.first_name}!
           </h1>
           <p className="text-gray-600">
@@ -84,14 +84,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
         </div>
         <button
           onClick={handleLogout}
-          className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+          className="bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors w-full sm:w-auto"
         >
           Logout
         </button>
       </div>
     </div>
     {/* Profile Summary */}
-    <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg shadow-xl p-8 mb-8 flex flex-col md:flex-row items-center md:items-start gap-8">
+    <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg shadow-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6 md:gap-8">
       <div className="flex-shrink-0 flex flex-col items-center">
         <ProfileAvatar 
           user={user} 
@@ -102,7 +102,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
       </div>
       <div className="flex-1">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">Full Name</label>
             <p className="text-lg text-gray-900">{user.first_name} {user.last_name}</p>
@@ -135,14 +135,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
         
         {/* Verification Notice */}
         {!user.is_verified && (
-          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-0">
               <div className="flex-shrink-0">
                 <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div className="ml-3 flex-1">
+              <div className="sm:ml-3 flex-1">
                 <h3 className="text-sm font-medium text-yellow-800">
                   Email Verification Required
                 </h3>
@@ -163,7 +163,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
                   <button
                     onClick={handleResendVerification}
                     disabled={isResendingVerification}
-                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
                   >
                     {isResendingVerification ? (
                       <div className="flex items-center">
@@ -191,7 +191,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
       </div>
     </div>
     {/* Quick Actions */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6 md:mb-8">
       <div className="backdrop-blur-md bg-white/70 rounded-2xl shadow-xl p-8 text-center border border-pink-100 hover:shadow-2xl transition-all">
         <div className="w-14 h-14 bg-gradient-to-tr from-pink-400 to-purple-400 rounded-xl flex items-center justify-center mx-auto mb-4">
           {/* Dress icon */}
@@ -233,7 +233,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ user, handleLogout }) => {
       </div>
     </div>
     {/* Recent Activity Placeholder */}
-    <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl shadow-xl p-8">
+    <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h2>
       <div className="text-center py-12">
         <div className="w-20 h-20 bg-gradient-to-tr from-pink-200 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-4">

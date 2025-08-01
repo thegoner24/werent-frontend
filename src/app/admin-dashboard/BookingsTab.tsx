@@ -179,8 +179,8 @@ const BookingsTab = forwardRef<BookingsTabRef>((props, ref) => {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4 md:mb-0">All Bookings</h2>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3 md:mb-0">All Bookings</h2>
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <input
@@ -224,7 +224,7 @@ const BookingsTab = forwardRef<BookingsTabRef>((props, ref) => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">{bookings.length}</div>
           <div className="text-sm text-blue-600">Total Bookings</div>
@@ -250,52 +250,52 @@ const BookingsTab = forwardRef<BookingsTabRef>((props, ref) => {
       </div>
 
       {/* Bookings Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-3 sm:mx-0">
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-50">
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredAndSortedBookings.map((booking) => (
               <tr key={booking.id} className="hover:bg-gray-50">
-                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                   #{booking.id}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                   User #{booking.user_id}
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-900">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-900">
                   <div className="max-w-xs truncate" title={booking.item_name}>
                     {booking.item_name || `Item #${booking.item_id}`}
                   </div>
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                   <div>{formatDate(booking.start_date)}</div>
                   <div className="text-xs text-gray-400">to {formatDate(booking.end_date)}</div>
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                   {booking.quantity}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                   {formatCurrency(booking.total_price)}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                   {getStatusBadge(booking.status, booking.is_paid)}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap">
+                <td className="px-2 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                   {booking.is_paid && booking.status.toLowerCase() !== 'confirmed' && booking.status.toLowerCase() !== 'returned' && booking.status.toLowerCase() !== 'completed' && (
                     <button
                       onClick={() => handleConfirmBooking(booking.id)}
-                      className="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600 transition-colors"
+                      className="bg-green-500 text-white px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm hover:bg-green-600 transition-colors"
                     >
                       Confirm
                     </button>
@@ -303,7 +303,7 @@ const BookingsTab = forwardRef<BookingsTabRef>((props, ref) => {
                   {booking.status.toLowerCase() === 'returned' && booking.status.toLowerCase() !== 'completed' && (
                     <button
                       onClick={() => handleCompleteBooking(booking.id)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition-colors"
+                      className="bg-blue-500 text-white px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm hover:bg-blue-600 transition-colors"
                     >
                       Confirm
                     </button>

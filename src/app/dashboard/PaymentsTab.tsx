@@ -29,10 +29,10 @@ const mockCards = [
 
 const PaymentsTab: React.FC = () => {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Payment Methods</h2>
-        <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-lg font-semibold shadow hover:from-purple-600 hover:to-pink-600 transition-all">+ Add Card</button>
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Payment Methods</h2>
+        <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-lg font-semibold shadow hover:from-purple-600 hover:to-pink-600 transition-all w-full sm:w-auto text-center">+ Add Card</button>
       </div>
       {mockCards.length === 0 ? (
         <p className="text-gray-600">You have no saved payment methods.</p>
@@ -43,7 +43,7 @@ const PaymentsTab: React.FC = () => {
               key={card.id}
               className={`flex flex-col md:flex-row md:items-center justify-between p-5 rounded-xl border shadow-sm bg-gradient-to-r ${card.isDefault ? 'from-purple-50 to-pink-50 border-purple-400' : 'from-white to-gray-50 border-gray-200'} transition`}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4">
                 <div className="w-12 h-8 flex items-center justify-center rounded bg-white border border-gray-200 shadow-sm mr-2">
                   {card.brand === 'Visa' && <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" className="h-5" />}
                   {card.brand === 'Mastercard' && <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="Mastercard" className="h-5" />}
@@ -55,15 +55,15 @@ const PaymentsTab: React.FC = () => {
                   <span className="text-xs text-gray-500">{card.name}</span>
                 </div>
                 {card.isDefault && (
-                  <span className="ml-4 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold shadow">Default</span>
+                  <span className="ml-0 sm:ml-4 mt-2 sm:mt-0 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold shadow">Default</span>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-4 md:mt-0">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 mt-4 md:mt-0 w-full sm:w-auto">
                 {!card.isDefault && (
-                  <button className="text-xs font-semibold px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition">Set as Default</button>
+                  <button className="text-xs font-semibold px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition w-full sm:w-auto">Set as Default</button>
                 )}
                 <button
-                  className={`text-xs font-semibold px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition ${card.isDefault ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`text-xs font-semibold px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto ${card.isDefault ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={card.isDefault}
                 >
                   Delete

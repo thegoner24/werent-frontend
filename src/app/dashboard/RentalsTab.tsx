@@ -54,9 +54,9 @@ const getStatusSteps = (status: string, isPaid: boolean = false, isPastDue: bool
 
 function RentalStepsTracker({ steps, currentStep, isGreyedOut, isCancelled }: { steps: string[]; currentStep: number; isGreyedOut?: boolean; isCancelled?: boolean }) {
   return (
-    <ol className="flex items-center w-full mb-4">
+    <ol className="flex flex-col sm:flex-row items-start sm:items-center w-full mb-4 gap-2 sm:gap-0">
       {steps.map((step, idx) => (
-        <li key={step} className={`flex-1 flex items-center ${idx < steps.length - 1 ? 'after:content-[" "] after:flex-1 after:border-t-2 after:border-gray-200 after:mx-2' : ''}`}>
+        <li key={step} className={`flex-1 flex items-center ${idx < steps.length - 1 ? 'after:content-[" "] after:hidden sm:after:flex after:flex-1 after:border-t-2 after:border-gray-200 after:mx-2' : ''}`}>
           <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
             isGreyedOut 
               ? 'bg-gray-200 border-gray-300 text-gray-400'
@@ -329,8 +329,8 @@ const RentalsTab: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">My Dress Rentals</h2>
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">My Dress Rentals</h2>
         <p className="text-gray-600">Please log in to view your rentals.</p>
       </div>
     );
@@ -338,9 +338,9 @@ const RentalsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">My Dress Rentals</h2>
-        <div className="flex items-center justify-center py-12">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">My Dress Rentals</h2>
+        <div className="flex items-center justify-center py-8 sm:py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
           <span className="ml-3 text-gray-600">Loading your rentals...</span>
         </div>
@@ -371,7 +371,7 @@ const RentalsTab: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8 overflow-x-auto">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 overflow-x-auto">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">My Dress Rentals</h2>
       
       {cartMessage && (

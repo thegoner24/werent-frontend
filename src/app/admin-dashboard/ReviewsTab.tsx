@@ -221,10 +221,10 @@ const ReviewsTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Analytics Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-l-4 border-blue-500">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,12 +233,12 @@ const ReviewsTab: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Reviews</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.totalReviews}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{analytics.totalReviews}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-l-4 border-green-500">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -247,12 +247,12 @@ const ReviewsTab: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Average Rating</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.averageRating}/5</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{analytics.averageRating}/5</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-l-4 border-yellow-500">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -261,12 +261,12 @@ const ReviewsTab: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Pending Moderation</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.pendingModeration}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{analytics.pendingModeration}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border-l-4 border-red-500">
           <div className="flex items-center">
             <div className="p-2 bg-red-100 rounded-lg">
               <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -275,14 +275,14 @@ const ReviewsTab: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Reported Reviews</p>
-              <p className="text-2xl font-bold text-gray-900">{analytics.reportedReviews}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{analytics.reportedReviews}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Sentiment Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Sentiment Analysis</h3>
           <div className="space-y-4">
@@ -421,7 +421,7 @@ const ReviewsTab: React.FC = () => {
                 
                 <p className="text-gray-700 mb-3">{review.comment}</p>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <span>Helpful: {review.helpful || 0}</span>
                     {review.reported && (
